@@ -34,3 +34,9 @@ pip install -e .
 ```
 
 to begin `pip` development mode.
+
+Tuna relies on minimalistic external packages to keep the installation lightweight, and most of our functionality is done directly through standard library functions.
+
+## Making a Change
+
+Now, what you can do is begin on your change. Once done, fork the repository, make a Pull Request, and we'll approve it ASAP!
