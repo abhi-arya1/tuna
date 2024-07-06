@@ -1,0 +1,17 @@
+# tuna-generated files
+.tuna/
+
+# general 
+.env
+.DS_Store
+
+# pip 
+build/
+tuna.egg-info/
+__pycache__
+
+# vscode 
+.vscode
+
+# notebooks 
+*.ipynb

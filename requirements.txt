@@ -1,0 +1,5 @@
+inquirer
+requests
+halo
+jupyterlab
+nbformat
