@@ -7,6 +7,7 @@ import os
 import inquirer
 from webbrowser import open as webopen
 from sys import argv
+from shutil import rmtree
 
 
 def load_credentials():
@@ -51,6 +52,9 @@ def validate():
 
 
 def init(): 
+    if os.path.exists(TUNA_DIR):
+        log(INFO_ICON, "You've already initialized Tuna in this directory! Run `tuna purge` to start fresh.")
+        exit(1)
     print(f"[{INFO_ICON}] Let's get started...")
     TUNA_DIR.mkdir(exist_ok=True)
     username, token = load_credentials()
@@ -82,6 +86,15 @@ def open_repository():
     with open(CONFIG_FILE, 'r') as f: 
         data = json.load(f)
         webopen(data.get('html_url'))
+
+
+
+def purge():
+    if os.path.exists(TUNA_DIR):
+        rmtree(TUNA_DIR)
+        log(INFO_ICON, "Tuna has been purged from your current directory")
+    else: 
+        log(INFO_ICON, "Tuna is not initialized in this directory")
 
 
 
@@ -127,6 +140,8 @@ def main():
             log(INFO_ICON, "Remote training coming soon...")
             # train(local=False)
 
+    elif argv[1] == "purge":
+        purge()
 
     else: 
         log(WARNING_ICON, f"Invalid option '{argv[1]}'. Run 'tuna' for help")

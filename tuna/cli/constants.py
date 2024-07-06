@@ -27,6 +27,8 @@ Commands:
 
     ⋅ tuna github (or) tuna help (or) tuna docs : Open the Tuna GitHub Repository in the browser
 
+    ⋅ tuna purge : (USE WITH CAUTION) Purge the '.tuna' folder from your current directory
+
     ⋅ tuna : Redisplay this message
 
 Help : Contact support@opennote.me

@@ -88,7 +88,7 @@ tuna train --local
 
 **5. Helpers**
 
-````bash
+```bash
 tuna help
 # or
 tuna github
@@ -99,14 +99,24 @@ tuna docs
 # is served in the README.md file.
 ```
 
-**6. No Flags**
+**6. Purge**
+
+```bash
+tuna purge
+
+# This will delete all tuna-generated files
+# in your current directory
+# USE WITH CAUTION!
+```
+
+**7. No Flags**
 
 ```bash
 tuna
 
 # Displays a welcome message and goes over all
 # commands again
-````
+```
 
 ## Localized Runs
 
