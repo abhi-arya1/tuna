@@ -1,6 +1,6 @@
 from .github_fs import fetch
 from .jupyter_fs import start_lab, monitor_lab, kill_lab
-from .constants import TUNA_DIR, AUTH_FILE, HELLO, CROSS_ICON, INFO_ICON, WARNING_ICON
+from .constants import TUNA_DIR, AUTH_FILE, CONFIG_FILE, HELLO, CROSS_ICON, INFO_ICON, WARNING_ICON
 from .util import log 
 import json 
 import os 
@@ -78,6 +78,13 @@ def refresh():
 
 
 
+def open_repository(): 
+    with open(CONFIG_FILE, 'r') as f: 
+        data = json.load(f)
+        webopen(data.get('html_url'))
+
+
+
 def main(): 
     if len(argv) == 1: 
         print(HELLO)
@@ -103,6 +110,11 @@ def main():
     elif argv[1] in ["github", "docs", "help"]:
         log(INFO_ICON, "Opening 'https://github.com/abhi-arya1/tuna' in your default browser.")
         webopen("https://github.com/abhi-arya1/tuna")
+
+    elif argv[1] == "browse": 
+        validate()
+        log(INFO_ICON, "Opening your repository in your default browser.")
+        open_repository()
 
     elif argv[1] == "train":
         if(len(argv)) > 2: 

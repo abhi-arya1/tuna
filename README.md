@@ -11,11 +11,13 @@ We simplify the **entire** process, meaning that all you have to do to build out
 
 Questions? Contact `abhi[at]opennote.me`.
 
+**Note: Tuna is currently only supported on _MacOS_ and _Linux_, Windows is coming soon...**
+
 # Documentation
 
 ## Getting Started
 
-To install `tuna` simply follow the below commands:
+To install `tuna`, make sure you have `Python 3.12+` installed on your machine, then simply follow the below commands:
 
 ```bash
 git clone https://github.com/abhi-arya1/tuna.git
@@ -108,18 +110,23 @@ tuna
 
 ## Localized Runs
 
-After installation of the CLI tool, Tuna is entirely localized on your system. Outside of GPU rental services that we associate with to allow training, we don't store nor transfer _any_ data.
+- After installation of the CLI tool, Tuna is entirely localized on your system. Outside of GPU rental services that we associate with to allow training, we don't store nor transfer _any_ data.
 
-GitHub credentials including OAuth tokens, your username, and your stored repositories can be cleared by deleting the `.tuna` directory in the same spot that it was made.
+- GitHub credentials including OAuth tokens, your username, and your stored repositories can be cleared by deleting the `.tuna` directory in the same spot that it was made.
 
-All files pulled from GitHub are strictly stored in the datasets that you can find in the `.tuna` directory that gets made. We pull text directly from the GitHub API to save you unwanted files and dependency installs, and also to protect your environment variables.
+- All files pulled from GitHub are strictly stored in the datasets that you can find in the `.tuna` directory that gets made. We pull text directly from the GitHub API to save you unwanted files and dependency installs, and also to protect your environment variables.
 
-**Unless you share data explicity with us, we won't ever see your personal data.**
+- **Unless you share data explicity with us, we won't ever see your personal data.**
 
-_**Disclaimer:** We do not own the models that we use for fine tuning, and their data policies are on their invididual websites. Look up your model of choice to learn more._
+- _**Disclaimer:** We do not own the models that we use for fine tuning, and their data policies are on their invididual websites. Look up your model of choice to learn more._
 
 ### Licensing
 
-Tuna is licensed under the MIT license. For more information on usage, contact me at the email at the start of this README.
+- Tuna is licensed under the MIT license. For more information on usage, contact me at the email at the start of this README.
+
+### Contributing
+
+- Tuna is an Open-Source CLI tool built at [Opennote Labs](https://www.linkedin.com/company/opennote/).
+- If you are interested in Contributing, take a look at [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 🎣 Happy Tun(a)ing!

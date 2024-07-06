@@ -9,6 +9,10 @@
 build/
 tuna.egg-info/
 __pycache__
+venv 
+.venv 
+env
+.env
 
 # vscode 
 .vscode
