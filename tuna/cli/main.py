@@ -4,6 +4,7 @@ from .constants import TUNA_DIR, AUTH_FILE, HELLO, CROSS_ICON, INFO_ICON, WARNIN
 import json 
 import os 
 import inquirer
+from webbrowser import open as webopen
 from sys import argv
 
 
@@ -97,6 +98,10 @@ def main():
 
     elif argv[1] == "refresh": 
         validate() 
+
+    elif argv[1] in ["github", "docs", "help"]:
+        print(f"[{INFO_ICON}] Opening 'https://github.com/abhi-arya1/tuna' in your default browser.")
+        webopen("https://github.com/abhi-arya1/tuna")
 
     elif argv[1] == "edit": 
         print("Editing the Tuna notebook in your current directory")

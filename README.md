@@ -73,14 +73,38 @@ tuna --edit
 # .tuna directory
 ``` -->
 
-**4. No Flags**
+**4. Train**
+
+```bash
+tuna train
+# Begins to train the dataset with a rented powerful GPU
+
+# To train locally on current hardware, run
+tuna train --local
+# (must be on a device with an NVIDIA GPU, since Tuna relies on CUDA)
+```
+
+**5. Helpers**
+
+````bash
+tuna help
+# or
+tuna github
+# or
+tuna docs
+
+# All of these will open the GitHub repository for Tuna, where all the documentation
+# is served in the README.md file.
+```
+
+**6. No Flags**
 
 ```bash
 tuna
 
 # Displays a welcome message and goes over all
 # commands again
-```
+````
 
 ## Localized Runs
 

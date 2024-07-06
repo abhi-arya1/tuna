@@ -17,10 +17,18 @@ HELLO = """
 
 Commands: 
     ⋅ tuna init : Initialize Tuna in your current directory
+
     ⋅ tuna serve : Run Tuna in JupyterLab, no automatic browser opening
         ⋅ tuna serve --open : Same as above with automatic browser opening
         ⋅ tuna serve --no-open : Same as "tuna serve"
-    ⋅ tuna refresh : Refresh GitHub cache in your current directory 
+
+    ⋅ tuna refresh : Refresh GitHub cache in your current directory
+
+    ⋅ tuna train : Begin training your model on the code with a powerful rented GPU
+        ⋅ tuna train --local : Begin training your model on local hardware (Requires an NVIDIA GPU)
+
+    ⋅ tuna github (or) tuna help (or) tuna docs : Open the Tuna GitHub Repository in the browser
+    
     ⋅ tuna : Redisplay this message
 
 Help : Contact support@opennote.me
