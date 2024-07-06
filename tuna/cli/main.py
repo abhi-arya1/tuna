@@ -1,6 +1,7 @@
 from .github_fs import fetch
 from .jupyter_fs import start_lab, monitor_lab, kill_lab
 from .constants import TUNA_DIR, AUTH_FILE, HELLO, CROSS_ICON, INFO_ICON, WARNING_ICON
+from .util import log 
 import json 
 import os 
 import inquirer
@@ -44,7 +45,7 @@ def authenticate():
 def validate(): 
     username, token = load_credentials()
     if not username or not token: 
-        print(f"[{CROSS_ICON}] You haven't set up a repository yet, run `tuna init` to start")
+        log(WARNING_ICON, "You haven't initialized Tuna yet. Run `tuna init` to start")
         exit(1)
 
 
@@ -73,7 +74,7 @@ def serve(browser: bool=False):
 
 def refresh(): 
     validate()
-    print(f"[{INFO_ICON}] Refreshing the Tuna Cache in your current directory")
+    log(INFO_ICON, "Refreshing the Tuna Cache in your current directory")
 
 
 
@@ -92,7 +93,7 @@ def main():
             elif argv[2] == "--no-open":
                 serve()
             else: 
-                print(f"[{WARNING_ICON}] Invalid flag '{argv[2]}'. Run 'tuna' for help")
+                log(WARNING_ICON, f"Invalid flag for 'serve': '{argv[2]}'. Run 'tuna' for help")
         else: 
             serve()
 
@@ -100,13 +101,23 @@ def main():
         validate() 
 
     elif argv[1] in ["github", "docs", "help"]:
-        print(f"[{INFO_ICON}] Opening 'https://github.com/abhi-arya1/tuna' in your default browser.")
+        log(INFO_ICON, "Opening 'https://github.com/abhi-arya1/tuna' in your default browser.")
         webopen("https://github.com/abhi-arya1/tuna")
 
-    elif argv[1] == "edit": 
-        print("Editing the Tuna notebook in your current directory")
+    elif argv[1] == "train":
+        if(len(argv)) > 2: 
+            if argv[2] == "--local":
+                log(INFO_ICON, "Local training coming soon...")
+                # train(local=True)
+            else: 
+                log(WARNING_ICON, f"Invalid flag for 'train': '{argv[2]}'. Run 'tuna' for help")
+        else: 
+            log(INFO_ICON, "Remote training coming soon...")
+            # train(local=False)
+
+
     else: 
-        print(f"[{WARNING_ICON}] Invalid option '{argv[1]}'. Run 'tuna' for help")
+        log(WARNING_ICON, f"Invalid option '{argv[1]}'. Run 'tuna' for help")
     
     exit(0)
 

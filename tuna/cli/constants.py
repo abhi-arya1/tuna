@@ -8,8 +8,6 @@ WARNING_ICON = "\u26A0"  # Warning sign
 LOADING_ICON = "\u27F3" # Loading sign
 INFO_ICON = "\u24D8" # Information sign
 
-
-
 CWD = Path(getcwd())
 
 HELLO = """

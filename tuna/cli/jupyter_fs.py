@@ -3,8 +3,8 @@ import subprocess
 import time 
 import psutil 
 import sys 
-from .util import clear_terminal
-from .constants import TUNA_DIR, CHECK_ICON, CROSS_ICON, WARNING_ICON, LOADING_ICON, INFO_ICON
+from .util import clear_terminal, log
+from .constants import TUNA_DIR, CROSS_ICON, WARNING_ICON, LOADING_ICON, INFO_ICON
 
 
 def start_lab(browser: bool): 
@@ -16,8 +16,8 @@ def start_lab(browser: bool):
 
 def monitor_lab(process): 
     clear_terminal()
-    print(f"[{INFO_ICON}] Running TunaLab on \033[1mhttp://localhost:8888/lab/tree/tuna.ipynb\033[0m")
-    print(f"[{INFO_ICON}] Type CTRL+C to end lab. Monitoring CPU and Memory usage...\n\n\n\n")
+    log(INFO_ICON, "Running TunaLab on \033[1mhttp://localhost:8888/lab/tree/tuna.ipynb\033[0m")
+    log(INFO_ICON, "Type CTRL+C to end lab. Monitoring CPU and Memory usage...\n\n\n\n")
 
     try:
         p = psutil.Process(process.pid)
@@ -42,8 +42,8 @@ def monitor_lab(process):
         pass
 
 
-def kill_lab(process): 
-    print(f"\n[{CROSS_ICON}] Ended TunaLab")
+def kill_lab(process):
+    log(CROSS_ICON, "Ended TunaLab") 
     process.terminate()
     try:
         process.wait(timeout=10)

@@ -5,3 +5,7 @@ def clear_terminal():
         os.system('cls')
     else:
         os.system('clear')
+
+
+def log(icon: str, message: str): 
+    print(f"[{icon}] {message}")
