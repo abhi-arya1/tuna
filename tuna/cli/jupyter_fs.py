@@ -4,24 +4,19 @@ import time
 import psutil 
 import sys 
 from .util import clear_terminal
-from .constants import TUNA_DIR
-
-CHECK_ICON = "\u2714"  # Check mark
-CROSS_ICON = "\u2716"  # Cross mark
-WARNING_ICON = "\u26A0"  # Warning sign
-LOADING_ICON = "\u27F3" # Loading sign
-INFO_ICON = "\u24D8" # Information sign
+from .constants import TUNA_DIR, CHECK_ICON, CROSS_ICON, WARNING_ICON, LOADING_ICON, INFO_ICON
 
 
-def start_lab(): 
+def start_lab(browser: bool): 
     print(f"[{LOADING_ICON} Starting TunaLab...")
-    process = subprocess.Popen(['jupyter', 'lab'], cwd=(TUNA_DIR), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    command = ['jupyter', 'lab'] if browser else ['jupyter', 'lab', '--no-browser']
+    process = subprocess.Popen(command, cwd=(TUNA_DIR), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return process
 
 
 def monitor_lab(process): 
     clear_terminal()
-    print(f"[{INFO_ICON}] Running TunaLab on \033[1mhttp://localhost:8888/lab\033[0m")
+    print(f"[{INFO_ICON}] Running TunaLab on \033[1mhttp://localhost:8888/lab/tree/tuna.ipynb\033[0m")
     print(f"[{INFO_ICON}] Type CTRL+C to end lab. Monitoring CPU and Memory usage...\n\n\n\n")
 
     try:

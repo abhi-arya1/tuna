@@ -1,6 +1,6 @@
 from .github_fs import fetch
 from .jupyter_fs import start_lab, monitor_lab, kill_lab
-from .constants import TUNA_DIR, AUTH_FILE, HELLO
+from .constants import TUNA_DIR, AUTH_FILE, HELLO, CROSS_ICON, INFO_ICON, WARNING_ICON
 import json 
 import os 
 import inquirer
@@ -18,8 +18,8 @@ def load_credentials():
 def save_credentials(username, token):
     with open(AUTH_FILE, 'w') as f:
         json.dump({
-            'message': 'This file contains your GitHub credentials. Do not share this file with anyone! If you think your credentials have been compromised, delete this file and run `tuna --init` again.',
-            'data_usage': 'We do not store this file. You can delete it whenever you want to revoke the Tuna CLI\'s access, and run `tuna --init` again to reauthenticate.',
+            'message': 'This file contains your GitHub credentials. Do not share this file with anyone! If you think your credentials have been compromised, delete this file and run `tuna init` again.',
+            'data_usage': 'We do not store this file. You can delete it whenever you want to revoke the Tuna CLI\'s access, and run `tuna init` again to reauthenticate.',
             'username': username, 
             'token': token
         }, f)
@@ -40,34 +40,68 @@ def authenticate():
     return username, token
 
 
+def validate(): 
+    username, token = load_credentials()
+    if not username or not token: 
+        print(f"[{CROSS_ICON}] You haven't set up a repository yet, run `tuna init` to start")
+        exit(1)
+
+
+
+def init(): 
+    print(f"[{INFO_ICON}] Let's get started...")
+    TUNA_DIR.mkdir(exist_ok=True)
+    username, token = load_credentials()
+    if not username or not token:
+        username, token = authenticate()
+        save_credentials(username, token)
+    repo = fetch(username, token)
+    print(repo)
+
+
+
+def serve(browser: bool=False): 
+    validate()
+    lab = start_lab(browser)
+    try:
+        monitor_lab(lab)
+    except KeyboardInterrupt:
+        kill_lab(lab)
+
+
+
+def refresh(): 
+    validate()
+    print(f"[{INFO_ICON}] Refreshing the Tuna Cache in your current directory")
+
+
+
 def main(): 
     if len(argv) == 1: 
         print(HELLO)
         exit(0)
 
-    if argv[1] == "--init": 
-        print("Let's get started...")
-        TUNA_DIR.mkdir(exist_ok=True)
-        username, token = load_credentials()
-        if not username or not token:
-            username, token = authenticate()
-            save_credentials(username, token)
-        repo = fetch(username, token)
-        print(repo)
+    if argv[1] == "init": 
+        init()
 
-    elif argv[1] == "--serve":
-        lab = start_lab()
-        try:
-            monitor_lab(lab)
-        except KeyboardInterrupt:
-            kill_lab(lab)
+    elif argv[1] == "serve":
+        if(len(argv)) > 2: 
+            if argv[2] == "--open":
+                serve(browser=True)
+            elif argv[2] == "--no-open":
+                serve()
+            else: 
+                print(f"[{WARNING_ICON}] Invalid flag '{argv[2]}'. Run 'tuna' for help")
+        else: 
+            serve()
 
-    elif argv[1] == "--refresh": 
-        print("Refreshing GitHub cache in your current directory")
-    elif argv[1] == "--edit": 
+    elif argv[1] == "refresh": 
+        validate() 
+
+    elif argv[1] == "edit": 
         print("Editing the Tuna notebook in your current directory")
     else: 
-        print("Invalid flag. Run 'tuna' for help")
+        print(f"[{WARNING_ICON}] Invalid option '{argv[1]}'. Run 'tuna' for help")
     
     exit(0)
 
