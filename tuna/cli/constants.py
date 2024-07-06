@@ -13,7 +13,7 @@ INFO_ICON = "\u24D8" # Information sign
 CWD = Path(getcwd())
 
 HELLO = """
-🎣 Welcome to Tuna
+🎣  Welcome to Tuna
 
 Commands: 
     ⋅ tuna init : Initialize Tuna in your current directory
@@ -28,12 +28,12 @@ Commands:
         ⋅ tuna train --local : Begin training your model on local hardware (Requires an NVIDIA GPU)
 
     ⋅ tuna github (or) tuna help (or) tuna docs : Open the Tuna GitHub Repository in the browser
-    
+
     ⋅ tuna : Redisplay this message
 
 Help : Contact support@opennote.me
 
-Happy Tun(a)ing! 🎣
+Happy Tun(a)ing!  🎣
 """
 
 TUNA_DIR = CWD / '.tuna'
