@@ -1,0 +1,61 @@
+name: 🐞 Bug Report
+description: Report a bug
+labels:
+  - bug
+  - pending
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## First of all
+        1. Please search for [existing issues](https://github.com/abhi-arya1/tuna/issues?q=is%3Aissue) about this problem first.
+        2. Make sure you are using Python 3.12+.
+        3. Make sure it's an issue with Tuna and not something else you are using.
+        4. Remember to be friendly, polite, and patient.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear description of what the bug is. Include screenshots if applicable.
+      placeholder: Bug description
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to ...
+        2. Click on ...
+        3. See error
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear description of what you expected to happen.
+
+  - type: textarea
+    id: info
+    attributes:
+      label: Platform and versions
+      description: "Please include the output of `python(3) --version` and any other relevant dependencies"
+      render: Shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Stack trace
+      render: Shell
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
