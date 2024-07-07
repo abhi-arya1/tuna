@@ -1,5 +1,5 @@
 import json
-from tuna.cli.constants import CONFIG_FILE, TRAIN_DATA, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES
+from tuna.cli.constants import REPO_FILE, TRAIN_DATA, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES
 
 def is_excluded(filename):
     if any(filename.lower().endswith(ext) for ext in EXCLUDED_EXTENSIONS):
@@ -53,7 +53,7 @@ def traverse_files(files, parent_path=''):
     return file_list
 
 def build_dataset():
-    with open(CONFIG_FILE, 'r') as f:
+    with open(REPO_FILE, 'r') as f:
         repository_data = json.load(f)
     all_files = traverse_files(repository_data['files'])
 

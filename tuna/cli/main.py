@@ -1,27 +1,29 @@
-from tuna.cli.github_fs import fetch
+from tuna.cli.github_fs import fetch, reload
 from tuna.cli.datasets import build_dataset
-from tuna.cli.jupyter_fs import start_lab, monitor_lab, kill_lab
-from tuna.cli.constants import TUNA_DIR, AUTH_FILE, CONFIG_FILE, HELLO, INFO_ICON, WARNING_ICON
+from tuna.cli.jupyter_fs import start_lab, monitor_lab, kill_lab, add_md_cell, add_code_cell
+from tuna.cli.fluidstack import select_gpu, spin_instance
 from tuna.cli.util import log 
+from tuna.cli.constants import TUNA_DIR, CONFIG_FILE, REPO_FILE, HELLO, \
+                            INFO_ICON, WARNING_ICON, CHECK_ICON, NOTEBOOK
+
 import json 
 import os 
 import inquirer
 from webbrowser import open as webopen
 from sys import argv
 from shutil import rmtree
-from halo import Halo
 
 
 def load_credentials():
-        if os.path.exists(AUTH_FILE):
-            with open(AUTH_FILE, 'r') as f:
-                data = json.load(f)
-                return data.get('username'), data.get('token')
-        return None, None
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'r') as f:
+            data = json.load(f)
+            return data.get('username'), data.get('token')
+    return None, None
 
 
 def save_credentials(username, token):
-    with open(AUTH_FILE, 'w') as f:
+    with open(CONFIG_FILE, 'w') as f:
         json.dump({
             'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
             'username': username, 
@@ -52,6 +54,24 @@ def validate():
 
 
 
+def validate_fluidstack(): 
+    with open(CONFIG_FILE, 'r') as f:
+        data = json.load(f)
+        api_key = data.get('fs_api_key', None)
+    if not api_key: 
+        questions = [
+            inquirer.Password('api_key', message="Enter your FluidStack API Key (https://www.fluidstack.io/)")
+        ]
+        answer = inquirer.prompt(questions)
+        api_key = answer['api_key']
+        with open(CONFIG_FILE, 'w') as f: 
+            data['fs_api_key'] = api_key
+            json.dump(data, f, indent=4)
+    return api_key
+
+    
+
+
 def init(): 
     if os.path.exists(TUNA_DIR):
         log(INFO_ICON, "You've already initialized Tuna in this directory! Run `tuna purge` to start fresh.")
@@ -63,6 +83,7 @@ def init():
         username, token = authenticate()
         save_credentials(username, token)
     fetch(username, token)
+    add_md_cell(NOTEBOOK, "# Hello, World!")
 
 
 
@@ -79,13 +100,24 @@ def serve(browser: bool=False):
 def refresh(): 
     validate()
     log(INFO_ICON, "Refreshing the Tuna Cache in your current directory")
+    reload()
+    log(CHECK_ICON, "Refreshed successfully!")
+
 
 
 
 def open_repository(): 
-    with open(CONFIG_FILE, 'r') as f: 
+    with open(REPO_FILE, 'r') as f: 
         data = json.load(f)
         webopen(data.get('html_url'))
+
+
+
+def train(local=False): 
+    validate() 
+    api_key = validate_fluidstack()
+    gpu = select_gpu(api_key)
+    spin_instance(api_key, gpu)
 
 
 
@@ -118,7 +150,7 @@ def main():
             serve()
 
     elif argv[1] == "refresh": 
-        validate() 
+        refresh()
 
     elif argv[1] in ["github", "docs", "help"]:
         log(INFO_ICON, "Opening 'https://github.com/abhi-arya1/tuna' in your default browser.")
@@ -143,9 +175,11 @@ def main():
     elif argv[1] == "purge":
         purge()
 
-    elif argv[1] == "dev": 
-        if argv[2] == "--datasets":
+    elif argv[1] == "--dev": 
+        if argv[2] == "dataset":
             build_dataset()
+        if argv[2] == "train": 
+            train()
 
     else: 
         log(WARNING_ICON, f"Invalid option '{argv[1]}'. Run 'tuna' for help")

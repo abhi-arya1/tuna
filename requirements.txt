@@ -4,3 +4,4 @@ halo
 jupyterlab
 nbformat
 scikit-learn
+tabulate

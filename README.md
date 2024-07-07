@@ -3,7 +3,7 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
 ![Build](https://img.shields.io/badge/build-failing-red.svg)
 
-#### _fine tuned, reimagined_
+#### _fine tuning, reimagined_
 
 `tuna` is your _one stop shop_ for fine tuning a code generation model on any codebase, available publically or privately on GitHub (more VCS support soon!).
 

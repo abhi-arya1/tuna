@@ -10,7 +10,8 @@ import inquirer
 import json
 import mimetypes
 from halo import Halo
-from tuna.cli.constants import CONFIG_FILE, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES, AUTH_FILE
+from tuna.cli.constants import REPO_FILE, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES, CONFIG_FILE, CHECK_ICON
+from tuna.cli.util import log
 
 
 class GitHubFile:
@@ -135,37 +136,21 @@ def fetch_directory(username, repo, token, path=''):
 
 
 
+def reload():
+    with open(CONFIG_FILE, 'r') as f:
+        auth_data = json.load(f)
+        username = auth_data['username']
+        token = auth_data['token']
+        repo_url = auth_data['repo_url']
+        repo_name = repo_url.split('/')[-1]
 
-# The "main" function
-def fetch(username, token) -> dict:
-    try:
-        repos = fetch_repos(username, token)
-
-        repo_question = [
-            inquirer.List('repo', message="Choose a repository", choices=[repo['name'] for repo in repos])
-        ]
-        repo_answer = inquirer.prompt(repo_question)
-        selected_repo_name = repo_answer['repo']
-        selected_repo_url = [repo['html_url'] for repo in repos if repo['name'] == selected_repo_name][0]
-
-        print(f"\033[92m\u2714 \033[1mSelected Project:\033[0m \033[92m{selected_repo_url}\033[0m")
-
-        project = GitHubProject(name=selected_repo_name, url=selected_repo_url)
-        
-        with open(AUTH_FILE, 'w') as f: 
-            json.dump({
-            'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
-            'username': username, 
-            'token': token,
-            'repo_url': selected_repo_url
-        }, f, indent=4)
-
-
-        spinner = Halo(text='Fetching files', spinner='dots')
-        spinner.start()
-
+    project = GitHubProject(name=repo_name, url=repo_url)
+    
+    spinner = Halo(text='Fetching files', spinner='dots')
+    spinner.start()
+    try: 
         try:
-            directory = fetch_directory(username, selected_repo_name, token)
+            directory = fetch_directory(username, repo_name, token)
             for item in directory:
                 project.add_file(item)
             spinner.succeed('Files fetched successfully!')
@@ -198,17 +183,47 @@ def fetch(username, token) -> dict:
                 return structure
 
             repo_data: dict = {
-                "repository_name": selected_repo_name,
-                "html_url": selected_repo_url,
+                "repository_name": repo_name,
+                "html_url": repo_url,
                 "files": build_structure(project._files)
             }
 
-            with open(CONFIG_FILE, 'w') as f: 
+            with open(REPO_FILE, 'w') as f: 
                 json.dump(repo_data, f, indent=4)
             spinner.succeed('Built configurations successfully!')
         except Exception as e:
             spinner.fail(f'Configuration load error: {str(e)}')
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to fetch repositories: {e}")
 
+
+
+
+def fetch(username, token) -> dict:
+    try:
+        repos = fetch_repos(username, token)
+
+        repo_question = [
+            inquirer.List('repo', message="Choose a repository", choices=[repo['name'] for repo in repos])
+        ]
+        repo_answer = inquirer.prompt(repo_question)
+        selected_repo_name = repo_answer['repo']
+        selected_repo_url = [repo['html_url'] for repo in repos if repo['name'] == selected_repo_name][0]
+
+        print(f"\033[92m\u2714 \033[1mSelected Project:\033[0m \033[92m{selected_repo_url}\033[0m")
+        
+        with open(CONFIG_FILE, 'w') as f: 
+            json.dump({
+            'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
+            'username': username, 
+            'token': token,
+            'repo_url': selected_repo_url
+        }, f, indent=4)
+
+        reload()
+
+        log(CHECK_ICON, f"Project '{selected_repo_name}' initialized successfully in the '/.tuna' directory!")
     except requests.exceptions.RequestException as e:
         print(f"Failed to fetch repositories: {e}")
 

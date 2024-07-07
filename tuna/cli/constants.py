@@ -9,8 +9,8 @@ CWD = Path(getcwd())
 
 TUNA_DIR = CWD / '.tuna'
 NOTEBOOK = TUNA_DIR / 'tuna.ipynb'
-CONFIG_FILE = TUNA_DIR / 'tuna.config.json'
-AUTH_FILE = TUNA_DIR / 'auth.config.json'
+REPO_FILE = TUNA_DIR / 'tuna.config.json'
+CONFIG_FILE = TUNA_DIR / 'auth.config.json'
 TRAIN_DATA = TUNA_DIR / 'train_dataset.jsonl'
 EVAL_DATA = TUNA_DIR / 'eval_dataset.txt' 
 TEST_DATA = TUNA_DIR / 'test_dataset.txt'
