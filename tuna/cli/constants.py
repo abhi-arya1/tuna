@@ -40,23 +40,7 @@ INFO_ICON = "\u24D8" # Information sign
 HELLO = """
 🎣  Welcome to Tuna
 
-Commands: 
-    ⋅ tuna init : Initialize Tuna in your current directory
-
-    ⋅ tuna serve : Run Tuna in JupyterLab, no automatic browser opening
-        ⋅ tuna serve --open : Same as above with automatic browser opening
-        ⋅ tuna serve --no-open : Same as "tuna serve"
-
-    ⋅ tuna refresh : Refresh GitHub cache in your current directory
-
-    ⋅ tuna train : Begin training your model on the code with a powerful rented GPU
-        ⋅ tuna train --local : Begin training your model on local hardware (Requires an NVIDIA GPU)
-
-    ⋅ tuna github (or) tuna help (or) tuna docs : Open the Tuna GitHub Repository in the browser
-
-    ⋅ tuna purge : (USE WITH CAUTION) Purge the '.tuna' folder from your current directory
-
-    ⋅ tuna : Redisplay this message
+Commands can be viewed at : https://github.com/abhi-arya1/tuna
 
 Help : Contact support@opennote.me
 

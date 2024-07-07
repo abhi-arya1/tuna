@@ -1,13 +1,24 @@
 # 🎣 Tuna
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
-![Build](https://img.shields.io/badge/build-failing-red.svg)
+![Version](https://img.shields.io/badge/Version-0.1.1-blue.svg)
+![Build](https://img.shields.io/badge/Build-soon-red.svg)
+![MacOS](https://img.shields.io/badge/MacOS-passing-dark_green.svg)
+![Linux](https://img.shields.io/badge/Linux-passing-dark_green.svg)
+![Windows](https://img.shields.io/badge/Windows-coming_soon-yellow.svg)
+[![Support](https://img.shields.io/badge/KoFi-☕-black.svg)](https://ko-fi.com/abhiarya)
+![Star](https://img.shields.io/badge/Give_us_a_Star!-purple.svg)
 
 #### _fine tuning, reimagined_
 
-`tuna` is your _one stop shop_ for fine tuning a code generation model on any codebase, available publically or privately on GitHub (more VCS support soon!).
+`tuna` is your _one stop (open-source) shop_ for fine tuning a code generation model on any codebase, available publically or privately on GitHub (more VCS support soon!).
 
 We simplify the **entire** process, meaning that all you have to do to build out your perfect model, settings and all, is simply follow the initialization command below!
+
+Don't have an NVIDIA GPU? Don't worry! Make sure you have an RSA SSH Key available at `~/.ssh/id_rsa.pub`, and set up an account and API key on our GPU provider, [FluidStack](https://fluidstack.io). Minimal prices, maximum development.
+
+If you're concered about Data Privacy and Data Collection, note that Tuna does not collect _any_ data on you, and is entirely open source. Check out the "Data Collection" section below to learn more.
+
+We'd love if you gave us a ⭐, as that's our primary way of tracking user interest! If you're feeling extra generous, you can click Sponsor ❤️. Thank you so much for reading!
 
 Questions? Contact `abhi[at]opennote.me`.
 
@@ -38,7 +49,6 @@ tuna init
 # Authenticates your GitHub credentials
 #   - This asks for a GitHub Token
 #     which MUST have READ REPO and READ USER permissions
-#     (if you're concered about data, scroll to "Localized Runs" in this README)
 # Lets you select a repository
 # Builds a Model Training Dataset
 # Sets up Jupyter Environment
@@ -75,11 +85,12 @@ tuna --edit
 # .tuna directory
 ``` -->
 
-**4. Train**
+**4. Train** (Coming Soon)
 
 ```bash
 tuna train
-# Begins to train the dataset with a rented powerful GPU
+# Begins to train the dataset with a powerful GPU from
+# FluidStack (see intro)
 
 # To train locally on current hardware, run
 tuna train --local
@@ -114,15 +125,16 @@ tuna purge
 ```bash
 tuna
 
-# Displays a welcome message and goes over all
-# commands again
+# Displays a welcome message
 ```
 
-## Localized Runs
+## Data Collection
 
-- After installation of the CLI tool, Tuna is entirely localized on your system. Outside of GPU rental services that we associate with to allow training, we don't store nor transfer _any_ data.
+- After installation of the CLI tool, Tuna is entirely localized on your system. Outside of GPU rental services that we associate with to allow training, we don't store nor transfer _any_ data to any internal services. _Tuna_ is **_strictly open source_**.
 
-- GitHub credentials including OAuth tokens, your username, and your stored repositories can be cleared by deleting the `.tuna` directory in the same spot that it was made.
+- GitHub credentials including OAuth tokens, your username, and your stored repositories can be cleared by deleting the `.tuna` directory in the same spot that it was made, or by running `tuna purge` in that directory.
+
+- FluidStack API keys are also stored locally, by deleting the `.tuna` directory in the same spot that it was made, or by running `tuna purge` in that directory
 
 - All files pulled from GitHub are strictly stored in the datasets that you can find in the `.tuna` directory that gets made. We pull text directly from the GitHub API to save you unwanted files and dependency installs, and also to protect your environment variables.
 
