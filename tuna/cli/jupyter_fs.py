@@ -3,8 +3,8 @@ import subprocess
 import time 
 import psutil 
 import sys 
-from .util import clear_terminal, log
-from .constants import TUNA_DIR, CROSS_ICON, WARNING_ICON, LOADING_ICON, INFO_ICON
+from tuna.cli.util import clear_terminal, log
+from tuna.cli.constants import TUNA_DIR, CROSS_ICON, WARNING_ICON, LOADING_ICON, INFO_ICON
 
 
 def start_lab(browser: bool): 

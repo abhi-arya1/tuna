@@ -3,3 +3,4 @@ requests
 halo
 jupyterlab
 nbformat
+scikit-learn

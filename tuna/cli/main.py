@@ -1,13 +1,15 @@
-from .github_fs import fetch
-from .jupyter_fs import start_lab, monitor_lab, kill_lab
-from .constants import TUNA_DIR, AUTH_FILE, CONFIG_FILE, HELLO, CROSS_ICON, INFO_ICON, WARNING_ICON
-from .util import log 
+from tuna.cli.github_fs import fetch
+from tuna.cli.datasets import build_dataset
+from tuna.cli.jupyter_fs import start_lab, monitor_lab, kill_lab
+from tuna.cli.constants import TUNA_DIR, AUTH_FILE, CONFIG_FILE, HELLO, INFO_ICON, WARNING_ICON
+from tuna.cli.util import log 
 import json 
 import os 
 import inquirer
 from webbrowser import open as webopen
 from sys import argv
 from shutil import rmtree
+from halo import Halo
 
 
 def load_credentials():
@@ -61,8 +63,7 @@ def init():
     if not username or not token:
         username, token = authenticate()
         save_credentials(username, token)
-    repo = fetch(username, token)
-    print(repo)
+    fetch(username, token)
 
 
 
@@ -142,6 +143,10 @@ def main():
 
     elif argv[1] == "purge":
         purge()
+
+    elif argv[1] == "dev": 
+        if argv[2] == "--datasets":
+            build_dataset()
 
     else: 
         log(WARNING_ICON, f"Invalid option '{argv[1]}'. Run 'tuna' for help")

@@ -2,13 +2,40 @@ from pathlib import Path
 from os import getcwd
 
 
+################################################ 
+# Tuna-Generated Directory Constants
+
+CWD = Path(getcwd())
+
+TUNA_DIR = CWD / '.tuna'
+NOTEBOOK = TUNA_DIR / 'tuna.ipynb'
+CONFIG_FILE = TUNA_DIR / 'tuna.config.json'
+AUTH_FILE = TUNA_DIR / 'auth.config.json'
+TRAIN_DATA = TUNA_DIR / 'train_dataset.jsonl'
+EVAL_DATA = TUNA_DIR / 'eval_dataset.txt' 
+TEST_DATA = TUNA_DIR / 'test_dataset.txt'
+
+TUNA_GITIGNORE = """
+ipynb_checkpoints/
+auth.config.json
+"""
+
+IPYNB_REQUIREMENTS = """
+transformers
+datasets
+peft
+trl
+python-dotenv
+"""
+
+################################################
+# CLI-Related Constants 
+
 CHECK_ICON = "\u2714"  # Check mark
 CROSS_ICON = "\u2716"  # Cross mark
 WARNING_ICON = "\u26A0"  # Warning sign
 LOADING_ICON = "\u27F3" # Loading sign
 INFO_ICON = "\u24D8" # Information sign
-
-CWD = Path(getcwd())
 
 HELLO = """
 🎣  Welcome to Tuna
@@ -36,20 +63,14 @@ Help : Contact support@opennote.me
 Happy Tun(a)ing!  🎣
 """
 
-TUNA_DIR = CWD / '.tuna'
-NOTEBOOK = TUNA_DIR / 'tuna.ipynb'
-CONFIG_FILE = TUNA_DIR / 'tuna.config.json'
-AUTH_FILE = TUNA_DIR / 'auth.config.json'
 
-TUNA_GITIGNORE = """
-ipynb_checkpoints/
-auth.config.json
-"""
+EXCLUDED_EXTENSIONS = (
+    '.png', '.jpg', '.jpeg', '.gif', '.svg', '.pdf', 
+    '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', 
+    '.csv', '.ico', '.pickle', '.pkl'
+)
 
-IPYNB_REQUIREMENTS = """
-transformers
-datasets
-peft
-trl
-python-dotenv
-"""
+EXCLUDED_FILENAMES = (
+    'license.md', 'license.txt', 'license', 'pipfile', 
+    'pipfile.lock', 'package-lock.json', 'outfile'
+)

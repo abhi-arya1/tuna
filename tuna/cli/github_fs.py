@@ -7,12 +7,15 @@ GitHub File System Manager for Tuna CLI
 
 import requests
 import inquirer
+import json
+import mimetypes
 from halo import Halo
+from tuna.cli.constants import CONFIG_FILE, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES
 
 
 class GitHubFile:
     def __init__(self, name, path, url, is_directory=False): 
-        self._name = name
+        self._name: str = name
         self._path = path
         self._url = url
         self._content = None
@@ -29,6 +32,8 @@ class GitHubFile:
         return self._url
     
     def content(self):
+        if self._name.lower().endswith(EXCLUDED_EXTENSIONS) or self._name.lower() in EXCLUDED_FILENAMES:
+            return mimetypes.guess_type(self._name)[0] or ''
         if self._content is None and not self._is_directory:
             response = requests.get(self._url)
             response.raise_for_status()
@@ -158,34 +163,42 @@ def fetch(username, token) -> dict:
         except Exception as e:
             spinner.fail(f'File load error: {str(e)}')
 
-        def build_structure(files):
-            structure = []
-            for file in files:
-                if file.is_directory():
-                    structure.append({
-                        "filename": file.name(),
-                        "filepath": file.path(),
-                        "file_url": file.url(),
-                        "directory": True,
-                        "children": build_structure(file.list_children())
-                    })
-                else:
-                    structure.append({
-                        "filename": file.name(),
-                        "filepath": file.path(),
-                        "file_url": file.url(),
-                        "directory": False,
-                        "content": file.content()
-                    })
-            return structure
+        spinner = Halo(text='Building configurations', spinner='dots')
+        spinner.start()
 
-        repo_data: dict = {
-            "repository_name": selected_repo_name,
-            "html_url": selected_repo_url,
-            "files": build_structure(project._files)
-        }
+        try:
+            def build_structure(files):
+                structure = []
+                for file in files:
+                    if file.is_directory():
+                        structure.append({
+                            "filename": file.name(),
+                            "filepath": file.path(),
+                            "file_url": file.url(),
+                            "directory": True,
+                            "children": build_structure(file.list_children())
+                        })
+                    else:
+                        structure.append({
+                            "filename": file.name(),
+                            "filepath": file.path(),
+                            "file_url": file.url(),
+                            "directory": False,
+                            "content": file.content()
+                        })
+                return structure
 
-        return repo_data
+            repo_data: dict = {
+                "repository_name": selected_repo_name,
+                "html_url": selected_repo_url,
+                "files": build_structure(project._files)
+            }
+
+            with open(CONFIG_FILE, 'w') as f: 
+                json.dump(repo_data, f, indent=4)
+            spinner.succeed('Built configurations successfully!')
+        except Exception as e:
+            spinner.fail(f'Configuration load error: {str(e)}')
 
     except requests.exceptions.RequestException as e:
         print(f"Failed to fetch repositories: {e}")
