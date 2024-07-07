@@ -1,10 +1,49 @@
 import nbformat as nbf
+import paramiko
 import subprocess
 import time 
 import psutil 
 import sys 
 from tuna.cli.util import clear_terminal, log
 from tuna.cli.constants import TUNA_DIR, CROSS_ICON, WARNING_ICON, LOADING_ICON, INFO_ICON
+from pathlib import Path 
+
+
+STARTUP_SCRIPT_PATH = Path.home() / 'startup.sh'
+PID_FILE_PATH = Path.home() / 'jupyter_lab.pid'
+def get_startup_script(username):
+    return f"""
+#!/bin/bash
+
+# Exit on any error
+set -e
+
+# Update and install Python 3.12 and JupyterLab
+sudo apt update 
+sudo apt upgrade -y
+sudo apt install -y software-properties-common
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install -y python3.12 python3-pip
+pip install jupyterlab
+
+# Update PATH
+echo 'export PATH=$PATH:/home/{username}/.local/bin' >> ~/.bashrc
+source ~/.bashrc
+
+# Start JupyterLab in the background and capture the PID
+nohup jupyter lab > jupyter_lab.log 2>&1 &
+echo $! > {PID_FILE_PATH}
+
+# Wait a few seconds to ensure JupyterLab has started
+sleep 5
+
+# Retrieve the token from the log file
+TOKEN=$(grep -oP 'token=\\K\\S+' jupyter_lab.log)
+
+# Print the token
+echo $TOKEN
+"""
 
 
 def start_lab(browser: bool): 
@@ -49,6 +88,73 @@ def kill_lab(process):
         process.wait(timeout=10)
     except subprocess.TimeoutExpired:
         process.kill()
+
+
+
+
+token, pid = get_jupyter_token_and_pid()
+if not token:
+    print("Failed to retrieve Jupyter token.")
+else:
+    # Set up the SSH tunnel
+    tunnel_process = setup_ssh_tunnel()
+    
+    # Wait a bit to ensure the tunnel is established
+    time.sleep(5)
+    
+    # Print the connection URL and PID
+    print(f'http://localhost:{LOCAL_PORT}/lab?token={token}')
+    print(f'JupyterLab PID: {pid}')
+
+    # Keep the script running to maintain the tunnel
+    try:
+        tunnel_process.wait()
+    except KeyboardInterrupt:
+        tunnel_process.terminate()
+        print("\nSSH tunnel closed.")
+
+
+
+
+def connect_lab(instance, api_key, ssh_file): 
+    username = instance["username"]
+    port = instance["ssh_port"]
+    hostname = instance["ip_address"]
+
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname, port, username, key_filename=str(ssh_file))
+
+    sftp = client.open_sftp()
+    with sftp.file(STARTUP_SCRIPT_PATH, 'w') as f:
+        f.write(get_startup_script(username))
+    sftp.chmod(STARTUP_SCRIPT_PATH, 0o755)
+    sftp.close()
+
+    stdin, stdout, stderr = client.exec_command(f'bash {STARTUP_SCRIPT_PATH}')
+    token = stdout.read().decode().strip()
+
+    print(token)
+    
+    sftp = client.open_sftp()
+    with sftp.file(PID_FILE_PATH, 'r') as f:
+        remote_pid = f.read().strip()
+    sftp.close()
+    
+    client.close()
+
+    tunnel_command = [
+        'ssh',
+        '-N',
+        '-L', f'localhost:8888:localhost:8888',
+        f'{username}@{hostname}'
+    ]
+    local_process = subprocess.Popen(tunnel_command)
+
+
+
+
+
 
 
 

@@ -175,7 +175,7 @@ def main():
     elif argv[1] == "purge":
         purge()
 
-    elif argv[1] == "--dev": 
+    elif argv[1] == "dev": 
         if argv[2] == "dataset":
             build_dataset()
         if argv[2] == "train": 

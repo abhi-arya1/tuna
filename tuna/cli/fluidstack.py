@@ -1,9 +1,12 @@
 import inquirer
-from tabulate import tabulate
 import requests
+import time
+import paramiko
+from tabulate import tabulate
+from halo import Halo
 from tuna.cli.util import log 
 from tuna.cli.constants import CHECK_ICON, CROSS_ICON, INFO_ICON
-from subprocess import run
+from tuna.cli.jupyter_fs import connect_lab
 from pathlib import Path
 
 SSH_KEY = Path.home() / '.ssh' / 'id_rsa.pub'
@@ -35,19 +38,55 @@ def select_gpu(api_key: str):
     answers = inquirer.prompt(questions)
 
     selected_option = next(gpu for gpu in gpu_options if f"{gpu['gpu_type'].replace('_', ' ')} - ${gpu['price_per_gpu_hr']} per GPU/hr" == answers['gpu'])
+
+    questions = [
+        inquirer.List('#gpus', 
+            message="How many GPUs would you like to use?",
+            choices=[str(i) for i in selected_option['gpu_counts']]
+        )
+    ]
+
+    answers = inquirer.prompt(questions)
+    selected_option['gpu_count'] = int(answers['#gpus'])
+
     log(CHECK_ICON, f"Selected GPU: {selected_option['gpu_type'].replace('_', ' ')}")
     return selected_option
 
 
 
-def check_ssh_key(): 
-    if not SSH_KEY.exists():
-        log(CROSS_ICON, "No SSH key found. Please make an RSA PublicKey at `~/.ssh/id_rsa.pub` and put it in your FluidStack account.")
+def check_ssh_key(api_key): 
+    spinner = Halo(text="Creating SSH Link", spinner="dots")
+    spinner.start()
+    try: 
+        if not SSH_KEY.exists():
+            log(CROSS_ICON, "No SSH key found. Please make an RSA PublicKey at `~/.ssh/id_rsa.pub` and put it in your FluidStack account.")
+            exit(1)
+        else: 
+            with open(SSH_KEY, 'r') as f:
+                ssh_key = f.read()
+        
+        res = requests.get('https://platform.fluidstack.io/ssh_keys', headers={
+            "api-key": api_key
+        })
+        keys = res.json()
+        if "TunaKey" in [key['name'] for key in keys]:
+            spinner.succeed("SSH Key Verified")
+            return "TunaKey"
+        else: 
+            res = requests.post('https://platform.fluidstack.io/ssh_keys', headers={
+                "api-key": api_key,
+                "Content-Type": "application/json"
+            }, json={
+                "name": "TunaKey",
+                "public_key": ssh_key
+            })
+            key = res.json()
+            spinner.succeed("SSH Key 'TunaKey' created successfully in your FluidStack account")
+            return key['name']
+    except requests.exceptions.RequestException as e:
+        spinner.fail(f"Failed to create SSH key: {e}")
         exit(1)
-    else: 
-        with open(SSH_KEY, 'r') as f:
-            ssh_key = f.read()
-            return ssh_key
+
 
 
 def spin_instance(api_key: str, selected_gpu: dict):
@@ -57,7 +96,7 @@ def spin_instance(api_key: str, selected_gpu: dict):
     answers = inquirer.prompt(questions)
     name = answers['instance_name']
 
-    key = check_ssh_key()
+    key = check_ssh_key(api_key)
 
     res = requests.post("https://platform.fluidstack.io/instances", 
             headers={
@@ -67,13 +106,15 @@ def spin_instance(api_key: str, selected_gpu: dict):
             json={
                 "gpu_type": selected_gpu['gpu_type'],
                 "name": name,
-                "ssh_key": key
+                "ssh_key": key, 
+                "operating_system_label": "ubuntu_20_04_lts_nvidia",
+                "gpu_count": selected_gpu['gpu_count'],
             }
         )
     instance = res.json()
     
     try: 
-        _ = instance["id"]
+        instance_id = instance["id"]
     except KeyError:
         try: 
             log(CROSS_ICON, f"Failed to spin up instance: {instance['message']} | Details: {instance["details"]}")
@@ -81,7 +122,34 @@ def spin_instance(api_key: str, selected_gpu: dict):
             log(CROSS_ICON, f"Failed to spin up instance: {instance['message']} | Data: {instance["data"]}")
         exit(1)
 
-    log(INFO_ICON, f"Spinning up instance '{name}' with {selected_gpu['gpu_type'].replace('_', ' ')} GPU...")
+    estimated_time = selected_gpu.get('estimated_provisioning_time_minutes', 5) 
+    spinner = Halo(text=f"Spinning up instance '{name}' with {selected_gpu['gpu_type'].replace('_', ' ')} GPU...", spinner='dots')
+    spinner.start()
+
+    for remaining in range(estimated_time, 0, -1):
+        spinner.text = f'Provisioning instance... ({remaining} minutes remaining)'
+
+        status_response = requests.get("https://platform.fluidstack.io/instances",
+                                       headers={"api-key": api_key})
+        instances = status_response.json()
+
+        this_instance = None 
+        instance_status = None
+        for inst in instances:
+            if inst["id"] == instance_id:
+                this_instance = inst
+                instance_status = inst["status"]
+                break
+
+        if instance_status == "running":
+            spinner.succeed('Instance is running!')
+            instance = this_instance
+            break
+
+        time.sleep(30) 
+    else:
+        spinner.fail(f"Instance failed to start within {estimated_time} minutes. Details: {this_instance}")
+
     table_data = [
         [instance["id"], instance["name"], instance["gpu_type"], instance["operating_system_label"]]
         for instance in [instance]
@@ -89,3 +157,10 @@ def spin_instance(api_key: str, selected_gpu: dict):
 
     headers = ["ID", "Name", "GPU", "OS"]
     print(tabulate(table_data, headers, tablefmt="pretty"))
+
+    spinner = Halo(text="Establishing connection to instance...", spinner="dots")
+    spinner.start()
+
+    connect_lab(instance, api_key, SSH_KEY)
+
+    
