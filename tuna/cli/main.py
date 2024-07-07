@@ -23,11 +23,10 @@ def load_credentials():
 def save_credentials(username, token):
     with open(AUTH_FILE, 'w') as f:
         json.dump({
-            'message': 'This file contains your GitHub credentials. Do not share this file with anyone! If you think your credentials have been compromised, delete this file and run `tuna init` again.',
-            'data_usage': 'We do not store this file. You can delete it whenever you want to revoke the Tuna CLI\'s access, and run `tuna init` again to reauthenticate.',
+            'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
             'username': username, 
             'token': token
-        }, f)
+        }, f, indent=4)
 
 
 def authenticate(): 

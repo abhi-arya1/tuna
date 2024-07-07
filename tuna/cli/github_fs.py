@@ -10,7 +10,7 @@ import inquirer
 import json
 import mimetypes
 from halo import Halo
-from tuna.cli.constants import CONFIG_FILE, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES
+from tuna.cli.constants import CONFIG_FILE, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES, AUTH_FILE
 
 
 class GitHubFile:
@@ -151,6 +151,15 @@ def fetch(username, token) -> dict:
         print(f"\033[92m\u2714 \033[1mSelected Project:\033[0m \033[92m{selected_repo_url}\033[0m")
 
         project = GitHubProject(name=selected_repo_name, url=selected_repo_url)
+        
+        with open(AUTH_FILE, 'w') as f: 
+            json.dump({
+            'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
+            'username': username, 
+            'token': token,
+            'repo_url': selected_repo_url
+        }, f, indent=4)
+
 
         spinner = Halo(text='Fetching files', spinner='dots')
         spinner.start()
