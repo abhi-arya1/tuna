@@ -5,7 +5,7 @@
 ![Linux](https://img.shields.io/badge/Linux-passing-dark_green.svg)
 ![Windows](https://img.shields.io/badge/Windows-coming_soon-yellow.svg)
 [![Support](https://img.shields.io/badge/KoFi-☕-black.svg)](https://ko-fi.com/abhiarya)
-![Star](https://img.shields.io/badge/Give_us_a_Star!-purple.svg)
+[![Star](https://img.shields.io/badge/Give_us_a_Star_on_GitHub!-purple.svg)](https://github.com/abhi-arya1/tuna)
 
 #### _fine tuning, reimagined_
 
