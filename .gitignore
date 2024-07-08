@@ -14,6 +14,9 @@ venv
 env
 .env
 
+# node 
+node_modules/
+
 # vscode 
 .vscode
 
