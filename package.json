@@ -1,8 +1,22 @@
 {
+  "author": "abhi-arya1",
+  "githubUrl": "https://github.com/abhi-arya1/tuna",
   "devDependencies": {
+    "cz-conventional-changelog": "^3.3.0",
     "husky": "^9.0.11"
   },
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "cm": "cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "husky": {
+      "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
+    }
   }
 }
