@@ -7,10 +7,11 @@ import sys
 from tuna.cli.util import clear_terminal, log
 from tuna.cli.constants import TUNA_DIR, CROSS_ICON, WARNING_ICON, LOADING_ICON, INFO_ICON
 from pathlib import Path 
+from halo import Halo
 
 
-STARTUP_SCRIPT_PATH = Path.home() / 'startup.sh'
-PID_FILE_PATH = Path.home() / 'jupyter_lab.pid'
+STARTUP_SCRIPT_PATH = '/home/abhi/startup.sh'
+PID_FILE_PATH = '/home/abhi/jupyter_lab.pid'
 def get_startup_script(username):
     return f"""
 #!/bin/bash
@@ -90,40 +91,19 @@ def kill_lab(process):
         process.kill()
 
 
-
-
-token, pid = get_jupyter_token_and_pid()
-if not token:
-    print("Failed to retrieve Jupyter token.")
-else:
-    # Set up the SSH tunnel
-    tunnel_process = setup_ssh_tunnel()
-    
-    # Wait a bit to ensure the tunnel is established
-    time.sleep(5)
-    
-    # Print the connection URL and PID
-    print(f'http://localhost:{LOCAL_PORT}/lab?token={token}')
-    print(f'JupyterLab PID: {pid}')
-
-    # Keep the script running to maintain the tunnel
-    try:
-        tunnel_process.wait()
-    except KeyboardInterrupt:
-        tunnel_process.terminate()
-        print("\nSSH tunnel closed.")
-
-
-
-
 def connect_lab(instance, api_key, ssh_file): 
-    username = instance["username"]
-    port = instance["ssh_port"]
-    hostname = instance["ip_address"]
+    spinner = Halo(text="Establishing connection to instance...", spinner="dots")
+    spinner.start()
+
+    username = "abhi" # instance["username"]
+    port = 22 # instance["ssh_port"]
+    hostname =  instance["ip_address"]
 
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname, port, username, key_filename=str(ssh_file))
+    client.connect(hostname, port, username, password="password1234") #key_filename=str(Path.home() / '.ssh' / 'id_rsa.pub'))
+    client.exec_command(f"touch {STARTUP_SCRIPT_PATH}")
+    client.exec_command(f"touch {PID_FILE_PATH}")
 
     sftp = client.open_sftp()
     with sftp.file(STARTUP_SCRIPT_PATH, 'w') as f:
@@ -131,7 +111,7 @@ def connect_lab(instance, api_key, ssh_file):
     sftp.chmod(STARTUP_SCRIPT_PATH, 0o755)
     sftp.close()
 
-    stdin, stdout, stderr = client.exec_command(f'bash {STARTUP_SCRIPT_PATH}')
+    _, stdout, _ = client.exec_command(f'bash {STARTUP_SCRIPT_PATH}')
     token = stdout.read().decode().strip()
 
     print(token)
@@ -149,12 +129,18 @@ def connect_lab(instance, api_key, ssh_file):
         '-L', f'localhost:8888:localhost:8888',
         f'{username}@{hostname}'
     ]
+
+    spinner.succeed(f"CONNECTED TO DEV LOCAL")
+    # spinner.succeed(f"Connected to instance '{instance['name']}.' Starting Lab now...")
+
     local_process = subprocess.Popen(tunnel_command)
 
+    try:
+        monitor_lab(local_process)
+    except KeyboardInterrupt:
+        kill_lab(local_process)
 
-
-
-
+    
 
 
 
@@ -189,3 +175,7 @@ def add_code_cell(notebook_path, content):
     with open(notebook_path, 'w', encoding='utf-8') as f:
         nbf.write(nb, f)
 
+
+
+if __name__ == "__main__": 
+    connect_lab("", "", "")

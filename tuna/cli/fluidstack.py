@@ -107,7 +107,7 @@ def spin_instance(api_key: str, selected_gpu: dict):
                 "gpu_type": selected_gpu['gpu_type'],
                 "name": name,
                 "ssh_key": key, 
-                "operating_system_label": "ubuntu_20_04_lts_nvidia",
+                "operating_system_label": "ubuntu_22_04_lts_nvidia",
                 "gpu_count": selected_gpu['gpu_count'],
             }
         )
@@ -126,11 +126,15 @@ def spin_instance(api_key: str, selected_gpu: dict):
     spinner = Halo(text=f"Spinning up instance '{name}' with {selected_gpu['gpu_type'].replace('_', ' ')} GPU...", spinner='dots')
     spinner.start()
 
-    for remaining in range(estimated_time, 0, -1):
-        spinner.text = f'Provisioning instance... ({remaining} minutes remaining)'
+    # Convert estimated time to seconds for the loop
+    estimated_time_seconds = estimated_time * 60
+
+    for remaining_seconds in range(estimated_time_seconds, 0, -20):
+        remaining_minutes = remaining_seconds // 60
+        spinner.text = f'Provisioning instance... ({remaining_minutes} minutes remaining)'
 
         status_response = requests.get("https://platform.fluidstack.io/instances",
-                                       headers={"api-key": api_key})
+                                    headers={"api-key": api_key})
         instances = status_response.json()
 
         this_instance = None 
@@ -146,20 +150,17 @@ def spin_instance(api_key: str, selected_gpu: dict):
             instance = this_instance
             break
 
-        time.sleep(30) 
+        time.sleep(20)
     else:
         spinner.fail(f"Instance failed to start within {estimated_time} minutes. Details: {this_instance}")
 
     table_data = [
-        [instance["id"], instance["name"], instance["gpu_type"], instance["operating_system_label"]]
+        [instance["id"], instance["name"], selected_gpu["gpu_type"], "Ubuntu 22.04 LTS Nvidia"]
         for instance in [instance]
     ]
 
     headers = ["ID", "Name", "GPU", "OS"]
     print(tabulate(table_data, headers, tablefmt="pretty"))
-
-    spinner = Halo(text="Establishing connection to instance...", spinner="dots")
-    spinner.start()
 
     connect_lab(instance, api_key, SSH_KEY)
 
