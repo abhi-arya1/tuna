@@ -8,6 +8,8 @@
 # pip 
 build/
 tuna.egg-info/
+tuna_cli.egg-info/
+tuna-cli.egg-info/
 __pycache__
 venv 
 .venv 

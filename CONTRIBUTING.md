@@ -11,6 +11,12 @@ Hi! Let's get started with development:
 
 ## Getting Started
 
+---
+
+**IMPORTANT**: Unless you are an authorized developer, _never_ use the `./build.sh` script. All pull requests that edit the `dist` directory in this way will be rejected.
+
+---
+
 Dependency Prerequisites:
 
 - `python3.12+`
