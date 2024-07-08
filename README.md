@@ -5,7 +5,8 @@
 ![MacOS](https://img.shields.io/badge/MacOS-passing-dark_green.svg)
 ![Linux](https://img.shields.io/badge/Linux-passing-dark_green.svg)
 ![Windows](https://img.shields.io/badge/Windows-coming_soon-yellow.svg)
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+[![Commitizen friendly](https://img.shields.io/badge/
+commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![Support](https://img.shields.io/badge/KoFi-☕-black.svg)](https://ko-fi.com/abhiarya)
 ![Star](https://img.shields.io/badge/Give_us_a_Star!-purple.svg)
 
