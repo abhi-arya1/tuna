@@ -5,45 +5,58 @@ import time
 import psutil 
 import sys 
 from tuna.cli.util import clear_terminal, log
-from tuna.cli.constants import TUNA_DIR, CROSS_ICON, WARNING_ICON, LOADING_ICON, INFO_ICON
-from pathlib import Path 
+from tuna.cli.constants import TUNA_DIR, WARNING_ICON, LOADING_ICON, INFO_ICON, CHECK_ICON
 from halo import Halo
+from rich.console import Console
+from rich.live import Live
+from rich.text import Text
 
+console = Console()
 
-STARTUP_SCRIPT_PATH = '/home/abhi/startup.sh'
-PID_FILE_PATH = '/home/abhi/jupyter_lab.pid'
-def get_startup_script(username):
-    return f"""
+STARTUP_SCRIPT_PATH = lambda username: f'/home/{username}/startup.sh'
+PID_FILE_PATH = lambda username: f'/home/{username}/jupyter_lab.pid'
+TOKEN_FILE_PATH = lambda username: f'/home/{username}/jupyter_token.txt'  
+STARTUP_SCRIPT_CONTENT = lambda username: f"""
 #!/bin/bash
 
 # Exit on any error
 set -e
 
-# Update and install Python 3.12 and JupyterLab
-sudo apt update 
-sudo apt upgrade -y
-sudo apt install -y software-properties-common
-sudo add-apt-repository -y ppa:deadsnakes/ppa
-sudo apt update
-sudo apt install -y python3.12 python3-pip
-pip install jupyterlab
+if ! command -v python3.12 &> /dev/null; then
+    echo "Configuring for TunaLab"
+
+    sudo apt update 
+    sudo apt upgrade -y
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt update
+    sudo apt install -y python3.12 python3-pip
+
+    pip install jupyterlab
+    mkdir tunalab
+else
+    echo "Tuna Configured, Starting Up..."
+fi
 
 # Update PATH
+export PATH=$PATH:/home/{username}/.local/bin
 echo 'export PATH=$PATH:/home/{username}/.local/bin' >> ~/.bashrc
 source ~/.bashrc
 
+# Enter TunaLab 
+cd tunalab
+
 # Start JupyterLab in the background and capture the PID
-nohup jupyter lab > jupyter_lab.log 2>&1 &
-echo $! > {PID_FILE_PATH}
+nohup jupyter lab --no-browser --port=8888 > jupyter_lab.log 2>&1 &
+echo $! > {PID_FILE_PATH(username)}
 
 # Wait a few seconds to ensure JupyterLab has started
 sleep 5
 
 # Retrieve the token from the log file
-TOKEN=$(grep -oP 'token=\\K\\S+' jupyter_lab.log)
+TOKEN=$(grep -oP 'token=\\K[a-f0-9]+' jupyter_lab.log)
 
 # Print the token
-echo $TOKEN
+echo $TOKEN > {TOKEN_FILE_PATH(username)}
 """
 
 
@@ -54,9 +67,12 @@ def start_lab(browser: bool):
     return process
 
 
-def monitor_lab(process): 
-    clear_terminal()
-    log(INFO_ICON, "Running TunaLab on \033[1mhttp://localhost:8888/lab/tree/tuna.ipynb\033[0m")
+def monitor_lab(process, token=""): 
+    # clear_terminal()
+    if token == "": 
+        log(INFO_ICON, f"Running TunaLab on \033[1mhttp://localhost:8888/lab\033[0m")
+    else: 
+        log(INFO_ICON, f"Running TunaLab on \033[1mhttp://localhost:8888/lab?token={token}\033[0m")
     log(INFO_ICON, "Type CTRL+C to end lab. Monitoring CPU and Memory usage...\n\n\n\n")
 
     try:
@@ -83,7 +99,7 @@ def monitor_lab(process):
 
 
 def kill_lab(process):
-    log(CROSS_ICON, "Ended TunaLab") 
+    log(CHECK_ICON, "Ended TunaLab, Goodbye") 
     process.terminate()
     try:
         process.wait(timeout=10)
@@ -91,37 +107,42 @@ def kill_lab(process):
         process.kill()
 
 
-def connect_lab(instance, api_key, ssh_file): 
-    spinner = Halo(text="Establishing connection to instance...", spinner="dots")
+
+def connect_lab(instance, ssh_file): 
+    spinner = Halo(text="Configuring instance for Tuna", spinner="dots")
     spinner.start()
 
-    username = "abhi" # instance["username"]
-    port = 22 # instance["ssh_port"]
+    username = instance["username"]
+    port = instance["ssh_port"]
     hostname =  instance["ip_address"]
 
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname, port, username, password="password1234") #key_filename=str(Path.home() / '.ssh' / 'id_rsa.pub'))
-    client.exec_command(f"touch {STARTUP_SCRIPT_PATH}")
-    client.exec_command(f"touch {PID_FILE_PATH}")
+    client.connect(hostname, port, username, key_filename=str(ssh_file))
+    client.exec_command(f"touch {STARTUP_SCRIPT_PATH(username)}")
+    client.exec_command(f"touch {PID_FILE_PATH(username)}")
 
     sftp = client.open_sftp()
-    with sftp.file(STARTUP_SCRIPT_PATH, 'w') as f:
-        f.write(get_startup_script(username))
-    sftp.chmod(STARTUP_SCRIPT_PATH, 0o755)
+    with sftp.file(STARTUP_SCRIPT_PATH(username), 'w') as f:
+        f.write(STARTUP_SCRIPT_CONTENT(username))
+    sftp.chmod(STARTUP_SCRIPT_PATH(username), 0o755)
     sftp.close()
 
-    _, stdout, _ = client.exec_command(f'bash {STARTUP_SCRIPT_PATH}')
-    token = stdout.read().decode().strip()
-
-    print(token)
+    _, stdout, _ = client.exec_command(f'bash {STARTUP_SCRIPT_PATH(username)}')
+    lines = []
+    with Live(Text("", style="grey"), refresh_per_second=4) as live:
+        for line in iter(stdout.readline, ""):
+            lines.append(line.strip())
+            if len(lines) > 5:
+                lines.pop(0)
+            live.update(Text("\n".join(lines), style="grey"))
     
     sftp = client.open_sftp()
-    with sftp.file(PID_FILE_PATH, 'r') as f:
-        remote_pid = f.read().strip()
+    with sftp.file(PID_FILE_PATH(username), 'r') as f, sftp.file(TOKEN_FILE_PATH(username), 'r') as g:
+        remote_pid = f.read().strip().decode('utf-8')
+        remote_token = g.read().strip().decode('utf-8').split(" ")[0]
+        print(remote_pid, remote_token)
     sftp.close()
-    
-    client.close()
 
     tunnel_command = [
         'ssh',
@@ -130,15 +151,17 @@ def connect_lab(instance, api_key, ssh_file):
         f'{username}@{hostname}'
     ]
 
-    spinner.succeed(f"CONNECTED TO DEV LOCAL")
-    # spinner.succeed(f"Connected to instance '{instance['name']}.' Starting Lab now...")
+    spinner.succeed(f"Connected to instance: '{username}@{hostname}' Starting Lab now...")
 
     local_process = subprocess.Popen(tunnel_command)
 
     try:
-        monitor_lab(local_process)
+        monitor_lab(local_process, token=remote_token)
     except KeyboardInterrupt:
+        _, stdout, _ = client.exec_command(f"sudo kill -9 {remote_pid}")
+        print(stdout)
         kill_lab(local_process)
+        client.close()
 
     
 
@@ -174,8 +197,3 @@ def add_code_cell(notebook_path, content):
 
     with open(notebook_path, 'w', encoding='utf-8') as f:
         nbf.write(nb, f)
-
-
-
-if __name__ == "__main__": 
-    connect_lab("", "", "")

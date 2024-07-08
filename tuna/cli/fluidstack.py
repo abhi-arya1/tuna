@@ -1,13 +1,12 @@
 import inquirer
 import requests
 import time
-import paramiko
+from pathlib import Path
 from tabulate import tabulate
 from halo import Halo
 from tuna.cli.util import log 
 from tuna.cli.constants import CHECK_ICON, CROSS_ICON, INFO_ICON
 from tuna.cli.jupyter_fs import connect_lab
-from pathlib import Path
 
 SSH_KEY = Path.home() / '.ssh' / 'id_rsa.pub'
 
@@ -129,9 +128,9 @@ def spin_instance(api_key: str, selected_gpu: dict):
     # Convert estimated time to seconds for the loop
     estimated_time_seconds = estimated_time * 60
 
-    for remaining_seconds in range(estimated_time_seconds, 0, -20):
+    for remaining_seconds in range(estimated_time_seconds, 0, -15):
         remaining_minutes = remaining_seconds // 60
-        spinner.text = f'Provisioning instance... ({remaining_minutes} minutes remaining)'
+        spinner.text = f'Allocating instance... ({remaining_minutes} minutes remaining)'
 
         status_response = requests.get("https://platform.fluidstack.io/instances",
                                     headers={"api-key": api_key})
@@ -150,7 +149,7 @@ def spin_instance(api_key: str, selected_gpu: dict):
             instance = this_instance
             break
 
-        time.sleep(20)
+        time.sleep(15)
     else:
         spinner.fail(f"Instance failed to start within {estimated_time} minutes. Details: {this_instance}")
 
@@ -162,6 +161,6 @@ def spin_instance(api_key: str, selected_gpu: dict):
     headers = ["ID", "Name", "GPU", "OS"]
     print(tabulate(table_data, headers, tablefmt="pretty"))
 
-    connect_lab(instance, api_key, SSH_KEY)
+    connect_lab(instance, SSH_KEY)
 
     
