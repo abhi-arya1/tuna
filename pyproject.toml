@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tuna-cli"
+version = "0.1.1"
+authors = [
+  { name = "Abhigyan Arya (Opennote Labs)", email = "support@opennote.me" },
+]
+description = "Fine tuning, reimagined. Welcome to tuna - we're simplifying cloud compute architecture, datasets, and more, to get your specialized AI from 0 to 1 ASAP."
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "inquirer",
+    "requests",
+    "halo",
+    "jupyterlab",
+    "nbformat",
+    "scikit-learn",
+    "tabulate",
+    "paramiko",
+]
+
+[project.urls]
+Homepage = "https://github.com/abhi-arya1/tuna"
+Issues = "https://github.com/abhi-arya1/tuna/issues"

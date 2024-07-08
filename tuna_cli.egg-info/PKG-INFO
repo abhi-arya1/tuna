@@ -1,9 +1,33 @@
+Metadata-Version: 2.1
+Name: tuna-cli
+Version: 0.1.1
+Summary: Fine tuning, reimagined. Welcome to tuna - we're simplifying cloud compute architecture, datasets, and more, to get your specialized AI from 0 to 1 ASAP.
+Author-email: "Abhigyan Arya (Opennote Labs)" <support@opennote.me>
+Project-URL: Homepage, https://github.com/abhi-arya1/tuna
+Project-URL: Issues, https://github.com/abhi-arya1/tuna/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Requires-Dist: inquirer
+Requires-Dist: requests
+Requires-Dist: halo
+Requires-Dist: jupyterlab
+Requires-Dist: nbformat
+Requires-Dist: scikit-learn
+Requires-Dist: tabulate
+Requires-Dist: paramiko
+
 # 🎣 Tuna
 
-[![PyPi](https://img.shields.io/pypi/v/tuna-cli)](https://pypi.org/project/tuna-cli/)
+![Version](https://img.shields.io/badge/Version-0.1.1-blue.svg)
+![Build](https://img.shields.io/badge/Build-soon-red.svg)
 ![MacOS](https://img.shields.io/badge/MacOS-passing-dark_green.svg)
 ![Linux](https://img.shields.io/badge/Linux-passing-dark_green.svg)
 ![Windows](https://img.shields.io/badge/Windows-coming_soon-yellow.svg)
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![Support](https://img.shields.io/badge/KoFi-☕-black.svg)](https://ko-fi.com/abhiarya)
 ![Star](https://img.shields.io/badge/Give_us_a_Star!-purple.svg)
 
@@ -27,10 +51,12 @@ Questions? Contact `abhi[at]opennote.me`.
 
 ## Getting Started
 
-To install `tuna`, make sure you have `Python 3.12+` installed on your machine, then simply run the below command:
+To install `tuna`, make sure you have `Python 3.12+` installed on your machine, then simply follow the below commands:
 
 ```bash
-pip install tuna-cli
+git clone https://github.com/abhi-arya1/tuna.git
+cd tuna
+pip install .
 ```
 
 This will make `tuna` executable from anywhere on your machine.
