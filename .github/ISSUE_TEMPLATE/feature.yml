@@ -1,0 +1,28 @@
+name: 💻 Feature
+description: Propose a feature to develop
+labels:
+  - feature
+  - pending
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## First of all
+        1. Please search for [existing features](https://github.com/abhi-arya1/tuna/issues?q=is%3Aissue) about this idea.
+        2. Remember to be friendly, polite, and patient.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the feature
+      description: A clear description of what the feature is
+      placeholder: Feature Description...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context about the feature here.
