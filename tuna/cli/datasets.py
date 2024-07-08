@@ -1,3 +1,6 @@
+# pylint: disable=all
+# FIXME: This file has major issues, updating soon
+
 import json
 from tuna.cli.constants import REPO_FILE, TRAIN_DATA, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES
 

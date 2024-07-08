@@ -6,5 +6,3 @@ nbformat
 scikit-learn
 tabulate
 paramiko
-colorama
-rich

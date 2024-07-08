@@ -1,21 +1,49 @@
+# pylint: disable=consider-using-sys-exit
+# pylint: disable=missing-timeout
+"""
+
+FluidStack API Utilities for Tuna
+
+This module contains utility functions for managing FluidStack instances and GPUs
+for the Tuna CLI.
+
+"""
+
+import time
 import inquirer
 import requests
-import time
-from pathlib import Path
 from tabulate import tabulate
 from halo import Halo
-from tuna.cli.util import log 
-from tuna.cli.constants import CHECK_ICON, CROSS_ICON, INFO_ICON
+from tuna.cli.util import log
+from tuna.cli.constants import CHECK_ICON, CROSS_ICON, INFO_ICON, SSH_KEY
 from tuna.cli.jupyter_fs import connect_lab
 
-SSH_KEY = Path.home() / '.ssh' / 'id_rsa.pub'
 
-def select_gpu(api_key: str): 
-    res = requests.get("https://platform.fluidstack.io/list_available_configurations", headers={"api-key": api_key})
+def select_gpu(api_key: str) -> dict:
+    """
+    Selects a GPU from the available options on FluidStack.
+
+    Args:
+        api_key (str): The FluidStack API Key provided by the User
+    
+    Returns:
+        dict: The selected GPU configuration via FluidStack API
+    """
+    # pylint: disable=missing-timeout
+    # Get available GPUs on FluidStack
+    res = requests.get(
+        "https://platform.fluidstack.io/list_available_configurations", 
+        headers={"api-key": api_key}
+        )
     gpu_options = res.json()
 
     table_data = [
-        [gpu["gpu_type"].replace('_', ' '), f"${gpu['price_per_gpu_hr']}", gpu["estimated_provisioning_time_minutes"], gpu["gpu_counts"]]
+        [
+            gpu["gpu_type"].replace('_', ' '),
+            f"${gpu['price_per_gpu_hr']}",
+            gpu["estimated_provisioning_time_minutes"],
+            gpu["gpu_counts"]
+        ]
         for gpu in gpu_options
     ]
 
@@ -23,6 +51,8 @@ def select_gpu(api_key: str):
     print(tabulate(table_data, headers, tablefmt="pretty"))
     log(INFO_ICON, "Data provided by FluidStack (https://fluidstack.io)")
 
+
+    # Prompt GPU Selection
     choices = [
         f"{gpu['gpu_type'].replace('_', ' ')} - ${gpu['price_per_gpu_hr']} per GPU/hr"
         for gpu in gpu_options
@@ -35,11 +65,14 @@ def select_gpu(api_key: str):
     ]
 
     answers = inquirer.prompt(questions)
+    # pylint: disable=line-too-long
+    selected_option = \
+        next(gpu for gpu in gpu_options if f"{gpu['gpu_type'].replace('_', ' ')} - ${gpu['price_per_gpu_hr']} per GPU/hr" == answers['gpu'])
 
-    selected_option = next(gpu for gpu in gpu_options if f"{gpu['gpu_type'].replace('_', ' ')} - ${gpu['price_per_gpu_hr']} per GPU/hr" == answers['gpu'])
 
+    # Get GPU Selection Specifics
     questions = [
-        inquirer.List('#gpus', 
+        inquirer.List('#gpus',
             message="How many GPUs would you like to use?",
             choices=[str(i) for i in selected_option['gpu_counts']]
         )
@@ -48,22 +81,35 @@ def select_gpu(api_key: str):
     answers = inquirer.prompt(questions)
     selected_option['gpu_count'] = int(answers['#gpus'])
 
+    # Log and Return Configured GPU Option
     log(CHECK_ICON, f"Selected GPU: {selected_option['gpu_type'].replace('_', ' ')}")
     return selected_option
 
 
 
-def check_ssh_key(api_key): 
+
+# pylint: disable=inconsistent-return-statements
+def check_ssh_key(api_key) -> str:
+    """
+    Check if the SSH Key is present in the FluidStack account, and make one if not. 
+
+    Args:
+        api_key (str): The FluidStack API Key provided by the User
+
+    Returns:
+        str: The name of the SSH Key in the FluidStack account
+    """
     spinner = Halo(text="Creating SSH Link", spinner="dots")
     spinner.start()
-    try: 
+    try:
         if not SSH_KEY.exists():
+            # pylint: disable=line-too-long
             log(CROSS_ICON, "No SSH key found. Please make an RSA PublicKey at `~/.ssh/id_rsa.pub` and put it in your FluidStack account.")
             exit(1)
-        else: 
-            with open(SSH_KEY, 'r') as f:
+        else:
+            with open(SSH_KEY, 'r', encoding="utf-8") as f:
                 ssh_key = f.read()
-        
+
         res = requests.get('https://platform.fluidstack.io/ssh_keys', headers={
             "api-key": api_key
         })
@@ -71,24 +117,34 @@ def check_ssh_key(api_key):
         if "TunaKey" in [key['name'] for key in keys]:
             spinner.succeed("SSH Key Verified")
             return "TunaKey"
-        else: 
-            res = requests.post('https://platform.fluidstack.io/ssh_keys', headers={
-                "api-key": api_key,
-                "Content-Type": "application/json"
-            }, json={
-                "name": "TunaKey",
-                "public_key": ssh_key
-            })
-            key = res.json()
-            spinner.succeed("SSH Key 'TunaKey' created successfully in your FluidStack account")
-            return key['name']
+
+        res = requests.post('https://platform.fluidstack.io/ssh_keys', headers={
+            "api-key": api_key,
+            "Content-Type": "application/json"
+        }, json={
+            "name": "TunaKey",
+            "public_key": ssh_key
+        })
+        spinner.succeed("SSH Key 'TunaKey' created successfully in your FluidStack account")
+        return "TunaKey"
     except requests.exceptions.RequestException as e:
         spinner.fail(f"Failed to create SSH key: {e}")
         exit(1)
 
 
 
-def spin_instance(api_key: str, selected_gpu: dict):
+
+# pylint: disable=too-many-locals
+def spin_instance(api_key: str, selected_gpu: dict) -> None:
+    """
+    Spins up a FluidStack instance with the selected GPU configuration.
+
+    Args:
+        api_key (str): The FluidStack API Key provided by the User
+        selected_gpu (dict): The selected GPU configuration via FluidStack API
+
+    Connects and runs the Remote Instance for tuning immediately after provisioning.
+    """
     questions = [
         inquirer.Text('instance_name', message="Enter an instance name")
     ]
@@ -97,7 +153,7 @@ def spin_instance(api_key: str, selected_gpu: dict):
 
     key = check_ssh_key(api_key)
 
-    res = requests.post("https://platform.fluidstack.io/instances", 
+    res = requests.post("https://platform.fluidstack.io/instances",
             headers={
                 "api-key": api_key,
                 "Content-Type": "application/json"
@@ -111,21 +167,24 @@ def spin_instance(api_key: str, selected_gpu: dict):
             }
         )
     instance = res.json()
-    
-    try: 
+
+    try:
         instance_id = instance["id"]
     except KeyError:
-        try: 
-            log(CROSS_ICON, f"Failed to spin up instance: {instance['message']} | Details: {instance["details"]}")
-        except KeyError: 
-            log(CROSS_ICON, f"Failed to spin up instance: {instance['message']} | Data: {instance["data"]}")
+        try:
+            # pylint: disable=line-too-long
+            log(CROSS_ICON,
+                f"Failed to spin up instance: {instance['message']} | Details: {instance["details"]}")
+        except KeyError:
+            log(CROSS_ICON,
+                f"Failed to spin up instance: {instance['message']} | Data: {instance["data"]}")
         exit(1)
 
-    estimated_time = selected_gpu.get('estimated_provisioning_time_minutes', 5) 
+    estimated_time = selected_gpu.get('estimated_provisioning_time_minutes', 5)
+    # pylint: disable=line-too-long
     spinner = Halo(text=f"Spinning up instance '{name}' with {selected_gpu['gpu_type'].replace('_', ' ')} GPU...", spinner='dots')
     spinner.start()
 
-    # Convert estimated time to seconds for the loop
     estimated_time_seconds = estimated_time * 60
 
     for remaining_seconds in range(estimated_time_seconds, 0, -15):
@@ -136,7 +195,7 @@ def spin_instance(api_key: str, selected_gpu: dict):
                                     headers={"api-key": api_key})
         instances = status_response.json()
 
-        this_instance = None 
+        this_instance = None
         instance_status = None
         for inst in instances:
             if inst["id"] == instance_id:
@@ -162,5 +221,3 @@ def spin_instance(api_key: str, selected_gpu: dict):
     print(tabulate(table_data, headers, tablefmt="pretty"))
 
     connect_lab(instance, SSH_KEY)
-
-    
