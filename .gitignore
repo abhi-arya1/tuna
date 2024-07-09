@@ -15,6 +15,7 @@ venv
 .venv 
 env
 .env
+PKG-INFO
 
 # node 
 node_modules/

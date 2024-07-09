@@ -28,6 +28,9 @@ dependencies = [
     "paramiko",
 ]
 
+[project.scripts]
+tuna = "tuna.cli.main:main"
+
 [project.urls]
 Homepage = "https://github.com/abhi-arya1/tuna"
 Issues = "https://github.com/abhi-arya1/tuna/issues"

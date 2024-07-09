@@ -2,6 +2,8 @@ Metadata-Version: 2.1
 Name: tuna-cli
 Version: 0.1.2
 Summary: Fine tuning, reimagined. Welcome to tuna - we're simplifying cloud compute architecture, datasets, and more, to get your specialized AI from 0 to 1 ASAP.
+Home-page: https://github.com/abhi-arya1/tuna
+Author: Abhigyan Arya (Opennote Labs)
 Author-email: "Abhigyan Arya (Opennote Labs)" <support@opennote.me>
 Project-URL: Homepage, https://github.com/abhi-arya1/tuna
 Project-URL: Issues, https://github.com/abhi-arya1/tuna/issues
@@ -27,7 +29,7 @@ Requires-Dist: paramiko
 ![Linux](https://img.shields.io/badge/Linux-passing-dark_green.svg)
 ![Windows](https://img.shields.io/badge/Windows-coming_soon-yellow.svg)
 [![Support](https://img.shields.io/badge/KoFi-☕-black.svg)](https://ko-fi.com/abhiarya)
-![Star](https://img.shields.io/badge/Give_us_a_Star!-purple.svg)
+[![Star](https://img.shields.io/badge/Give_us_a_Star_on_GitHub!-purple.svg)](https://github.com/abhi-arya1/tuna)
 
 #### _fine tuning, reimagined_
 

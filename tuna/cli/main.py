@@ -16,7 +16,7 @@ from tuna.cli.github_fs import fetch, reload
 from tuna.cli.datasets import build_dataset
 from tuna.cli.jupyter_fs import start_lab, monitor_lab, kill_lab, \
     add_md_cell
-from tuna.cli.fluidstack import select_gpu, spin_instance
+from tuna.cli.fluidstack import select_gpu, spin_instance, get_instances, existing_or_new_trainer
 from tuna.cli.util import log
 from tuna.cli.constants import TUNA_DIR, CONFIG_FILE, REPO_FILE, HELLO, \
     INFO_ICON, WARNING_ICON, CHECK_ICON, NOTEBOOK
@@ -140,6 +140,7 @@ def init() -> None:
 
 
 
+
 def serve(browser: bool=False) -> None:
     """
     Serve the Tuna Jupyter Notebook in the Browser.
@@ -180,14 +181,32 @@ def open_repository() -> None:
 
 
 
-def train() -> None:
+def train(local=False) -> None:
     """
     Setup remote compute training with FluidStack.
+
+    Args: 
+        local (bool, optional): Whether to train locally. Default=False.
     """
     validate()
+
+    if local:
+        log(INFO_ICON, "Local training coming soon...")
+        return
+
     api_key = validate_fluidstack()
-    gpu = select_gpu(api_key)
-    spin_instance(api_key, gpu)
+    instances = get_instances(api_key)
+
+    if instances and len(instances) != 0:
+        use_existing = existing_or_new_trainer()
+    else:
+        use_existing = False
+
+    if not instances or len(instances) == 0 or not use_existing:
+        gpu = select_gpu(api_key)
+        spin_instance(api_key, gpu)
+    else:
+        pass
 
 
 
@@ -244,13 +263,18 @@ def main() -> None:
     elif argv[1] == "train":
         if(len(argv)) > 2:
             if argv[2] == "--local":
-                log(INFO_ICON, "Local training coming soon...")
-                # train(local=True)
+                train(local=True)
             else:
                 log(WARNING_ICON, f"Invalid flag for 'train': '{argv[2]}'. Run 'tuna' for help")
         else:
-            log(INFO_ICON, "Remote training coming soon...")
-            # train(local=False)
+            train()
+
+    elif argv[1] == "fluidstack": 
+        if argv[2] == "manage": 
+            log(INFO_ICON, "Opening FluidStack Dashboard in your default browser.")
+            webopen("https://dashboard.fluidstack.io/")
+        else:
+            log(WARNING_ICON, f"Invalid option '{argv[2]}'. Run 'tuna' for help")
 
     elif argv[1] == "purge":
         purge()
@@ -258,8 +282,6 @@ def main() -> None:
     elif argv[1] == "dev":
         if argv[2] == "dataset":
             build_dataset()
-        if argv[2] == "train":
-            train()
 
     else:
         log(WARNING_ICON, f"Invalid option '{argv[1]}'. Run 'tuna' for help")

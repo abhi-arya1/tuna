@@ -134,6 +134,63 @@ def check_ssh_key(api_key) -> str:
 
 
 
+def existing_or_new_trainer() -> bool:
+    """
+    Prompts the user to select an existing training dataset or create a new one.
+
+    Returns:
+        bool: True if the user selects an existing training dataset, False otherwise
+    """
+    questions = [
+        inquirer.List('trainer',
+                    message="Would you like to use an existing FluidStack instance, or run a new one?",
+                    choices=["Existing", "New"]
+                    )
+    ]
+    answers = inquirer.prompt(questions)
+    return answers['trainer'] == "Existing"
+
+
+
+
+def get_instances(api_key: str) -> list[dict]: 
+    """
+    Fetches the list of instances running on FluidStack.
+
+    Args:
+        api_key (str): The FluidStack API Key provided by the User
+
+    Returns:
+        list[dict]: The list of instances running on FluidStack
+    """
+    res = requests.get("https://platform.fluidstack.io/instances",
+        headers={"api-key": api_key}
+    )
+    instances = res.json()
+    return instances
+
+
+
+
+def get_instance_by_id(instance_id: str, instances: list[dict]) -> dict:
+    """
+    Fetches the instance by ID from the list of instances.
+
+    Args:
+        api_key (str): The FluidStack API Key provided by the User
+        instance_id (str): The ID of the instance to fetch
+        instances (list[dict]): The list of instances running on FluidStack
+
+    Returns:
+        dict: The instance with the specified ID
+    """
+    for instance in instances:
+        if instance["id"] == instance_id:
+            return instance
+    raise ValueError(f"Instance with ID {instance_id} not found")
+
+
+
 # pylint: disable=too-many-locals
 def spin_instance(api_key: str, selected_gpu: dict) -> None:
     """
@@ -180,37 +237,25 @@ def spin_instance(api_key: str, selected_gpu: dict) -> None:
                 f"Failed to spin up instance: {instance['message']} | Data: {instance["data"]}")
         exit(1)
 
-    estimated_time = selected_gpu.get('estimated_provisioning_time_minutes', 5)
+    est_time = selected_gpu.get('estimated_provisioning_time_minutes', 5)
+    est_time_secs = est_time * 60
+    tickspeed = 20
     # pylint: disable=line-too-long
     spinner = Halo(text=f"Spinning up instance '{name}' with {selected_gpu['gpu_type'].replace('_', ' ')} GPU...", spinner='dots')
     spinner.start()
 
-    estimated_time_seconds = estimated_time * 60
+    for remaining_seconds in range(est_time_secs, 0, -tickspeed):
+        spinner.text = f'Allocating instance {name} with {selected_gpu['gpu_type'].replace('_', ' ')}... ({round(remaining_seconds / 60, 2)} minutes remaining)'
+        instances = get_instances(api_key)
+        instance = get_instance_by_id(instance_id, instances)
 
-    for remaining_seconds in range(estimated_time_seconds, 0, -15):
-        remaining_minutes = remaining_seconds // 60
-        spinner.text = f'Allocating instance... ({remaining_minutes} minutes remaining)'
-
-        status_response = requests.get("https://platform.fluidstack.io/instances",
-                                    headers={"api-key": api_key})
-        instances = status_response.json()
-
-        this_instance = None
-        instance_status = None
-        for inst in instances:
-            if inst["id"] == instance_id:
-                this_instance = inst
-                instance_status = inst["status"]
-                break
-
-        if instance_status == "running":
-            spinner.succeed('Instance is running!')
-            instance = this_instance
+        if instance["status"] == "running":
+            spinner.succeed(f'Spun up instance {name} with {selected_gpu["gpu_type"].replace("_", " ")} GPU successfully!')
             break
 
-        time.sleep(15)
+        time.sleep(tickspeed)
     else:
-        spinner.fail(f"Instance failed to start within {estimated_time} minutes. Details: {this_instance}")
+        spinner.fail(f"Instance failed to start within {est_time} minutes. Details: {instance}")
 
     table_data = [
         [instance["id"], instance["name"], selected_gpu["gpu_type"], "Ubuntu 22.04 LTS Nvidia"]
