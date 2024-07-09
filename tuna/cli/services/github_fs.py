@@ -12,9 +12,9 @@ import mimetypes
 import requests
 import inquirer
 from halo import Halo
-from tuna.cli.constants import REPO_FILE, EXCLUDED_EXTENSIONS, \
+from tuna.cli.core.constants import REPO_FILE, EXCLUDED_EXTENSIONS, \
     EXCLUDED_FILENAMES, CONFIG_FILE, CHECK_ICON
-from tuna.cli.util import log
+from tuna.cli.core.util import log
 
 
 

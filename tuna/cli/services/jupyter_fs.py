@@ -16,8 +16,8 @@ from pathlib import Path
 import nbformat as nbf
 import paramiko
 import psutil
-from tuna.cli.util import clear_terminal, log
-from tuna.cli.constants import TUNA_DIR, WARNING_ICON, LOADING_ICON, INFO_ICON, CHECK_ICON, \
+from tuna.cli.core.util import clear_terminal, log
+from tuna.cli.core.constants import TUNA_DIR, WARNING_ICON, LOADING_ICON, INFO_ICON, CHECK_ICON, \
     CURSOR_UP_ONE, ERASE_LINE, DARK_GRAY, PURPLE, RESET, SPINNER_DOTS, BLUE, \
     STARTUP_SCRIPT_PATH, PID_FILE_PATH, TOKEN_FILE_PATH, STARTUP_SCRIPT_CONTENT
 
