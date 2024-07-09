@@ -146,6 +146,6 @@ tuna
 ### Contributing
 
 - Tuna is an Open-Source CLI tool built at [Opennote Labs](https://www.linkedin.com/company/opennote/).
-- If you are interested in Contributing, take a look at [CONTRIBUTING.md](./CONTRIBUTING.md).
+- If you are interested in Contributing, take a look at [CONTRIBUTING.md](https://github.com/abhi-arya1/tuna/blob/main/CONTRIBUTING.md).
 
 🎣 Happy Tun(a)ing!
