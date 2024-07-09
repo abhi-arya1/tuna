@@ -8,8 +8,8 @@ import os
 from tuna.cli.core.constants import INFO_ICON, TUNA_DIR, NOTEBOOK
 from tuna.cli.core.util import log
 from tuna.cli.core.authenticator import load_credentials, save_credentials, authenticate
-from tuna.cli.services.github_fs import fetch
-from tuna.cli.services.jupyter_fs import add_md_cell
+from tuna.cli.services.github import fetch
+from tuna.cli.services.jupyter import add_md_cell
 
 
 def init() -> None:

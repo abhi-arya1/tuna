@@ -15,8 +15,8 @@ import requests
 from tabulate import tabulate
 from halo import Halo
 from tuna.cli.core.util import log
-from tuna.cli.core.constants import CHECK_ICON, CROSS_ICON, INFO_ICON, SSH_KEY
-from tuna.cli.services.jupyter_fs import connect_lab
+from tuna.cli.core.constants import CHECK_ICON, CROSS_ICON, INFO_ICON, SSH_KEY, FluidstackState
+
 
 
 def select_gpu(api_key: str) -> dict:
@@ -154,6 +154,26 @@ def existing_or_new_trainer() -> bool:
 
 
 
+def stop_instance(api_key: str, instance_id: str):
+    """
+    Stops the FluidStack instance with the specified ID.
+
+    Args:
+        api_key (str): The FluidStack API Key provided by the User
+        instance_id (str): The ID of the instance to stop
+    """
+    res = requests.put(f"https://platform.fluidstack.io/instances/{instance_id}/stop",
+        headers={"api-key": api_key}
+    )
+    if res.status_code == 200:
+        log(CHECK_ICON,
+            f"Instance with ID {instance_id} stopping on https://dashboard.fluidstack.io")
+    else:
+        log(CROSS_ICON, f"Failed to stop Fluidstack instance with ID {instance_id} | {res.json()}")
+
+
+
+
 def get_instances(api_key: str) -> list[dict]:
     """
     Fetches the list of instances running on FluidStack.
@@ -192,8 +212,10 @@ def get_instance_by_id(instance_id: str, instances: list[dict]) -> dict:
 
 
 
+
 # pylint: disable=too-many-locals
-def spin_instance(api_key: str, selected_gpu: dict) -> None:
+# pylint: disable=line-too-long
+def spin_new_instance(api_key: str, selected_gpu: dict) -> dict:
     """
     Spins up a FluidStack instance with the selected GPU configuration.
 
@@ -201,7 +223,8 @@ def spin_instance(api_key: str, selected_gpu: dict) -> None:
         api_key (str): The FluidStack API Key provided by the User
         selected_gpu (dict): The selected GPU configuration via FluidStack API
 
-    Connects and runs the Remote Instance for tuning immediately after provisioning.
+    Returns: 
+        dict: The instance that was spun up
     """
     questions = [
         inquirer.Text('instance_name', message="Enter an instance name")
@@ -250,7 +273,7 @@ def spin_instance(api_key: str, selected_gpu: dict) -> None:
         instances = get_instances(api_key)
         instance = get_instance_by_id(instance_id, instances)
 
-        if instance["status"] == "running":
+        if FluidstackState[instance["status"]] == FluidstackState.RUNNING:
             spinner.succeed(f'Spun up instance {name} with {selected_gpu["gpu_type"].replace("_", " ")} GPU successfully!')
             break
 
@@ -266,4 +289,52 @@ def spin_instance(api_key: str, selected_gpu: dict) -> None:
     headers = ["ID", "Name", "GPU", "OS"]
     print(tabulate(table_data, headers, tablefmt="pretty"))
 
-    connect_lab(instance, SSH_KEY)
+    return instance
+
+
+
+
+def spin_existing_instance(api_key: str, instance: dict) -> dict:
+    """
+    Spins up an instance that's in the user's FluidStack account. 
+
+    Args:
+        api_key (str): The FluidStack API Key provided by the User
+        instance (dict): The instance to load up
+
+    Returns: 
+        dict: The instance that was spun up
+    """
+    status = instance["status"]
+
+    if FluidstackState[status] == FluidstackState.RUNNING:
+        log(CHECK_ICON, f"Instance '{instance['name']}' is running!")
+        return instance
+
+    if FluidstackState[status] == FluidstackState.PENDING:
+        instance_id = instance["id"]
+        est_time = instance["configuration"]["estimated_provisioning_time_minutes"]
+        est_time_secs = est_time * 60
+        tickspeed = 15
+
+        spinner = Halo(text=f"Waiting for '{instance['name']} to start up...", spinner='dots')
+        spinner.start()
+
+        for remaining_seconds in range(est_time_secs, 0, -tickspeed):
+            spinner.text = f"Waiting for '{instance['name']}' to start up... ({round(remaining_seconds / 60, 2)} minutes remaining)"
+            instances = get_instances(api_key)
+            instance = get_instance_by_id(instance_id, instances)
+
+            if FluidstackState[instance["status"]] == FluidstackState.RUNNING:
+                spinner.succeed(f'Spun up instance \'{instance['name']}\' successfully!')
+                break
+
+            time.sleep(tickspeed)
+        else:
+            spinner.fail(f"Instance failed to start within {est_time} minutes. Details: {instance}")
+            exit(1)
+
+
+        return instance
+
+    log(CROSS_ICON, f"Instance '{instance['name']}' is in an invalid state: {status}. Fix it at https://dashboard.fluidstack.io")

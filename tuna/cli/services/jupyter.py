@@ -17,6 +17,7 @@ import nbformat as nbf
 import paramiko
 import psutil
 from tuna.cli.core.util import clear_terminal, log
+from tuna.cli.services.fluidstack import stop_instance
 from tuna.cli.core.constants import TUNA_DIR, WARNING_ICON, LOADING_ICON, INFO_ICON, CHECK_ICON, \
     CURSOR_UP_ONE, ERASE_LINE, DARK_GRAY, PURPLE, RESET, SPINNER_DOTS, BLUE, \
     STARTUP_SCRIPT_PATH, PID_FILE_PATH, TOKEN_FILE_PATH, STARTUP_SCRIPT_CONTENT
@@ -173,7 +174,7 @@ def _tunalab_spinner_thread(stop: 'any') -> None:
 
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
-def connect_lab(instance: dict, ssh_file: Path) -> None:
+def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
     """
     Connects a FluidStack GPU Instance using the User's Local 
     SSH Configuration to a JupyterLab Instance for seamless remote development with 
@@ -270,6 +271,6 @@ def connect_lab(instance: dict, ssh_file: Path) -> None:
         monitor_lab(local_process, token=remote_token)
     except KeyboardInterrupt:
         _, stdout, _ = client.exec_command(f"sudo kill -9 {remote_pid}")
-        print(stdout)
+        stop_instance(api_key, instance["id"])
         kill_lab(local_process)
         client.close()

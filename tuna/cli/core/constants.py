@@ -1,13 +1,18 @@
-# pylint: disable=unnecessary-lambda-assignment
 """
 
 Constants used in the Tuna CLI
 
 """
 
+# pylint: disable=unnecessary-lambda-assignment
 from pathlib import Path
 from os import getcwd
 from enum import Enum
+
+
+# VERSION
+VERSION = "0.1.3"
+
 
 ################################################
 # Tuna-Generated Directory Constants
@@ -35,6 +40,9 @@ trl
 python-dotenv
 """
 
+
+
+
 ################################################
 # CLI-Related Constants
 
@@ -53,16 +61,42 @@ RESET         = '\x1b[0m'
 RED           = '\033[31m'
 SPINNER_DOTS  = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 
+# Help Message
+HELP = f"{DARK_GRAY}Run 'tuna [-h | --help] <command>' for help{RESET}"
+
 # Tuna Welcome Message
 HELLO = f"""
-🎣  {BLUE}Welcome to Tuna{RESET}
+🎣 {PURPLE}Welcome to Tuna CLI v{VERSION}!{RESET}
 
-Commands can be viewed at : https://github.com/abhi-arya1/tuna
+usage: tuna [-v | --version] <command> [<args>] [-h | --help]
 
-Help : Run 'tuna <command> --help', or 'tuna docs'
+These are common Tuna commands used in various situations:
+
+{BLUE}start a working area{RESET}
+   init        Initialize the Tuna configuration in the current directory
+   refresh     Refresh the Tuna cache in the current directory
+
+{BLUE}work on the current change{RESET}
+   serve       Serve the Tuna Jupyter Notebook
+   browse      Open the Tuna-initialized GitHub repository in the default browser
+   train       Set up remote compute training with FluidStack
+
+{BLUE}examine the history and state{RESET}
+   github      Open the Tuna GitHub repository in the default browser
+   docs        Open the Tuna documentation in the default browser
+
+{BLUE}manage your configuration{RESET}
+   purge       Remove the Tuna configuration from the current directory
+   fluidstack  Fluidstack Configuration Head for Tuna
+
+{BLUE}advanced{RESET}
+   dev         Build a dataset for development purposes
+
+See 'tuna [-h | --help] <command>' for more information on a specific command.
 
 {BLUE}Happy Tun(a)ing!{RESET}
 """
+
 
 # Files Ignored by Tuna Trainer
 EXCLUDED_EXTENSIONS = (
@@ -76,11 +110,31 @@ EXCLUDED_FILENAMES = (
     'pipfile.lock', 'package-lock.json', 'outfile'
 )
 
+
 # SSH Configurations
 SSH_KEY = Path.home() / '.ssh' / 'id_rsa.pub'
 
+
+
+
+
 ################################################
 # Trainer and Remote Development Constants
+
+# FluidStack GPU Machine States
+class FluidstackState(Enum):
+    """
+    FluidStack GPU Machine States
+    """
+    RUNNING="running"
+    PENDING="pending"
+    UNHEALTHY="unhealthy"
+    SHUTTING_DOWN="shutting_down"
+    TERMINATED="terminated"
+    STOPPING="stopping"
+    STOPPED="stopped"
+
+
 
 # FluidStack GPU OS Configuration
 STARTUP_SCRIPT_PATH    = lambda username: f'/home/{username}/startup.sh'
@@ -129,6 +183,10 @@ TOKEN=$(grep -oP 'token=\\K[a-f0-9]+' jupyter_lab.log)
 echo $TOKEN > {TOKEN_FILE_PATH(username)}
 """
 
+
+
+
+
 ################################################
 # CLI Command Tokens
 
@@ -154,89 +212,6 @@ class Token(Enum):
     LOCAL = "--local"
     MANAGE = "--manage"
     HELP = "--help"
-
-
-
-# Documentation Dictionary
-COMMANDS_DOCS = {
-    "init": f"""
-{BLUE}USAGE{RESET}: tuna init
-{BLUE}DESCRIPTION{RESET}: Initialize the Tuna configuration in the current directory.
-
-This command sets up the necessary configuration files and folders for using Tuna.
-""",
-
-    "serve": f"""
-{BLUE}USAGE{RESET}: tuna serve [--open | --no-open]
-{BLUE}DESCRIPTION{RESET}: Serve the Tuna Jupyter Notebook.
-
-{BLUE}OPTIONS{RESET}:
-    --open: Open the Notebook in the browser automatically.
-    --no-open: Do not open the Notebook in the browser.
-
-This command starts a Jupyter Notebook server with the Tuna Notebook.
-""",
-
-    "refresh": f"""
-{BLUE}USAGE{RESET}: tuna refresh
-{BLUE}DESCRIPTION{RESET}: Refresh the Tuna cache in the current directory.
-
-This command updates the cached data used by Tuna from the GitHub repository.
-""",
-
-    "github": f"""
-{BLUE}USAGE{RESET}: tuna github
-{BLUE}DESCRIPTION{RESET}: Open the Tuna GitHub repository in the default browser.
-
-This command opens the Tuna GitHub repository in the default browser.
-""",
-
-    "docs": f"""
-{BLUE}USAGE{RESET}: tuna docs
-{BLUE}DESCRIPTION{RESET}: Open the Tuna documentation in the default browser.
-
-This command opens the Tuna documentation (README) in the default browser.
-""",
-
-    "browse": f"""
-{BLUE}USAGE{RESET}: tuna browse
-{BLUE}DESCRIPTION{RESET}: Open the Tuna-initialized GitHub repository in the default browser.
-
-This command opens the GitHub repository associated with the current Tuna configuration.
-""",
-
-    "train": f"""
-{BLUE}USAGE{RESET}: tuna train [--local]
-{BLUE}DESCRIPTION{RESET}: Set up remote compute training with FluidStack.
-{BLUE}OPTIONS{RESET}:
-    --local: Train locally instead of using FluidStack.
-
-This command sets up remote compute training with FluidStack, and forwards a powerful Jupyter Instance to your local machine automatically.
-""",
-
-    "fluidstack": f"""
-{BLUE}USAGE{RESET}: tuna fluidstack
-{BLUE}DESCRIPTION{RESET}: Fluidstack Configuration Head for Tuna.
-{BLUE}OPTIONS{RESET}:
-    --manage: Manage Fluidstack Instances on https://dashboard.fluidstack.io
-
-This command allows you to manage your Fluidstack instances, and update/pause/delete instances as needed.
-""",
-
-    "purge": f"""
-{BLUE}USAGE{RESET}: tuna purge
-{BLUE}DESCRIPTION{RESET}: Remove the Tuna configuration from the current directory.
-
-This command deletes the .tuna directory and associated configuration files.
-""",
-
-    "dev": f"""
-{BLUE}USAGE{RESET}: tuna dev dataset
-{BLUE}DESCRIPTION{RESET}: Build a dataset for development purposes.
-
-This command generates a dataset for AI tuning, using the Tuna dataset builder.
-"""
-}
-
-# Help Message
-HELP = f"{DARK_GRAY}Run 'tuna <command> --help' for help{RESET}"
+    HELP_SHORT = "-h"
+    VERSION = "--version"
+    VERSION_SHORT = "-v"

@@ -6,14 +6,14 @@ This file manages all functionality for the Tuna CLI.
 
 """
 
-# pylint: disable=consider-using-sys-exit
-
 
 from webbrowser import open as webopen
 from sys import argv
 from tuna.cli.services.datasets import build_dataset
 from tuna.cli.core.util import log
-from tuna.cli.core.constants import HELLO, INFO_ICON, WARNING_ICON, Token, COMMANDS_DOCS, HELP
+from tuna.cli.core.constants import HELLO, INFO_ICON, WARNING_ICON, \
+    Token, HELP, VERSION
+from tuna.cli.core.docs import DOCS
 from tuna.cli.cmd.init import init
 from tuna.cli.cmd.serve import serve
 from tuna.cli.cmd.refresh import refresh
@@ -28,13 +28,26 @@ def _help(token: str) -> None:
     """
     Helper function to display information for a specific Tuna command.
     """
-    print(COMMANDS_DOCS[token])
+    doc = DOCS.get(token, False) 
+    if not doc: 
+        log(WARNING_ICON, f"Invalid help command '{argv[2]}'. \n- [-h | --help] only works with valid commands. \n- Run 'tuna' for some valid commands.")
+        exit(1)
+    print(DOCS[token])
     exit(0)
 
 
 
-# pylint: disable=too-many-branches
-# pylint: disable=consider-using-sys-exit
+
+def _version() -> None: 
+    """
+    Display the current version of Tuna.
+    """
+    print(f"Tuna v{VERSION}")
+    exit(0)
+
+
+
+# pylint: disable=all
 def main() -> None:
     """
     Runs the `tuna` CLI with any provided arguments.
@@ -44,10 +57,13 @@ def main() -> None:
         exit(0)
 
     if len(argv) == 3:
-        if argv[2] == Token.HELP.value:
-            _help(argv[1])
+        if argv[1] in [Token.HELP.value, Token.HELP_SHORT.value]:
+            _help(argv[2])
 
-    if argv[1] == Token.INIT.value:
+    if argv[1] in [Token.VERSION.value, Token.VERSION_SHORT.value]:
+        _version()
+
+    elif argv[1] == Token.INIT.value:
         init()
 
     elif argv[1] == Token.SERVE.value:
