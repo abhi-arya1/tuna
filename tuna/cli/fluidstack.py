@@ -141,6 +141,7 @@ def existing_or_new_trainer() -> bool:
     Returns:
         bool: True if the user selects an existing training dataset, False otherwise
     """
+    # pylint: disable=line-too-long
     questions = [
         inquirer.List('trainer',
                     message="Would you like to use an existing FluidStack instance, or run a new one?",
@@ -153,7 +154,7 @@ def existing_or_new_trainer() -> bool:
 
 
 
-def get_instances(api_key: str) -> list[dict]: 
+def get_instances(api_key: str) -> list[dict]:
     """
     Fetches the list of instances running on FluidStack.
 

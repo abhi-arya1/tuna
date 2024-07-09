@@ -269,8 +269,8 @@ def main() -> None:
         else:
             train()
 
-    elif argv[1] == "fluidstack": 
-        if argv[2] == "manage": 
+    elif argv[1] == "fluidstack":
+        if argv[2] == "manage":
             log(INFO_ICON, "Opening FluidStack Dashboard in your default browser.")
             webopen("https://dashboard.fluidstack.io/")
         else:
