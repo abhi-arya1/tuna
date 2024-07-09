@@ -157,7 +157,7 @@ class Token(Enum):
 
 
 
-# Documentation Dictionary 
+# Documentation Dictionary
 COMMANDS_DOCS = {
     "init": f"""
 {BLUE}USAGE{RESET}: tuna init
@@ -216,8 +216,8 @@ This command sets up remote compute training with FluidStack, and forwards a pow
 
     "fluidstack": f"""
 {BLUE}USAGE{RESET}: tuna fluidstack
-{BLUE}DESCRIPTION{RESET}: Fluidstack Configuration Head for Tuna. 
-{BLUE}OPTIONS{RESET}: 
+{BLUE}DESCRIPTION{RESET}: Fluidstack Configuration Head for Tuna.
+{BLUE}OPTIONS{RESET}:
     --manage: Manage Fluidstack Instances on https://dashboard.fluidstack.io
 
 This command allows you to manage your Fluidstack instances, and update/pause/delete instances as needed.
