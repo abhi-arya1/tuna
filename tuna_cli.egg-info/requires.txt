@@ -1,8 +1,0 @@
-inquirer
-requests
-halo
-jupyterlab
-nbformat
-scikit-learn
-tabulate
-paramiko
