@@ -75,7 +75,8 @@ HELP = f"{DARK_GRAY}Run 'tuna [-h | --help] <command>' for help{RESET}"
 HELLO = f"""
 🎣 {PURPLE}Welcome to Tuna CLI v{VERSION}!{RESET}
 
-usage: tuna [-v | --version] <command> [<args>] [-h | --help]
+usage:   tuna [-h | --help] <command> [<args>]
+version: tuna [-v | --version]
 
 These are common Tuna commands used in various situations:
 
