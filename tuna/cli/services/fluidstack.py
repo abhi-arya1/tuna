@@ -273,7 +273,7 @@ def spin_new_instance(api_key: str, selected_gpu: dict) -> dict:
         instances = get_instances(api_key)
         instance = get_instance_by_id(instance_id, instances)
 
-        if FluidstackState[instance["status"]] == FluidstackState.RUNNING:
+        if instance["status"] == FluidstackState.RUNNING.value:
             spinner.succeed(f'Spun up instance {name} with {selected_gpu["gpu_type"].replace("_", " ")} GPU successfully!')
             break
 
@@ -307,11 +307,11 @@ def spin_existing_instance(api_key: str, instance: dict) -> dict:
     """
     status = instance["status"]
 
-    if FluidstackState[status] == FluidstackState.RUNNING:
+    if status == FluidstackState.RUNNING.value:
         log(CHECK_ICON, f"Instance '{instance['name']}' is running!")
         return instance
 
-    if FluidstackState[status] == FluidstackState.PENDING:
+    if status == FluidstackState.PENDING.value:
         instance_id = instance["id"]
         est_time = instance["configuration"]["estimated_provisioning_time_minutes"]
         est_time_secs = est_time * 60
@@ -325,7 +325,7 @@ def spin_existing_instance(api_key: str, instance: dict) -> dict:
             instances = get_instances(api_key)
             instance = get_instance_by_id(instance_id, instances)
 
-            if FluidstackState[instance["status"]] == FluidstackState.RUNNING:
+            if instance["status"] == FluidstackState.RUNNING.value:
                 spinner.succeed(f'Spun up instance \'{instance['name']}\' successfully!')
                 break
 
