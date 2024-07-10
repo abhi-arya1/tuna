@@ -11,7 +11,7 @@ from enum import Enum
 
 
 # VERSION
-VERSION = "0.1.4"
+VERSION = "0.1.4 Release 3 (Beta)"
 
 
 ################################################
@@ -140,48 +140,6 @@ class FluidstackState(Enum):
 STARTUP_SCRIPT_PATH    = lambda username: f'/home/{username}/startup.sh'
 PID_FILE_PATH          = lambda username: f'/home/{username}/jupyter_lab.pid'
 TOKEN_FILE_PATH        = lambda username: f'/home/{username}/jupyter_token.txt'
-STARTUP_SCRIPT_CONTENT = lambda username: f"""
-#!/bin/bash
-
-# Exit on any error
-set -e
-
-if ! command -v python3.12 &> /dev/null; then
-    echo "Configuring for TunaLab"
-
-    sudo apt update 
-    sudo apt upgrade -y
-    sudo add-apt-repository -y ppa:deadsnakes/ppa
-    sudo apt update
-    sudo apt install -y python3.12 python3-pip
-
-    pip install jupyterlab
-    mkdir tunalab
-else
-    echo "Tuna Configured, Starting Up..."
-fi
-
-# Update PATH
-export PATH=$PATH:/home/{username}/.local/bin
-echo 'export PATH=$PATH:/home/{username}/.local/bin' >> ~/.bashrc
-source ~/.bashrc
-
-# Enter TunaLab 
-cd tunalab
-
-# Start JupyterLab in the background and capture the PID
-nohup jupyter lab --no-browser --port=8888 > jupyter_lab.log 2>&1 &
-echo $! > {PID_FILE_PATH(username)}
-
-# Wait a few seconds to ensure JupyterLab has started
-sleep 5
-
-# Retrieve the token from the log file
-TOKEN=$(grep -oP 'token=\\K[a-f0-9]+' jupyter_lab.log)
-
-# Print the token
-echo $TOKEN > {TOKEN_FILE_PATH(username)}
-"""
 
 
 

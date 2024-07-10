@@ -18,9 +18,10 @@ import paramiko
 import psutil
 from tuna.cli.core.util import clear_terminal, log
 from tuna.cli.services.fluidstack import stop_instance
+from tuna.cli.core.scripts import FLUIDSTACK_CONFIGURATION_SCRIPT
 from tuna.cli.core.constants import TUNA_DIR, WARNING_ICON, LOADING_ICON, INFO_ICON, CHECK_ICON, \
     CURSOR_UP_ONE, ERASE_LINE, DARK_GRAY, PURPLE, RESET, SPINNER_DOTS, BLUE, \
-    STARTUP_SCRIPT_PATH, PID_FILE_PATH, TOKEN_FILE_PATH, STARTUP_SCRIPT_CONTENT
+    STARTUP_SCRIPT_PATH, PID_FILE_PATH, TOKEN_FILE_PATH
 
 
 
@@ -203,7 +204,7 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
 
     sftp = client.open_sftp()
     with sftp.file(STARTUP_SCRIPT_PATH(username), 'w') as f:
-        f.write(STARTUP_SCRIPT_CONTENT(username))
+        f.write(FLUIDSTACK_CONFIGURATION_SCRIPT(username))
     sftp.chmod(STARTUP_SCRIPT_PATH(username), 0o755)
     sftp.close()
 
