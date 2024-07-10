@@ -6,3 +6,4 @@ nbformat
 scikit-learn
 tabulate
 paramiko
+watchdog

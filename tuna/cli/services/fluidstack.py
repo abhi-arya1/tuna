@@ -15,7 +15,8 @@ import requests
 from tabulate import tabulate
 from halo import Halo
 from tuna.cli.core.util import log
-from tuna.cli.core.constants import CHECK_ICON, CROSS_ICON, INFO_ICON, SSH_KEY, FluidstackState
+from tuna.cli.core.constants import WARNING_ICON, CHECK_ICON, CROSS_ICON, \
+    INFO_ICON, SSH_KEY, FluidstackState
 
 
 
@@ -213,6 +214,17 @@ def get_instance_by_id(instance_id: str, instances: list[dict]) -> dict:
 
 
 
+
+def sync():
+    """
+    Live syncs local files to the remote machine
+
+    """
+
+
+
+
+
 # pylint: disable=too-many-locals
 # pylint: disable=line-too-long
 def spin_new_instance(api_key: str, selected_gpu: dict) -> dict:
@@ -282,11 +294,11 @@ def spin_new_instance(api_key: str, selected_gpu: dict) -> dict:
         spinner.fail(f"Instance failed to start within {est_time} minutes. Details: {instance}")
 
     table_data = [
-        [instance["id"], instance["name"], selected_gpu["gpu_type"], "Ubuntu 22.04 LTS Nvidia"]
+        [instance["name"], selected_gpu["gpu_type"], "Ubuntu 22.04 LTS Nvidia"]
         for instance in [instance]
     ]
 
-    headers = ["ID", "Name", "GPU", "OS"]
+    headers = ["Name", "GPU", "OS"]
     print(tabulate(table_data, headers, tablefmt="pretty"))
 
     return instance
@@ -334,7 +346,20 @@ def spin_existing_instance(api_key: str, instance: dict) -> dict:
             spinner.fail(f"Instance failed to start within {est_time} minutes. Details: {instance}")
             exit(1)
 
-
         return instance
 
-    log(CROSS_ICON, f"Instance '{instance['name']}' is in an invalid state: {status}. Fix it at https://dashboard.fluidstack.io")
+    if status == FluidstackState.STOPPED.value:
+        res = requests.put(f"https://platform.fluidstack.io/instances/{instance['id']}/start",
+            headers={"api-key": api_key}
+        )
+        if res.status_code == 200:
+            log(CHECK_ICON, f"Started instance '{instance['name']}' successfully!")
+            return instance
+
+        message = res.json()
+        log(WARNING_ICON, f"Failed to start instance '{instance['name']}': {message}. Run 'tuna fluidstack --manage' to fix this.")
+        exit(0)
+
+
+    log(CROSS_ICON, f"Instance '{instance['name']}' is in an invalid 'tuna' state: {status}. Run 'tuna fluidstack --manage' to fix this.")
+    exit(0)

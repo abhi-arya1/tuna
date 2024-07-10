@@ -11,13 +11,14 @@ from enum import Enum
 
 
 # VERSION
-VERSION = "0.1.4 Release 3 (Beta)"
+VERSION = "0.1.4 Dev Build 3"
 
 
 ################################################
 # Tuna-Generated Directory Constants
 
 CWD = Path(getcwd())
+
 
 TUNA_DIR    = CWD / '.tuna'
 NOTEBOOK    = TUNA_DIR / 'tuna.ipynb'
@@ -26,11 +27,14 @@ CONFIG_FILE = TUNA_DIR / 'auth.config.json'
 TRAIN_DATA  = TUNA_DIR / 'train_dataset.jsonl'
 EVAL_DATA   = TUNA_DIR / 'eval_dataset.txt'
 TEST_DATA   = TUNA_DIR / 'test_dataset.txt'
+REMOTE_CFG  = TUNA_DIR / 'remote.config.json'
+
 
 TUNA_GITIGNORE = """
 ipynb_checkpoints/
 auth.config.json
 """
+
 
 IPYNB_REQUIREMENTS = """
 transformers
@@ -42,9 +46,9 @@ python-dotenv
 
 
 
-
 ################################################
 # CLI-Related Constants
+
 
 # ANSI and UNICODE Constants
 CHECK_ICON    = "\u2714"
@@ -61,8 +65,10 @@ RESET         = '\x1b[0m'
 RED           = '\033[31m'
 SPINNER_DOTS  = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 
+
 # Help Message
 HELP = f"{DARK_GRAY}Run 'tuna [-h | --help] <command>' for help{RESET}"
+
 
 # Tuna Welcome Message
 HELLO = f"""
@@ -116,10 +122,11 @@ SSH_KEY = Path.home() / '.ssh' / 'id_rsa.pub'
 
 
 
-
-
 ################################################
 # Trainer and Remote Development Constants
+
+TUNA_LAB_LOC  = '~/tunalab'
+TUNA_LOG_LOC  = '~/tunalab/tuna_remote.log'
 
 # FluidStack GPU Machine States
 class FluidstackState(Enum):
@@ -140,7 +147,6 @@ class FluidstackState(Enum):
 STARTUP_SCRIPT_PATH    = lambda username: f'/home/{username}/startup.sh'
 PID_FILE_PATH          = lambda username: f'/home/{username}/jupyter_lab.pid'
 TOKEN_FILE_PATH        = lambda username: f'/home/{username}/jupyter_token.txt'
-
 
 
 

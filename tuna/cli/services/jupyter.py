@@ -7,21 +7,30 @@ for the Tuna CLI.
 
 """
 
-import subprocess
+# pylint: disable=line-too-long
+
 import sys
 import time
+import curses
+import subprocess
+import threading
 import itertools
 from threading import Thread
 from pathlib import Path
 import nbformat as nbf
 import paramiko
 import psutil
-from tuna.cli.core.util import clear_terminal, log
+from watchdog.observers import Observer
+from tuna.cli.core.util import log, remote_sync
+from tuna.cli.core.watchfiles import LabWatcher
+
+# pylint: disable=unused-import
 from tuna.cli.services.fluidstack import stop_instance
+
 from tuna.cli.core.scripts import FLUIDSTACK_CONFIGURATION_SCRIPT
-from tuna.cli.core.constants import TUNA_DIR, WARNING_ICON, LOADING_ICON, INFO_ICON, CHECK_ICON, \
+from tuna.cli.core.constants import TUNA_DIR, INFO_ICON, CHECK_ICON, \
     CURSOR_UP_ONE, ERASE_LINE, DARK_GRAY, PURPLE, RESET, SPINNER_DOTS, BLUE, \
-    STARTUP_SCRIPT_PATH, PID_FILE_PATH, TOKEN_FILE_PATH
+    STARTUP_SCRIPT_PATH, PID_FILE_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC
 
 
 
@@ -88,7 +97,7 @@ def start_lab(browser: bool) -> subprocess.Popen:
     Returns: 
         subprocess.Popen: The process object for the JupyterLab instance.
     """
-    print(f"[{LOADING_ICON}] Starting TunaLab...")
+    print(">>> Starting TunaLab...")
     command = ['jupyter', 'lab'] if browser else ['jupyter', 'lab', '--no-browser']
     # pylint: disable=consider-using-with
     process = subprocess.Popen(
@@ -101,45 +110,75 @@ def start_lab(browser: bool) -> subprocess.Popen:
 
 
 
-
-def monitor_lab(process: subprocess.Popen, token: str="") -> None:
+# pylint: disable=too-many-arguments
+def monitor_lab(process: subprocess.Popen, token: str="", username: str="", hostname: str="", port: int=22) -> None:
     """
     Monitor the CPU and Memory usage of the JupyterLab instance on the local machine.
 
     Args:
         process (subprocess.Popen): The process object for the JupyterLab instance.
         token (str): The token for the JupyterLab instance. Defaults to "" for Local Runs 
+        watch_directory (str): The directory to watch for file changes.
+        watch_command (str): The command to run when a file change is detected.
     """
-    clear_terminal()
-    if token == "":
-        log(INFO_ICON, "Running TunaLab on \033[1mhttp://localhost:8888/lab\033[0m")
-    else:
-        log(INFO_ICON, f"Running TunaLab on \033[1mhttp://localhost:8888/lab?token={token}\033[0m")
-    log(INFO_ICON, "Type CTRL+C to end lab. Monitoring CPU and Memory usage...\n\n\n\n")
+    def watch_files():
+        def on_change():
+            remote_sync(TUNA_DIR, TUNA_LAB_LOC, username, hostname, port)
 
-    try:
+        event_handler = LabWatcher(function=on_change)
+        observer = Observer()
+        observer.schedule(event_handler, TUNA_DIR, recursive=True)
+        observer.start()
+        observer.join()
+
+    def draw_screen(stdscr):
+        curses.curs_set(0)  # Hide cursor
+        stdscr.nodelay(True)  # Make getch() non-blocking
+        stdscr.clear()
+
+        # Initialize colors
+        curses.start_color()
+        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)
+
+        bold = curses.A_BOLD
+        pl = " " * 3
+        if token == "":
+            log_message = f"{pl}Running TunaLab on http://localhost:8888/lab"
+        else:
+            log_message = f"{pl}Running TunaLab on http://localhost:8888/lab?token={token}"
+
+        stdscr.addstr(0, 0, "")
+        stdscr.addstr(1, 0, log_message, bold)
+        stdscr.addstr(2, 0, f"{pl}Type CTRL+C to end lab. Monitoring CPU and Memory usage...", bold)
+
         p = psutil.Process(process.pid)
 
+        if token:
+            watch_thread = threading.Thread(target=watch_files)
+            watch_thread.daemon = True
+            watch_thread.start()
+
         while True:
+            stdscr.refresh()
             if p.is_running():
                 cpu_usage = p.cpu_percent(interval=1)
                 memory_usage = p.memory_info().rss / (1024 * 1024)
 
-                sys.stdout.write("\033[F\033[F\033[F")
-                cpu_color = "\033[91m" if cpu_usage > 50 else "\033[0m"
-                mem_color = "\033[91m" if memory_usage > 50 * 1024 else "\033[0m"
-                cpu_icon = WARNING_ICON if cpu_usage > 50 else INFO_ICON
-                mem_icon = WARNING_ICON if memory_usage > 50 * 1024 else INFO_ICON
+                cpu_color = curses.color_pair(1) if cpu_usage > 50 else curses.color_pair(3)
+                mem_color = curses.color_pair(1) if memory_usage > 50 * 1024 else curses.color_pair(3)
 
-                sys.stdout.write(
-                    # pylint: disable=line-too-long
-                    f"[{cpu_icon}] CPU Usage: {cpu_color}{cpu_usage}%\033[0m\n[{mem_icon}] Memory Usage: {mem_color}{memory_usage} MB\033[0m\n\n")
-                sys.stdout.flush()
+                stdscr.addstr(4, 0, f"{pl}>>> CPU Usage: {cpu_usage}% ", cpu_color)
+                stdscr.addstr(5, 0, f"{pl}>>> Memory Usage: {memory_usage} MB\n\n", mem_color)
+                stdscr.clrtoeol()
+
+                if stdscr.getch() == ord('q'):
+                    break
 
             time.sleep(5)
-    except psutil.NoSuchProcess:
-        pass
 
+    curses.wrapper(draw_screen)
 
 
 
@@ -164,7 +203,7 @@ def _tunalab_spinner_thread(stop: 'any') -> None:
     """
     UI Spinner Function for TunaLab Configuration 
     
-    - Do not call outside of `jupyter_fs.py`   
+    - Do not call outside of `jupyter.py`   
     """
     spinner = itertools.cycle(SPINNER_DOTS)
     while not stop():
@@ -173,8 +212,11 @@ def _tunalab_spinner_thread(stop: 'any') -> None:
         time.sleep(0.1)
 
 
+
+
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=unused-argument
 def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
     """
     Connects a FluidStack GPU Instance using the User's Local 
@@ -250,7 +292,7 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
             sftp.file(TOKEN_FILE_PATH(username), 'r') as g:
         remote_pid = f.read().strip().decode('utf-8')
         remote_token = g.read().strip().decode('utf-8').split(" ")[0]
-        print(remote_pid, remote_token)
+        # print(remote_pid, remote_token)
     sftp.close()
 
 
@@ -263,15 +305,23 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
     ]
 
 
-    # Run Local JupyterLab Instance on Remote Compute, and monitor **LOCAL** CPU and Memory Usage
+    # Run Local JupyterLab Instance on Remote Compute, and
+    # monitor **LOCAL** CPU and Memory Usage
     # until process is ended by the user
     # pylint: disable=consider-using-with
     local_process = subprocess.Popen(tunnel_command)
 
     try:
-        monitor_lab(local_process, token=remote_token)
+        remote_sync(TUNA_DIR, TUNA_LAB_LOC, username, hostname, port)
+        monitor_lab(local_process,
+                    token=remote_token,
+                    username=username,
+                    hostname=hostname,
+                    port=port
+                )
     except KeyboardInterrupt:
         _, stdout, _ = client.exec_command(f"sudo kill -9 {remote_pid}")
-        stop_instance(api_key, instance["id"])
+        # stop_instance(api_key, instance["id"])
         kill_lab(local_process)
+        log(INFO_ICON, "Your instance has not been ended on Fluidstack. Visit https://dashboard.fluidstack.io/ or run 'tuna fluidstack --manage' to manage instances.")
         client.close()
