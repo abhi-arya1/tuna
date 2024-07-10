@@ -8,10 +8,11 @@ Constants used in the Tuna CLI
 from pathlib import Path
 from os import getcwd
 from enum import Enum
+from tuna.version import LATEST_VERSION
 
 
 # VERSION
-VERSION = "0.1.4 Dev Build 3"
+VERSION = LATEST_VERSION
 
 
 ################################################
