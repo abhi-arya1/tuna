@@ -143,47 +143,48 @@ def main() -> None:
     command = argv[1]
     arg = argv[2] if len(argv) > 2 else None
 
-    if command in [Token.HELP.value, Token.HELP_SHORT.value]:
-        if arg:
-            _help(arg)
-        else:
-            log(WARNING_ICON, f"No argument provided for '{command}'. {HELP}")
+    match command:
+        case Token.HELP.value | Token.HELP_SHORT.value:
+            if arg:
+                _help(arg)
+            else:
+                log(WARNING_ICON, f"No argument provided for '{command}'. {HELP}")
 
-    elif command in [Token.VERSION.value, Token.VERSION_SHORT.value]:
-        _version()
+        case Token.VERSION.value | Token.VERSION_SHORT.value:
+            _version()
 
-    elif command == Token.INIT.value:
-        init()
+        case Token.INIT.value:
+            init()
 
-    elif command == Token.SERVE.value:
-        _handle_serve_command(arg)
+        case Token.SERVE.value:
+            _handle_serve_command(arg)
 
-    elif command == Token.REFRESH.value:
-        refresh()
+        case Token.REFRESH.value:
+            refresh()
 
-    elif command in [Token.GITHUB.value, Token.DOCS.value]:
-        _open_url("https://github.com/abhi-arya1/tuna")
+        case Token.GITHUB.value | Token.DOCS.value:
+            _open_url("https://github.com/abhi-arya1/tuna")
 
-    elif command == Token.BROWSE.value:
-        open_repository()
+        case Token.BROWSE.value:
+            open_repository()
 
-    elif command == Token.TRAIN.value:
-        _handle_train_command(arg, argv)
+        case Token.TRAIN.value:
+            _handle_train_command(arg, argv)
 
-    elif command == Token.FLUIDSTACK.value:
-        _handle_fluidstack_command(arg)
+        case Token.FLUIDSTACK.value:
+            _handle_fluidstack_command(arg)
 
-    elif command == Token.PURGE.value:
-        purge()
+        case Token.PURGE.value:
+            purge()
 
-    elif command == Token.MAKE.value:
-        _handle_make_command(arg)
+        case Token.MAKE.value:
+            _handle_make_command(arg)
 
-    elif command == Token.DEV.value: 
-        _handle_dev(arg)
+        case Token.DEV.value:
+            _handle_dev(arg)
 
-    else:
-        log(WARNING_ICON, f"Invalid option '{command}'. {HELP}")
+        case _:
+            log(WARNING_ICON, f"Invalid option '{command}'. {HELP}")
 
     exit(0)
 
