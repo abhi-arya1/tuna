@@ -1,8 +1,8 @@
 """
 
-JupyterLab File System Utilities for Tuna
+JupyterLab Instance Utilities for Tuna
 
-This module contains utility functions for managing Jupyter Notebooks and JupyterLab instances
+This module contains utility functions for managing JupyterLab instances
 for the Tuna CLI.
 
 """
@@ -17,7 +17,6 @@ import threading
 import itertools
 from threading import Thread
 from pathlib import Path
-import nbformat as nbf
 import paramiko
 import psutil
 from watchdog.observers import Observer
@@ -34,59 +33,6 @@ from tuna.cli.core.constants import TUNA_DIR, INFO_ICON, CHECK_ICON, \
 
 
 
-def _get_notebook(notebook_path: Path) -> nbf.notebooknode.NotebookNode:
-    """
-    Reads a Jupyter Notebook File and returns the NotebookNode object.
-
-    Args:
-        notebook_path (pathlib.Path): The path to the Jupyter Notebook file.
-
-    Returns:
-        nbf.notebooknode.NotebookNode: The NotebookNode object for the Jupyter Notebook file.
-    """
-    if notebook_path.exists():
-        with open(notebook_path, 'r', encoding='utf-8') as f:
-            return nbf.read(f, as_version=4)
-    else:
-        return nbf.v4.new_notebook()
-
-
-
-def add_md_cell(notebook_path: Path, content: str) -> None:
-    """
-    Adds a Markdown Cell to a Jupyter Notebook File.
-
-    Args:
-        notebook_path (pathlib.Path): The path to the Jupyter Notebook file.
-        content (str): The content to be added to the Markdown Cell.
-    """
-    nb = _get_notebook(notebook_path)
-    new_cell = nbf.v4.new_markdown_cell(content)
-    nb.cells.append(new_cell)
-
-    with open(notebook_path, 'w', encoding='utf-8') as f:
-        nbf.write(nb, f)
-
-
-
-
-def add_code_cell(notebook_path: Path, content: str) -> None:
-    """
-    Adds a Code Cell to a Jupyter Notebook File.
-
-    Args:
-        notebook_path (pathlib.Path): The path to the Jupyter Notebook file.
-        content (str): The content to be added to the Code Cell.
-    """
-    nb = _get_notebook(notebook_path)
-    new_cell = nbf.v4.new_code_cell(content)
-    nb.cells.append(new_cell)
-
-    with open(notebook_path, 'w', encoding='utf-8') as f:
-        nbf.write(nb, f)
-
-
-
 def start_lab(browser: bool) -> subprocess.Popen:
     """
     Start JupyterLab in the `.tuna` parent directory. 
@@ -98,7 +44,8 @@ def start_lab(browser: bool) -> subprocess.Popen:
         subprocess.Popen: The process object for the JupyterLab instance.
     """
     print(">>> Starting TunaLab...")
-    command = ['jupyter', 'lab'] if browser else ['jupyter', 'lab', '--no-browser']
+    time.sleep(1.5)
+    command = ['jupyter', 'lab', "--LabApp.token=''"] if browser else ['jupyter', 'lab', "--LabApp.token=''", '--no-browser']
     # pylint: disable=consider-using-with
     process = subprocess.Popen(
             command,
@@ -159,24 +106,25 @@ def monitor_lab(process: subprocess.Popen, token: str="", username: str="", host
             watch_thread = threading.Thread(target=watch_files)
             watch_thread.daemon = True
             watch_thread.start()
+        try:
+            while True:
+                stdscr.refresh()
+                if p.is_running():
+                    cpu_usage = p.cpu_percent(interval=1)
+                    memory_usage = p.memory_info().rss / (1024 * 1024)
 
-        while True:
-            stdscr.refresh()
-            if p.is_running():
-                cpu_usage = p.cpu_percent(interval=1)
-                memory_usage = p.memory_info().rss / (1024 * 1024)
+                    cpu_color = curses.color_pair(1) if cpu_usage > 50 else curses.color_pair(3)
+                    mem_color = curses.color_pair(1) if memory_usage > 50 * 1024 else curses.color_pair(3)
 
-                cpu_color = curses.color_pair(1) if cpu_usage > 50 else curses.color_pair(3)
-                mem_color = curses.color_pair(1) if memory_usage > 50 * 1024 else curses.color_pair(3)
+                    stdscr.addstr(4, 0, f"{pl}>>> CPU Usage: {cpu_usage}% ", cpu_color)
+                    stdscr.addstr(5, 0, f"{pl}>>> Memory Usage: {memory_usage} MB\n\n", mem_color)
+                    stdscr.clrtoeol()
 
-                stdscr.addstr(4, 0, f"{pl}>>> CPU Usage: {cpu_usage}% ", cpu_color)
-                stdscr.addstr(5, 0, f"{pl}>>> Memory Usage: {memory_usage} MB\n\n", mem_color)
-                stdscr.clrtoeol()
-
-                if stdscr.getch() == ord('q'):
-                    break
-
-            time.sleep(5)
+                    if stdscr.getch() == ord('q'):
+                        break
+                time.sleep(5)
+        except KeyboardInterrupt:
+            pass
 
     curses.wrapper(draw_screen)
 
@@ -210,6 +158,21 @@ def _tunalab_spinner_thread(stop: 'any') -> None:
         sys.stdout.write(f'\r{PURPLE}{next(spinner)}{RESET} Configuring TunaLab for Training...')
         sys.stdout.flush()
         time.sleep(0.1)
+
+
+
+
+
+def connect_local_lab() -> None:
+    """
+    Connects a Local JupyterLab Instance for seamless remote development with 
+    the dataset and files generated with Tuna, in `.tuna`
+
+    Keeps the lab running for compute until it is manually stopped by the user.
+    """
+    process = start_lab(browser=False)
+    monitor_lab(process)
+    kill_lab(process)
 
 
 

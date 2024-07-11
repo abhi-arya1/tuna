@@ -8,8 +8,8 @@ This file manages all functionality for the Tuna CLI.
 
 
 from webbrowser import open as webopen
-from sys import argv
-from tuna.cli.services.datasets import build_dataset
+from sys import argv, exit
+from tuna.cli.services.dataset import build_dataset
 from tuna.cli.core.util import log
 from tuna.cli.core.constants import HELLO, INFO_ICON, WARNING_ICON, \
     Token, HELP, VERSION
@@ -47,6 +47,82 @@ def _version() -> None:
 
 
 
+
+def _handle_serve_command(arg: str) -> None:
+    """
+    Handles the 'serve' command with the provided argument.
+    """
+    if arg == Token.OPEN.value:
+        serve(browser=True)
+    elif arg == Token.NO_OPEN.value:
+        serve()
+    elif arg:
+        log(WARNING_ICON, f"Invalid flag for 'serve': '{arg}'. {HELP}")
+    else:
+        serve()
+
+
+
+
+def _handle_train_command(arg: str, args: list[str]) -> None:
+    """
+    Handles the 'train' command with the provided argument.
+    """
+    if arg == Token.LOCAL.value:
+        if len(args) == 4 and args[3] == Token.FORCE.value:
+            train(local=True, force=True)
+        else: 
+            train(local=True)
+    elif arg:
+        log(WARNING_ICON, f"Invalid flag for 'train': '{arg}'. {HELP}")
+    else:
+        train()
+
+
+
+
+def _handle_fluidstack_command(arg: str) -> None:
+    """
+    Handles the 'fluidstack' command with the provided argument.
+    """
+    if arg == Token.MANAGE.value:
+        log(INFO_ICON, "Opening FluidStack Dashboard in your default browser.")
+        webopen("https://dashboard.fluidstack.io/")
+    elif arg:
+        log(WARNING_ICON, f"Invalid option '{arg}'. {HELP}")
+    else:
+        log(WARNING_ICON, f"Invalid options '{argv}'. {HELP}")
+
+
+
+
+def _handle_make_command(arg: str) -> None:
+    """
+    Handles the 'make' command with the provided argument.
+    """
+    if arg == Token.DATASET.value:
+        build_dataset()
+    elif arg == Token.NOTEBOOK.value:
+        log(WARNING_ICON, "This feature is not yet implemented. Please check back later.")
+    elif arg:
+        log(WARNING_ICON, f"Invalid option '{arg}'. {HELP}")
+    else:
+        log(WARNING_ICON, f"Invalid options '{argv}'. {HELP}")
+
+
+
+
+def _open_url(url: str) -> None:
+    """
+    Opens the provided URL in the default browser.
+    """
+    log(INFO_ICON, f"Opening '{url}' in your default browser.")
+    webopen(url)
+
+
+
+
+
 # pylint: disable=all
 def main() -> None:
     """
@@ -56,64 +132,47 @@ def main() -> None:
         print(HELLO)
         exit(0)
 
-    if len(argv) == 3:
-        if argv[1] in [Token.HELP.value, Token.HELP_SHORT.value]:
-            _help(argv[2])
+    command = argv[1]
+    arg = argv[2] if len(argv) > 2 else None
 
-    if argv[1] in [Token.VERSION.value, Token.VERSION_SHORT.value]:
+    if command in [Token.HELP.value, Token.HELP_SHORT.value]:
+        if arg:
+            _help(arg)
+        else:
+            log(WARNING_ICON, f"No argument provided for '{command}'. {HELP}")
+
+    elif command in [Token.VERSION.value, Token.VERSION_SHORT.value]:
         _version()
 
-    elif argv[1] == Token.INIT.value:
+    elif command == Token.INIT.value:
         init()
 
-    elif argv[1] == Token.SERVE.value:
-        if(len(argv)) > 2:
-            if argv[2] ==Token.OPEN.value:
-                serve(browser=True)
-            elif argv[2] == Token.NO_OPEN.value:
-                serve()
-            else:
-                log(WARNING_ICON, f"Invalid flag for 'serve': '{argv[2]}'. {HELP}")
-        else:
-            serve()
+    elif command == Token.SERVE.value:
+        _handle_serve_command(arg)
 
-    elif argv[1] == Token.REFRESH.value:
+    elif command == Token.REFRESH.value:
         refresh()
 
-    elif argv[1] in [Token.GITHUB.value, Token.DOCS.value]:
-        log(INFO_ICON, "Opening 'https://github.com/abhi-arya1/tuna' in your default browser.")
-        webopen("https://github.com/abhi-arya1/tuna")
+    elif command in [Token.GITHUB.value, Token.DOCS.value]:
+        _open_url("https://github.com/abhi-arya1/tuna")
 
-    elif argv[1] == Token.BROWSE.value:
+    elif command == Token.BROWSE.value:
         open_repository()
 
-    elif argv[1] == Token.TRAIN.value:
-        if(len(argv)) > 2:
-            if argv[2] == Token.LOCAL.value:
-                train(local=True)
-            else:
-                log(WARNING_ICON, f"Invalid flag for 'train': '{argv[2]}'. {HELP}")
-        else:
-            train()
+    elif command == Token.TRAIN.value:
+        _handle_train_command(arg, argv)
 
-    elif argv[1] == Token.FLUIDSTACK.value:
-        if len(argv) == 3 and argv[2] == Token.MANAGE.value:
-            log(INFO_ICON, "Opening FluidStack Dashboard in your default browser.")
-            webopen("https://dashboard.fluidstack.io/")
-        elif len(argv) == 3:
-            log(WARNING_ICON, f"Invalid option '{argv[2]}'. {HELP}")
-        else:
-            log(WARNING_ICON, f"Invalid options '{argv}'. {HELP}")
+    elif command == Token.FLUIDSTACK.value:
+        _handle_fluidstack_command(arg)
 
-    elif argv[1] == Token.PURGE.value:
+    elif command == Token.PURGE.value:
         purge()
 
-    elif argv[1] == Token.DATASET.value:
-        if argv[2] == "dataset":
-            build_dataset()
+    elif command == Token.MAKE.value:
+        _handle_make_command(arg)
 
     else:
-        log(WARNING_ICON, f"Invalid option '{argv[1]}'. {HELP}")
+        log(WARNING_ICON, f"Invalid option '{command}'. {HELP}")
 
     exit(0)
 

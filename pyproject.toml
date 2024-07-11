@@ -26,7 +26,8 @@ dependencies = [
     "scikit-learn",
     "tabulate",
     "paramiko",
-    "watchdog"
+    "watchdog",
+    "gputil"
 ]
 
 [project.scripts]

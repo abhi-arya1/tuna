@@ -4,17 +4,19 @@ SSH Machine Training Setup for Tuna CLI
 
 """
 
+import GPUtil as gputil
 import inquirer
 from tabulate import tabulate
 from tuna.cli.core.authenticator import validate, validate_fluidstack
-from tuna.cli.core.constants import INFO_ICON, SSH_KEY
+from tuna.cli.core.constants import INFO_ICON, SSH_KEY, WARNING_ICON
 from tuna.cli.core.util import log
 from tuna.cli.services.fluidstack import get_instances, spin_new_instance, \
     existing_or_new_trainer, select_gpu, spin_existing_instance
-from tuna.cli.services.jupyter import connect_lab
+from tuna.cli.services.jupyter import connect_lab, connect_local_lab
 
 
-def train(local=False) -> None:
+
+def train(local=False, force=False) -> None:
     """
     Setup remote compute training with FluidStack.
 
@@ -24,7 +26,11 @@ def train(local=False) -> None:
     validate()
 
     if local:
-        log(INFO_ICON, "Local training coming soon...")
+        if not force:
+            _check_gpu()
+        else:
+            log(WARNING_ICON, "[UNDEFINED BEHAVIOR] Forcing local training without GPU check...")
+        connect_local_lab()
         return
 
     api_key = validate_fluidstack()
@@ -90,3 +96,17 @@ def _train_from_existing(api_key: str, instances: list[dict]) -> None:
 
     instance = spin_existing_instance(api_key, selected_option)
     connect_lab(api_key, instance, SSH_KEY)
+
+
+
+
+# pylint: disable=consider-using-sys-exit
+# pylint: disable=line-too-long
+def _check_gpu():
+    """
+    Validate existence of NVIDIA GPU for local training
+    """
+    gpus = gputil.getGPUs()
+    if len(gpus) == 0:
+        log(WARNING_ICON, "Tuna '--local' training requires an NVIDIA GPU, which wasn't found on your system. Use 'tuna train --local --force' to bypass this check.")
+        exit(1)
