@@ -122,6 +122,14 @@ def _open_url(url: str) -> None:
 
 
 
+def _handle_dev(arg: str) -> None:
+    """
+    Handles development mode commands for Tuna CLI
+    """
+    log(INFO_ICON, f"No commands under development. Build 'v{VERSION}' is stable.")
+
+
+
 
 # pylint: disable=all
 def main() -> None:
@@ -170,6 +178,9 @@ def main() -> None:
 
     elif command == Token.MAKE.value:
         _handle_make_command(arg)
+
+    elif command == Token.DEV.value: 
+        _handle_dev(arg)
 
     else:
         log(WARNING_ICON, f"Invalid option '{command}'. {HELP}")
