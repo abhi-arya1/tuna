@@ -10,16 +10,13 @@ from os import getcwd
 from enum import Enum
 from tuna.version import LATEST_VERSION
 
-
 # VERSION
 VERSION = LATEST_VERSION
-
 
 ################################################
 # Tuna-Generated Directory Constants
 
 CWD = Path(getcwd())
-
 
 TUNA_DIR    = CWD / '.tuna'
 NOTEBOOK    = TUNA_DIR / 'tuna.ipynb'
@@ -31,7 +28,7 @@ TEST_DATA   = TUNA_DIR / 'test_dataset.txt'
 REMOTE_CFG  = TUNA_DIR / 'remote.config.json'
 
 
-TUNA_GITIGNORE = """
+TUNA_GITIGNORE     = """
 ipynb_checkpoints/
 auth.config.json
 """
@@ -68,7 +65,7 @@ SPINNER_DOTS  = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", 
 
 
 # Help Message
-HELP = f"{DARK_GRAY}Run 'tuna [-h | --help] <command>' for help{RESET}"
+HELP  = f"{DARK_GRAY}Run 'tuna [-h | --help] <command>' for help{RESET}"
 
 
 # Tuna Welcome Message
@@ -118,11 +115,8 @@ EXCLUDED_FILENAMES = (
     'pipfile.lock', 'package-lock.json', 'outfile'
 )
 
-
 # SSH Configurations
 SSH_KEY = Path.home() / '.ssh' / 'id_rsa.pub'
-
-
 
 ################################################
 # Trainer and Remote Development Constants
@@ -135,13 +129,13 @@ class FluidstackState(Enum):
     """
     FluidStack GPU Machine States
     """
-    RUNNING="running"
-    PENDING="pending"
-    UNHEALTHY="unhealthy"
-    SHUTTING_DOWN="shutting_down"
-    TERMINATED="terminated"
-    STOPPING="stopping"
-    STOPPED="stopped"
+    RUNNING       = "running"
+    PENDING       = "pending"
+    UNHEALTHY     = "unhealthy"
+    SHUTTING_DOWN = "shutting_down"
+    TERMINATED    = "terminated"
+    STOPPING      = "stopping"
+    STOPPED       = "stopped"
 
 
 
@@ -149,8 +143,6 @@ class FluidstackState(Enum):
 STARTUP_SCRIPT_PATH    = lambda username: f'/home/{username}/startup.sh'
 PID_FILE_PATH          = lambda username: f'/home/{username}/jupyter_lab.pid'
 TOKEN_FILE_PATH        = lambda username: f'/home/{username}/jupyter_token.txt'
-
-
 
 
 ################################################
