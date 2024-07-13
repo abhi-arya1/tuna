@@ -2,7 +2,7 @@
 # FIXME: This file has major issues, updating soon
 
 import json
-from tuna.cli.constants import REPO_FILE, TRAIN_DATA, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES
+from tuna.cli.core.constants import REPO_FILE, TRAIN_DATA, EXCLUDED_EXTENSIONS, EXCLUDED_FILENAMES
 
 def is_excluded(filename):
     if any(filename.lower().endswith(ext) for ext in EXCLUDED_EXTENSIONS):

@@ -6,226 +6,132 @@ This file manages all functionality for the Tuna CLI.
 
 """
 
-import json
-import os
+
 from webbrowser import open as webopen
-from sys import argv
-from shutil import rmtree
-import inquirer
-from tuna.cli.github_fs import fetch, reload
-from tuna.cli.datasets import build_dataset
-from tuna.cli.jupyter_fs import start_lab, monitor_lab, kill_lab, \
-    add_md_cell
-from tuna.cli.fluidstack import select_gpu, spin_instance, get_instances, existing_or_new_trainer
-from tuna.cli.util import log
-from tuna.cli.constants import TUNA_DIR, CONFIG_FILE, REPO_FILE, HELLO, \
-    INFO_ICON, WARNING_ICON, CHECK_ICON, NOTEBOOK
+from sys import argv, exit
+from tuna.cli.services.dataset import build_dataset
+from tuna.cli.core.util import log
+from tuna.cli.core.constants import HELLO, INFO_ICON, WARNING_ICON, \
+    Token, HELP, VERSION
+from tuna.cli.core.docs import DOCS
+from tuna.cli.cmd.init import init
+from tuna.cli.cmd.serve import serve
+from tuna.cli.cmd.refresh import refresh
+from tuna.cli.cmd.open_repo import open_repository
+from tuna.cli.cmd.purge import purge
+from tuna.cli.cmd.train import train
 
 
 
-# pylint: disable=line-too-long
-def load_credentials() -> tuple[str, str] | tuple[None, None]:
+
+def _help(token: str) -> None:
     """
-    Loads GitHub Credentials from the Tuna Configuration File.
-
-    Returns:
-        tuple[str, str] | tuple[None, None]: The GitHub Username and Token if available, else `tuple[None, None]`
+    Helper function to display information for a specific Tuna command.
     """
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, 'r', encoding="utf-8") as f:
-            data = json.load(f)
-            return data.get('username'), data.get('token')
-    return None, None
-
-
-
-
-def save_credentials(username: str, token: str) -> None:
-    """
-    Saves GitHub Credentials to the Tuna Configuration File.
-
-    Args:
-        username (str): The GitHub Username
-        token (str): The GitHub Token
-    """
-    with open(CONFIG_FILE, 'w', encoding="utf-8") as f:
-        json.dump({
-            'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
-            'username': username, 
-            'token': token
-        }, f, indent=4)
-
-
-
-
-def authenticate() -> tuple[str, str]:
-    """
-    Authenticates the User with GitHub.
-
-    Returns:
-        tuple[str, str]: The GitHub Username and Token
-    """
-    username, token = load_credentials()
-    if not username or not token:
-        # pylint: disable=line-too-long
-        questions = [
-            inquirer.Text('username', message="Enter your GitHub username"),
-            inquirer.Password('token', message="Enter your GitHub token (requires username and all repo permissions)")
-        ]
-        answers = inquirer.prompt(questions)
-        username = answers['username']
-        token = answers['token']
-        save_credentials(username, token)
-
-    return username, token
-
-
-
-
-def validate() -> None:
-    """
-    Validates the presence of `.tuna` in the directory.
-    """
-    username, token = load_credentials()
-    if not username or not token:
-        log(WARNING_ICON, "You haven't initialized Tuna yet. Run `tuna init` to start")
-        # pylint: disable=consider-using-sys-exit
+    doc = DOCS.get(token, False) 
+    if not doc: 
+        log(WARNING_ICON, f"Invalid help command '{argv[2]}'. \n- [-h | --help] only works with valid commands. \n- Run 'tuna' for some valid commands.")
         exit(1)
+    print(DOCS[token])
+    exit(0)
 
 
 
 
-def validate_fluidstack() -> str:
+def _version() -> None: 
     """
-    Validates the presence of the FluidStack API Key in the Configuration File.
-
-    Returns:
-        str: The FluidStack API Key
+    Display the current version of Tuna.
     """
-    with open(CONFIG_FILE, 'r', encoding="utf-8") as f:
-        data = json.load(f)
-        api_key = data.get('fs_api_key', None)
-    if not api_key:
-        questions = [
-            # pylint: disable=line-too-long
-            inquirer.Password('api_key', message="Enter your FluidStack API Key (https://www.fluidstack.io/)")
-        ]
-        answer = inquirer.prompt(questions)
-        api_key = answer['api_key']
-        with open(CONFIG_FILE, 'w', encoding="utf-8") as f:
-            data['fs_api_key'] = api_key
-            json.dump(data, f, indent=4)
-    return api_key
+    print(f"Tuna v{VERSION}")
+    exit(0)
 
 
 
 
-def init() -> None:
+def _handle_serve_command(arg: str) -> None:
     """
-    Initialize `.tuna` in the current directory.
+    Handles the 'serve' command with the provided argument.
     """
-    if os.path.exists(TUNA_DIR):
-        # pylint: disable=line-too-long
-        # pylint: disable=consider-using-sys-exit
-        log(INFO_ICON, "You've already initialized Tuna in this directory! Run `tuna purge` to start fresh.")
-        exit(1)
-    print(f"[{INFO_ICON}] Let's get started...")
-    TUNA_DIR.mkdir(exist_ok=True)
-    username, token = load_credentials()
-    if not username or not token:
-        username, token = authenticate()
-        save_credentials(username, token)
-    fetch(username, token)
-    add_md_cell(NOTEBOOK, "# Hello, World!")
-
-
-
-
-def serve(browser: bool=False) -> None:
-    """
-    Serve the Tuna Jupyter Notebook in the Browser.
-
-    Args:
-        browser (bool, optional): Whether to open the Notebook in the Browser. Default=False.
-    """
-    validate()
-    lab = start_lab(browser)
-    try:
-        monitor_lab(lab)
-    except KeyboardInterrupt:
-        kill_lab(lab)
-
-
-
-
-def refresh() -> None:
-    """
-    Refresh the Tuna Cache in the current directory.
-    """
-    validate()
-    log(INFO_ICON, "Refreshing the Tuna Cache in your current directory")
-    reload()
-    log(CHECK_ICON, "Refreshed successfully!")
-
-
-
-
-def open_repository() -> None:
-    """
-    Opens the Tuna-initialized GitHub Repository in the default browser.
-    """
-    with open(REPO_FILE, 'r', encoding="utf-8") as f:
-        data = json.load(f)
-        webopen(data.get('html_url'))
-
-
-
-
-def train(local=False) -> None:
-    """
-    Setup remote compute training with FluidStack.
-
-    Args: 
-        local (bool, optional): Whether to train locally. Default=False.
-    """
-    validate()
-
-    if local:
-        log(INFO_ICON, "Local training coming soon...")
-        return
-
-    api_key = validate_fluidstack()
-    instances = get_instances(api_key)
-
-    if instances and len(instances) != 0:
-        use_existing = existing_or_new_trainer()
+    if arg == Token.OPEN.value:
+        serve(browser=True)
+    elif arg == Token.NO_OPEN.value:
+        serve()
+    elif arg:
+        log(WARNING_ICON, f"Invalid flag for 'serve': '{arg}'. {HELP}")
     else:
-        use_existing = False
-
-    if not instances or len(instances) == 0 or not use_existing:
-        gpu = select_gpu(api_key)
-        spin_instance(api_key, gpu)
-    else:
-        pass
+        serve()
 
 
 
 
-def purge() -> None:
+def _handle_train_command(arg: str, args: list[str]) -> None:
     """
-    Remove the `.tuna` directory from the current directory.
+    Handles the 'train' command with the provided argument.
     """
-    if os.path.exists(TUNA_DIR):
-        rmtree(TUNA_DIR)
-        log(INFO_ICON, "Tuna has been purged from your current directory")
+    if arg == Token.LOCAL.value:
+        if len(args) == 4 and args[3] == Token.FORCE.value:
+            train(local=True, force=True)
+        else: 
+            train(local=True)
+    elif arg:
+        log(WARNING_ICON, f"Invalid flag for 'train': '{arg}'. {HELP}")
     else:
-        log(INFO_ICON, "Tuna is not initialized in this directory")
+        train()
 
 
 
 
-# pylint: disable=too-many-branches
-# pylint: disable=consider-using-sys-exit
+def _handle_fluidstack_command(arg: str) -> None:
+    """
+    Handles the 'fluidstack' command with the provided argument.
+    """
+    if arg == Token.MANAGE.value:
+        log(INFO_ICON, "Opening FluidStack Dashboard in your default browser.")
+        webopen("https://dashboard.fluidstack.io/")
+    elif arg:
+        log(WARNING_ICON, f"Invalid option '{arg}'. {HELP}")
+    else:
+        log(WARNING_ICON, f"Invalid options '{argv}'. {HELP}")
+
+
+
+
+def _handle_make_command(arg: str) -> None:
+    """
+    Handles the 'make' command with the provided argument.
+    """
+    if arg == Token.DATASET.value:
+        build_dataset()
+    elif arg == Token.NOTEBOOK.value:
+        log(WARNING_ICON, "This feature is not yet implemented. Please check back later.")
+    elif arg:
+        log(WARNING_ICON, f"Invalid option '{arg}'. {HELP}")
+    else:
+        log(WARNING_ICON, f"`tuna make` requires a command, such as `tuna make [notebook | dataset]`. {HELP}")
+
+
+
+
+def _open_url(url: str) -> None:
+    """
+    Opens the provided URL in the default browser.
+    """
+    log(INFO_ICON, f"Opening '{url}' in your default browser.")
+    webopen(url)
+
+
+
+
+def _handle_dev(arg: str) -> None:
+    """
+    Handles development mode commands for Tuna CLI
+    """
+    log(INFO_ICON, f"No commands under development. Build 'v{VERSION}' is stable.")
+
+
+
+
+# pylint: disable=all
 def main() -> None:
     """
     Runs the `tuna` CLI with any provided arguments.
@@ -234,57 +140,51 @@ def main() -> None:
         print(HELLO)
         exit(0)
 
-    if argv[1] == "init":
-        init()
+    command = argv[1]
+    arg = argv[2] if len(argv) > 2 else None
 
-    elif argv[1] == "serve":
-        if(len(argv)) > 2:
-            if argv[2] == "--open":
-                serve(browser=True)
-            elif argv[2] == "--no-open":
-                serve()
+    match command:
+        case Token.HELP.value | Token.HELP_SHORT.value:
+            if arg:
+                _help(arg)
             else:
-                log(WARNING_ICON, f"Invalid flag for 'serve': '{argv[2]}'. Run 'tuna' for help")
-        else:
-            serve()
+                log(WARNING_ICON, f"No argument provided for '{command}'. {HELP}")
 
-    elif argv[1] == "refresh":
-        refresh()
+        case Token.VERSION.value | Token.VERSION_SHORT.value:
+            _version()
 
-    elif argv[1] in ["github", "docs", "help"]:
-        log(INFO_ICON, "Opening 'https://github.com/abhi-arya1/tuna' in your default browser.")
-        webopen("https://github.com/abhi-arya1/tuna")
+        case Token.INIT.value:
+            init()
 
-    elif argv[1] == "browse":
-        validate()
-        log(INFO_ICON, "Opening your repository in your default browser.")
-        open_repository()
+        case Token.SERVE.value:
+            _handle_serve_command(arg)
 
-    elif argv[1] == "train":
-        if(len(argv)) > 2:
-            if argv[2] == "--local":
-                train(local=True)
-            else:
-                log(WARNING_ICON, f"Invalid flag for 'train': '{argv[2]}'. Run 'tuna' for help")
-        else:
-            train()
+        case Token.REFRESH.value:
+            refresh()
 
-    elif argv[1] == "fluidstack":
-        if argv[2] == "manage":
-            log(INFO_ICON, "Opening FluidStack Dashboard in your default browser.")
-            webopen("https://dashboard.fluidstack.io/")
-        else:
-            log(WARNING_ICON, f"Invalid option '{argv[2]}'. Run 'tuna' for help")
+        case Token.GITHUB.value | Token.DOCS.value:
+            _open_url("https://github.com/abhi-arya1/tuna")
 
-    elif argv[1] == "purge":
-        purge()
+        case Token.BROWSE.value:
+            open_repository()
 
-    elif argv[1] == "dev":
-        if argv[2] == "dataset":
-            build_dataset()
+        case Token.TRAIN.value:
+            _handle_train_command(arg, argv)
 
-    else:
-        log(WARNING_ICON, f"Invalid option '{argv[1]}'. Run 'tuna' for help")
+        case Token.FLUIDSTACK.value:
+            _handle_fluidstack_command(arg)
+
+        case Token.PURGE.value:
+            purge()
+
+        case Token.MAKE.value:
+            _handle_make_command(arg)
+
+        case Token.DEV.value:
+            _handle_dev(arg)
+
+        case _:
+            log(WARNING_ICON, f"Invalid option '{command}'. {HELP}")
 
     exit(0)
 
@@ -295,5 +195,5 @@ if __name__ == '__main__':
         main()
     # pylint: disable=broad-exception-caught
     except Exception as e:
-        print(e)
+        log(WARNING_ICON, f"Tuna encountered an error: {e}")
         exit(1)

@@ -5,7 +5,7 @@
 .env
 .DS_Store
 
-# pip 
+# pip packaging and building
 build/
 tuna.egg-info/
 tuna_cli.egg-info/
@@ -15,7 +15,9 @@ venv
 .venv 
 env
 .env
-PKG-INFO
+
+# testing 
+.pytest_cache/
 
 # node 
 node_modules/
