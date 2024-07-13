@@ -34,7 +34,7 @@ Write all minor versions as:
 
 """
 
-VERSION = "0.1.4 Dev Build 6 (v0.2)" # Current Version
+VERSION = "0.2.0 Dev Build 1" # Current Version
 
 LATEST_VERSION = VERSION # Shown when running "tuna [-v | --version]" (via tuna.cli.core.constants.py)
 
@@ -42,6 +42,7 @@ LATEST_VERSION = VERSION # Shown when running "tuna [-v | --version]" (via tuna.
 # MAJOR VERSIONS
 ######################################################
 
+VERSION_0_1_5  = "0.1.5" # 07/12/2024
 VERSION_0_1_4  = "0.1.4" # 07/10/2024
 VERSION_0_1_3  = "0.1.3" # 07/09/2024
 VERSION_0_1_2  = "0.1.2" # 07/09/2024
