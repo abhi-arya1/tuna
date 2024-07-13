@@ -107,7 +107,7 @@ def _handle_make_command(arg: str) -> None:
     elif arg:
         log(WARNING_ICON, f"Invalid option '{arg}'. {HELP}")
     else:
-        log(WARNING_ICON, f"Invalid options '{argv}'. {HELP}")
+        log(WARNING_ICON, f"`tuna make` requires a command, such as `tuna make [notebook | dataset]`. {HELP}")
 
 
 
