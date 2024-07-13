@@ -9,11 +9,11 @@ This file manages all functionality for the Tuna CLI.
 
 from webbrowser import open as webopen
 from sys import argv, exit
-from tuna.cli.services.dataset import build_dataset
 from tuna.cli.core.util import log
 from tuna.cli.core.constants import HELLO, INFO_ICON, WARNING_ICON, \
     Token, HELP, VERSION
 from tuna.cli.core.docs import DOCS
+from tuna.cli.generators.dataset import build_dataset
 from tuna.cli.cmd.init import init
 from tuna.cli.cmd.serve import serve
 from tuna.cli.cmd.refresh import refresh
