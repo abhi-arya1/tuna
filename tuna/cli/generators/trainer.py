@@ -1,23 +1,26 @@
-# pylint: disable=all
+"""
 
-import os
-import torch
+Tuna Notebook Generation Service
+
+"""
+
+from tuna.cli.util.block import JupyterBlock
+
+
+def _block_1():
+    def markdown(model: str) -> str:
+        return f"# Tuna {model} Trainer"
+
+    code = """
+import os 
+import traceback 
+import typing 
+import dataclasses 
+import torch 
 import transformers 
 import datasets
 import peft
-import trl
+import trl 
+"""
 
-from dotenv import load_dotenv
-load_dotenv()
-
-class TunaTrainer:
-    def __init__(self, base_model: str, model_path: str, device: torch.device):
-        self.base_model = base_model
-        self.model_path = model_path
-        self.device = device
-        self.model
-
-    
-    @staticmethod
-    def _setup_model(base_model: str):
-        pass
+    return JupyterBlock(markdown, code, 1)

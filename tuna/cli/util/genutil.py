@@ -1,6 +1,6 @@
 """
 
-Utility functions for the CLI.
+Generic Utility functions for the Tuna CLI.
 
 """
 

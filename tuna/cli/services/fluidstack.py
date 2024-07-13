@@ -14,7 +14,7 @@ import inquirer
 import requests
 from tabulate import tabulate
 from halo import Halo
-from tuna.cli.core.util import log
+from tuna.cli.util.genutil import log
 from tuna.cli.core.constants import WARNING_ICON, CHECK_ICON, CROSS_ICON, \
     INFO_ICON, SSH_KEY, FluidstackState
 
@@ -210,16 +210,6 @@ def get_instance_by_id(instance_id: str, instances: list[dict]) -> dict:
         if instance["id"] == instance_id:
             return instance
     raise ValueError(f"Instance with ID {instance_id} not found")
-
-
-
-
-
-def sync():
-    """
-    Live syncs local files to the remote machine
-
-    """
 
 
 

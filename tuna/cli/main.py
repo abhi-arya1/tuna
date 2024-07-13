@@ -9,9 +9,9 @@ This file manages all functionality for the Tuna CLI.
 
 from webbrowser import open as webopen
 from sys import argv, exit
-from tuna.cli.core.util import log
+from tuna.cli.util.genutil import log, warn
 from tuna.cli.core.constants import HELLO, INFO_ICON, WARNING_ICON, \
-    Token, HELP, VERSION
+    Token, HELP, VERSION, CANCELLED_CMD
 from tuna.cli.core.docs import DOCS
 from tuna.cli.generators.dataset import build_dataset
 from tuna.cli.cmd.init import init
@@ -138,64 +138,64 @@ def main() -> None:
     """
     Runs the `tuna` CLI with any provided arguments.
     """
-    if len(argv) == 1:
-        print(HELLO)
-        exit(0)
+    try:
+        if len(argv) == 1:
+            print(HELLO)
+            exit(0)
 
-    command = argv[1]
-    arg = argv[2] if len(argv) > 2 else None
+        command = argv[1]
+        arg = argv[2] if len(argv) > 2 else None
 
-    match command:        
-        case Token.HELP.value | Token.HELP_SHORT.value:
-            if arg:
-                _help(arg)
-            else:
-                log(WARNING_ICON, f"No argument provided for '{command}'. {HELP}")
+        match command:        
+            case Token.HELP.value | Token.HELP_SHORT.value:
+                if arg:
+                    _help(arg)
+                else:
+                    log(WARNING_ICON, f"No argument provided for '{command}'. {HELP}")
 
-        case Token.VERSION.value | Token.VERSION_SHORT.value:
-            _version()
-        
-        case Token.INIT.value:
-            init()
+            case Token.VERSION.value | Token.VERSION_SHORT.value:
+                _version()
+            
+            case Token.INIT.value:
+                init()
 
-        case Token.SERVE.value:
-            _handle_serve_command(arg)
+            case Token.SERVE.value:
+                _handle_serve_command(arg)
 
-        case Token.REFRESH.value:
-            refresh()
+            case Token.REFRESH.value:
+                refresh()
 
-        case Token.GITHUB.value | Token.DOCS.value:
-            _open_url("https://github.com/abhi-arya1/tuna")
+            case Token.GITHUB.value | Token.DOCS.value:
+                _open_url("https://github.com/abhi-arya1/tuna")
 
-        case Token.BROWSE.value:
-            open_repository()
+            case Token.BROWSE.value:
+                open_repository()
 
-        case Token.TRAIN.value:
-            _handle_train_command(arg, argv)
+            case Token.TRAIN.value:
+                _handle_train_command(arg, argv)
 
-        case Token.FLUIDSTACK.value:
-            _handle_fluidstack_command(arg)
+            case Token.FLUIDSTACK.value:
+                _handle_fluidstack_command(arg)
 
-        case Token.PURGE.value:
-            purge()
+            case Token.PURGE.value:
+                purge()
 
-        case Token.MAKE.value:
-            _handle_make_command(arg)
+            case Token.MAKE.value:
+                _handle_make_command(arg)
 
-        case Token.DEV.value:
-            _handle_dev(arg)
+            case Token.DEV.value:
+                _handle_dev(arg)
 
-        case _:
-            log(WARNING_ICON, f"Invalid option '{command}'. {HELP}")
+            case _:
+                log(WARNING_ICON, f"Invalid option '{command}'. {HELP}")
+    except TypeError: 
+        pass
+    except Exception as e:
+        log(WARNING_ICON, f"Tuna encountered an error: {e}")
 
     exit(0)
 
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    # pylint: disable=broad-exception-caught
-    except Exception as e:
-        log(WARNING_ICON, f"Tuna encountered an error: {e}")
-        exit(1)
+    main()

@@ -20,18 +20,18 @@ from pathlib import Path
 import paramiko
 import psutil
 from watchdog.observers import Observer
-from tuna.cli.core.util import log, sync_to_remote
+from tuna.cli.util.genutil import log, sync_to_remote
 from tuna.cli.core.watchfiles import LabWatcher
 
 # pylint: disable=unused-import
 from tuna.cli.services.fluidstack import stop_instance
 from tuna.cli.core.authenticator import validate_ip
 
-from tuna.cli.core.scripts import FLUIDSTACK_CONFIGURATION_SCRIPT
+from tuna.cli.core.scripts import FLUIDSTACK_CONFIGURATION_SCRIPT, SYNC_WITH_LOCAL_SCRIPT
 from tuna.cli.core.constants import TUNA_DIR, INFO_ICON, CHECK_ICON, \
     CURSOR_UP_ONE, ERASE_LINE, DARK_GRAY, PURPLE, RESET, SPINNER_DOTS, BLUE, \
     STARTUP_SCRIPT_PATH, JUPYTER_PID_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC, LOCAL_DAEMON_TAG, \
-    REMOTE_DAEMON_TAG, WATCHFILES_SCRIPT_PATH, WATCHFILES_PID_PATH
+    REMOTE_DAEMON_TAG, SYNC_SCRIPT_PATH, WATCHFILES_PID_PATH
 
 
 
@@ -140,7 +140,7 @@ def kill_lab(process: subprocess.Popen) -> None:
     Args:
         process (subprocess.Popen): The process object for the JupyterLab instance
     """
-    log(CHECK_ICON, "Ended TunaLab, Goodbye")
+    log(CHECK_ICON, "Ended Local TunaLab Server, Goodbye...")
     process.terminate()
     try:
         process.wait(timeout=10)
@@ -200,10 +200,7 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
     port = instance["ssh_port"]
     hostname =  instance["ip_address"]
 
-    # local_hostname, local_ip = validate_ip()
-
-    print(f"{BLUE}[{INFO_ICON} Tuna Build] Log via {username}@{hostname}:{port} --> {RESET}")
-
+    local_hostname, local_ip = validate_ip()
 
     # Connect and set up remote machine configuration
     client = paramiko.SSHClient()
@@ -211,8 +208,7 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
     client.connect(hostname, port, username, key_filename=str(ssh_file))
     client.exec_command(f"touch {STARTUP_SCRIPT_PATH(username)}")
     client.exec_command(f"touch {JUPYTER_PID_PATH(username)}")
-    # client.exec_command(f"touch {WATCHFILES_PID_PATH(username)}")
-    # client.exec_command(f"touch {WATCHFILES_SCRIPT_PATH(username)}")
+    client.exec_command(f"touch {SYNC_SCRIPT_PATH(username)}")
 
     # Configure Remote Scripts
     sftp = client.open_sftp()
@@ -220,14 +216,16 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
         f.write(FLUIDSTACK_CONFIGURATION_SCRIPT(username))
     sftp.chmod(STARTUP_SCRIPT_PATH(username), 0o755)
 
-    # with sftp.file(WATCHFILES_SCRIPT_PATH(username), 'w') as f:
-    #     f.write(SYNC_WITH_LOCAL_SCRIPT(username, local_hostname, local_ip))
-    # sftp.chmod(WATCHFILES_SCRIPT_PATH(username), 0o755)
+    with sftp.file(SYNC_SCRIPT_PATH(username), 'w') as f:
+        f.write(SYNC_WITH_LOCAL_SCRIPT(username, local_hostname, local_ip))
+    sftp.chmod(SYNC_SCRIPT_PATH(username), 0o755)
 
     sftp.close()
 
 
     # Execute setup scripts on remote machine and log output to command line
+    print(f"{BLUE}[{INFO_ICON} Tuna Builder] Log via {username}@{hostname}:{port} --> {RESET}")
+
     _, stdout, _ = client.exec_command(f'bash {STARTUP_SCRIPT_PATH(username)}')
     stop_spinner = False
     spinner = Thread(target=_tunalab_spinner_thread, args=(lambda: stop_spinner,))
@@ -266,10 +264,8 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
     sftp = client.open_sftp()
     with sftp.file(JUPYTER_PID_PATH(username), 'r') as f, \
             sftp.file(TOKEN_FILE_PATH(username), 'r') as g:
-            # sftp.file(WATCHFILES_PID_PATH(username), 'r') as h:
         remote_pid = f.read().strip().decode('utf-8')
         remote_token = g.read().strip().decode('utf-8').split(" ")[0]
-        # remote_watchfiles_pid = h.read().strip().decode('utf-8')
 
     sftp.close()
 
@@ -297,10 +293,12 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
                 )
     except KeyboardInterrupt:
         _, stdout, _ = client.exec_command(f"sudo kill -9 {remote_pid}")
-        # _, stdout, _ = client.exec_command(f"sudo kill -9 {remote_watchfiles_pid}")
-        # stop_instance(api_key, instance["id"])
+        log(REMOTE_DAEMON_TAG, "Remote Tuna Server ended.")
+
+        _, stdout, _ = client.exec_command(f"python3 {SYNC_SCRIPT_PATH(username)}")
+        log(REMOTE_DAEMON_TAG, "Files synced back to local. All remote processes complete.")
+
+        log(LOCAL_DAEMON_TAG, f"Daemon processes ended. No longer watching files in {TUNA_DIR}.")
+        log(INFO_ICON, "Your GPU instance has not been ended on Fluidstack. Visit https://dashboard.fluidstack.io/ or run 'tuna fluidstack --manage' to manage instances.")
         kill_lab(local_process)
-        log(INFO_ICON, f"[{REMOTE_DAEMON_TAG}] All remote Tuna processes ended.")
-        log(INFO_ICON, f"[{LOCAL_DAEMON_TAG}] Daemon process ended. No longer watching files in {TUNA_DIR}.")
-        log(INFO_ICON, "Your instance has not been ended on Fluidstack. Visit https://dashboard.fluidstack.io/ or run 'tuna fluidstack --manage' to manage instances.")
         client.close()

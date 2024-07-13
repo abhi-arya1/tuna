@@ -26,10 +26,6 @@ TRAIN_DATA  = TUNA_DIR / 'train_dataset.jsonl'
 EVAL_DATA   = TUNA_DIR / 'eval_dataset.txt'
 TEST_DATA   = TUNA_DIR / 'test_dataset.txt'
 
-TUNA_GITIGNORE     = """
-ipynb_checkpoints/
-auth.config.json
-"""
 
 IPYNB_REQUIREMENTS = """
 transformers
@@ -150,7 +146,7 @@ class FluidstackState(Enum):
 
 # FluidStack GPU OS Configuration
 STARTUP_SCRIPT_PATH    = lambda username: f'/home/{username}/startup.sh'
-WATCHFILES_SCRIPT_PATH = lambda username: f'/home/{username}/watchfiles.py'
+SYNC_SCRIPT_PATH = lambda username: f'/home/{username}/watchfiles.py'
 JUPYTER_PID_PATH       = lambda username: f'/home/{username}/jupyter_lab.pid'
 WATCHFILES_PID_PATH    = lambda username: f'/home/{username}/tuna_daemon.pid'
 TOKEN_FILE_PATH        = lambda username: f'/home/{username}/jupyter_token.txt'

@@ -9,7 +9,7 @@ import json
 import socket
 import inquirer
 from tuna.cli.core.constants import CONFIG_FILE, WARNING_ICON, BOLD, RESET, ITALIC, INFO_ICON
-from tuna.cli.core.util import log
+from tuna.cli.util.genutil import log
 
 
 # pylint: disable=line-too-long

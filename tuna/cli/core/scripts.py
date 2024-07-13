@@ -12,7 +12,7 @@ Usage:
 
 # pylint: disable=unnecessary-lambda-assignment
 from tuna.cli.core.constants import JUPYTER_PID_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC, \
-    TUNA_DIR, REMOTE_DAEMON_TAG, WATCHFILES_PID_PATH
+    TUNA_DIR, REMOTE_DAEMON_TAG
 
 
 FLUIDSTACK_CONFIGURATION_SCRIPT = lambda username: f"""
@@ -31,9 +31,6 @@ if [ ! -d "tunalab" ]; then
 
     echo "TUNA: Installing JupyterLab"
     pip install jupyterlab
-
-    echo "TUNA: Installing Watchfiles" 
-    pip install watchfiles
     
     mkdir {TUNA_LAB_LOC}
     echo "TUNA: TunaLab Workspace created." 
@@ -82,7 +79,6 @@ SYNC_WITH_LOCAL_SCRIPT = lambda remote_username, local_username, ip: f"""
 import os
 import glob 
 import subprocess
-from watchfiles import watch 
 
 def sync_to_remote():
     remote_files = glob.glob(os.path.join('{TUNA_LAB_LOC}, "*"))
@@ -93,17 +89,12 @@ def sync_to_remote():
     ] + remote_files + [f"{local_username}@{ip}:{TUNA_DIR}"]
 
     try:
-        print("[{REMOTE_DAEMON_TAG}] Syncing Files from {TUNA_LAB_LOC}")
+        print("[{REMOTE_DAEMON_TAG}] Syncing edits back from {TUNA_LAB_LOC}")
         subprocess.run(scp_command, check=True, text=True, capture_output=True)
         print("[{REMOTE_DAEMON_TAG}] Sync Successful to {local_username}@{ip}:{TUNA_DIR} from {TUNA_LAB_LOC}")
     except subprocess.CalledProcessError as e:
         print("[{REMOTE_DAEMON_TAG}] Sync Error Occurred")
         print(e.stderr)
 
-with open("{WATCHFILES_PID_PATH(remote_username)}", "w") as f:
-    f.write(str(os.getpid()))
-
-for changes in watch({TUNA_LAB_LOC}):
-    sync_to_remote()
-
+sync_to_remote()
 """

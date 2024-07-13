@@ -1,9 +1,6 @@
 """
 
-Jupyter Notebook Management Service for Tuna CLI
-
-This module contains utilities for managing Jupyter Notebooks 
-in the Tuna CLI.
+Jupyter Notebook Management Utilities for Tuna CLI
 
 """
 
