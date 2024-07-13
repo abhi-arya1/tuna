@@ -6,10 +6,9 @@ Utility functions for the CLI.
 
 import os
 import glob
-import json
 import subprocess
 from pathlib import Path
-from tuna.cli.core.constants import BLUE, RESET, RED, WARNING_ICON, REMOTE_CFG
+from tuna.cli.core.constants import BLUE, RESET, RED, WARNING_ICON, LOCAL_DAEMON_TAG
 
 
 def clear_terminal():
@@ -36,25 +35,19 @@ def log(icon: str, message: str):
 
 
 
+def warn(daemon_tag: str, message: str):
+    """
+    Logs a warning message from the Tuna Daemon to the terminal.
+    """
+    print(f"{daemon_tag} {message}")
 
-def write_remote(username: str, hostname: str, ssh_path: str, port: int=22):
-    """
-    Logs remote configuration 
-    """
-    with open(REMOTE_CFG, 'w', encoding="utf-8") as j:
-        json.dump({
-            "username": username,
-            "hostname": hostname,
-            "ssh_path": ssh_path,
-            "port": port
-        }, j, indent=4)
 
 
 
 
 # pylint: disable=too-many-arguments
 # pylint: disable=line-too-long
-def remote_sync(local_path: Path, remote_path: Path, username: str, hostname: str, port: int):
+def sync_to_remote(local_path: Path, remote_path: Path, username: str, hostname: str, port: int):
     """
     Copy a directory to a remote machine using SFTP.
 
@@ -76,9 +69,9 @@ def remote_sync(local_path: Path, remote_path: Path, username: str, hostname: st
     ] + local_files + [f"{username}@{hostname}:{remote_path}"]
 
     try:
-        print(f"[TUNA] Syncing Files from {str(local_path)}")
+        print(f"[{LOCAL_DAEMON_TAG}] Syncing Files from {str(local_path)}")
         subprocess.run(scp_command, check=True, text=True, capture_output=True)
-        print(f"[TUNA] Sync Successful to ~/tunalab from {str(local_path)}")
+        print(f"[{LOCAL_DAEMON_TAG}] Sync Successful to ~/tunalab from {str(local_path)}")
     except subprocess.CalledProcessError as e:
-        print("[TUNA] Sync Error Occurred")
+        print(f"[{LOCAL_DAEMON_TAG}] Sync Error Occurred")
         print(e.stderr)

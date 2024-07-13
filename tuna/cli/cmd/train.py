@@ -7,12 +7,15 @@ SSH Machine Training Setup for Tuna CLI
 import GPUtil as gputil
 import inquirer
 from tabulate import tabulate
-from tuna.cli.core.authenticator import validate, validate_fluidstack
-from tuna.cli.core.constants import INFO_ICON, SSH_KEY, WARNING_ICON
-from tuna.cli.core.util import log
+from tuna.cli.services.notebook import validate_nb
+from tuna.cli.core.authenticator import validate, validate_fs, validate_hf
+from tuna.cli.core.constants import INFO_ICON, SSH_KEY, WARNING_ICON, UNDEFINED_BEHV, \
+    NO_NOTEBOOK, NOTEBOOK
+from tuna.cli.core.util import log, warn
 from tuna.cli.services.fluidstack import get_instances, spin_new_instance, \
     existing_or_new_trainer, select_gpu, spin_existing_instance
 from tuna.cli.services.jupyter import connect_lab, connect_local_lab
+from tuna.cli.core.authenticator import validate_ip
 
 
 
@@ -24,17 +27,25 @@ def train(local=False, force=False) -> None:
         local (bool, optional): Whether to train locally. Default=False.
     """
     validate()
+    validate_ip()
 
     if local:
         if not force:
             _check_gpu()
         else:
-            log(WARNING_ICON, "[UNDEFINED BEHAVIOR] Forcing local training without GPU check...")
+            warn(UNDEFINED_BEHV, "Forcing local training without GPU check...")
         connect_local_lab()
         return
 
-    api_key = validate_fluidstack()
-    instances = get_instances(api_key)
+    if not force:
+        validate_nb(NOTEBOOK)
+    else:
+        warn(NO_NOTEBOOK, "Forcing remote training without notebook check...")
+
+    fs_api_key = validate_fs()
+    validate_hf()
+
+    instances = get_instances(fs_api_key)
 
     if instances and len(instances) != 0:
         use_existing = existing_or_new_trainer()
@@ -43,11 +54,11 @@ def train(local=False, force=False) -> None:
         use_existing = False
 
     if not instances or len(instances) == 0 or not use_existing:
-        gpu = select_gpu(api_key)
-        instance = spin_new_instance(api_key, gpu)
-        connect_lab(api_key, instance, SSH_KEY)
+        gpu = select_gpu(fs_api_key)
+        instance = spin_new_instance(fs_api_key, gpu)
+        connect_lab(fs_api_key, instance, SSH_KEY)
     else:
-        _train_from_existing(api_key, instances)
+        _train_from_existing(fs_api_key, instances)
 
 
 

@@ -20,16 +20,18 @@ from pathlib import Path
 import paramiko
 import psutil
 from watchdog.observers import Observer
-from tuna.cli.core.util import log, remote_sync
+from tuna.cli.core.util import log, sync_to_remote
 from tuna.cli.core.watchfiles import LabWatcher
 
 # pylint: disable=unused-import
 from tuna.cli.services.fluidstack import stop_instance
+from tuna.cli.core.authenticator import validate_ip
 
 from tuna.cli.core.scripts import FLUIDSTACK_CONFIGURATION_SCRIPT
 from tuna.cli.core.constants import TUNA_DIR, INFO_ICON, CHECK_ICON, \
     CURSOR_UP_ONE, ERASE_LINE, DARK_GRAY, PURPLE, RESET, SPINNER_DOTS, BLUE, \
-    STARTUP_SCRIPT_PATH, PID_FILE_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC
+    STARTUP_SCRIPT_PATH, JUPYTER_PID_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC, LOCAL_DAEMON_TAG, \
+    REMOTE_DAEMON_TAG, WATCHFILES_SCRIPT_PATH, WATCHFILES_PID_PATH
 
 
 
@@ -70,7 +72,7 @@ def monitor_lab(process: subprocess.Popen, token: str="", username: str="", host
     """
     def watch_files():
         def on_change():
-            remote_sync(TUNA_DIR, TUNA_LAB_LOC, username, hostname, port)
+            sync_to_remote(TUNA_DIR, TUNA_LAB_LOC, username, hostname, port)
 
         event_handler = LabWatcher(function=on_change)
         observer = Observer()
@@ -105,6 +107,7 @@ def monitor_lab(process: subprocess.Popen, token: str="", username: str="", host
         if token:
             watch_thread = threading.Thread(target=watch_files)
             watch_thread.daemon = True
+            log(INFO_ICON, f"[{LOCAL_DAEMON_TAG}] Starting to watch for changes in {TUNA_DIR}")
             watch_thread.start()
         try:
             while True:
@@ -197,6 +200,8 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
     port = instance["ssh_port"]
     hostname =  instance["ip_address"]
 
+    # local_hostname, local_ip = validate_ip()
+
     print(f"{BLUE}[{INFO_ICON} Tuna Build] Log via {username}@{hostname}:{port} --> {RESET}")
 
 
@@ -205,12 +210,20 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname, port, username, key_filename=str(ssh_file))
     client.exec_command(f"touch {STARTUP_SCRIPT_PATH(username)}")
-    client.exec_command(f"touch {PID_FILE_PATH(username)}")
+    client.exec_command(f"touch {JUPYTER_PID_PATH(username)}")
+    # client.exec_command(f"touch {WATCHFILES_PID_PATH(username)}")
+    # client.exec_command(f"touch {WATCHFILES_SCRIPT_PATH(username)}")
 
+    # Configure Remote Scripts
     sftp = client.open_sftp()
     with sftp.file(STARTUP_SCRIPT_PATH(username), 'w') as f:
         f.write(FLUIDSTACK_CONFIGURATION_SCRIPT(username))
     sftp.chmod(STARTUP_SCRIPT_PATH(username), 0o755)
+
+    # with sftp.file(WATCHFILES_SCRIPT_PATH(username), 'w') as f:
+    #     f.write(SYNC_WITH_LOCAL_SCRIPT(username, local_hostname, local_ip))
+    # sftp.chmod(WATCHFILES_SCRIPT_PATH(username), 0o755)
+
     sftp.close()
 
 
@@ -251,11 +264,13 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
 
     # Get Process and Token for Remote Jupyter Instance
     sftp = client.open_sftp()
-    with sftp.file(PID_FILE_PATH(username), 'r') as f, \
+    with sftp.file(JUPYTER_PID_PATH(username), 'r') as f, \
             sftp.file(TOKEN_FILE_PATH(username), 'r') as g:
+            # sftp.file(WATCHFILES_PID_PATH(username), 'r') as h:
         remote_pid = f.read().strip().decode('utf-8')
         remote_token = g.read().strip().decode('utf-8').split(" ")[0]
-        # print(remote_pid, remote_token)
+        # remote_watchfiles_pid = h.read().strip().decode('utf-8')
+
     sftp.close()
 
 
@@ -267,15 +282,13 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
         f'{username}@{hostname}'
     ]
 
-
-    # Run Local JupyterLab Instance on Remote Compute, and
-    # monitor **LOCAL** CPU and Memory Usage
-    # until process is ended by the user
+    # JupyterLab Local Instance forwarded to Remote Compute
     # pylint: disable=consider-using-with
     local_process = subprocess.Popen(tunnel_command)
 
     try:
-        remote_sync(TUNA_DIR, TUNA_LAB_LOC, username, hostname, port)
+        # Run initial sync, start monitoring lab instance
+        sync_to_remote(TUNA_DIR, TUNA_LAB_LOC, username, hostname, port)
         monitor_lab(local_process,
                     token=remote_token,
                     username=username,
@@ -284,7 +297,10 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
                 )
     except KeyboardInterrupt:
         _, stdout, _ = client.exec_command(f"sudo kill -9 {remote_pid}")
+        # _, stdout, _ = client.exec_command(f"sudo kill -9 {remote_watchfiles_pid}")
         # stop_instance(api_key, instance["id"])
         kill_lab(local_process)
+        log(INFO_ICON, f"[{REMOTE_DAEMON_TAG}] All remote Tuna processes ended.")
+        log(INFO_ICON, f"[{LOCAL_DAEMON_TAG}] Daemon process ended. No longer watching files in {TUNA_DIR}.")
         log(INFO_ICON, "Your instance has not been ended on Fluidstack. Visit https://dashboard.fluidstack.io/ or run 'tuna fluidstack --manage' to manage instances.")
         client.close()

@@ -1,6 +1,6 @@
 """
 
-Bash Scripts for running Remote TunaLab instances on FluidStack GPU Machines
+Bash and Python Scripts for running Remote TunaLab instances on FluidStack GPU Machines
 
 Requires: 
     Ubuntu 22.04 LTS Nvidia 
@@ -11,11 +11,9 @@ Usage:
 """
 
 # pylint: disable=unnecessary-lambda-assignment
-from tuna.cli.core.constants import PID_FILE_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC
+from tuna.cli.core.constants import JUPYTER_PID_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC, \
+    TUNA_DIR, REMOTE_DAEMON_TAG, WATCHFILES_PID_PATH
 
-# sudo add-apt-repository -y ppa:deadsnakes/ppa
-# sudo apt update
-# sudo apt install -y python3.12 python3-pip
 
 FLUIDSTACK_CONFIGURATION_SCRIPT = lambda username: f"""
 #!/bin/bash
@@ -33,6 +31,9 @@ if [ ! -d "tunalab" ]; then
 
     echo "TUNA: Installing JupyterLab"
     pip install jupyterlab
+
+    echo "TUNA: Installing Watchfiles" 
+    pip install watchfiles
     
     mkdir {TUNA_LAB_LOC}
     echo "TUNA: TunaLab Workspace created." 
@@ -59,7 +60,7 @@ echo "TUNA: Remote logs configured"
 # Start JupyterLab in the background and capture the PID
 echo "TUNA: Starting JupyterLab..."
 nohup jupyter lab --no-browser --port=8888 > tuna_remote.log 2>&1 &
-echo $! > {PID_FILE_PATH(username)}
+echo $! > {JUPYTER_PID_PATH(username)}
 
 # Wait a few seconds to ensure JupyterLab has started
 sleep 5
@@ -69,4 +70,40 @@ TOKEN=$(grep -oP 'token=\\K[a-f0-9]+' tuna_remote.log)
 
 # Print the token
 echo $TOKEN > {TOKEN_FILE_PATH(username)}
+"""
+
+
+
+
+
+# pylint: disable=line-too-long
+SYNC_WITH_LOCAL_SCRIPT = lambda remote_username, local_username, ip: f"""
+
+import os
+import glob 
+import subprocess
+from watchfiles import watch 
+
+def sync_to_remote():
+    remote_files = glob.glob(os.path.join('{TUNA_LAB_LOC}, "*"))
+    scp_command = [
+        "scp",
+        "-r",
+        "-v",
+    ] + remote_files + [f"{local_username}@{ip}:{TUNA_DIR}"]
+
+    try:
+        print("[{REMOTE_DAEMON_TAG}] Syncing Files from {TUNA_LAB_LOC}")
+        subprocess.run(scp_command, check=True, text=True, capture_output=True)
+        print("[{REMOTE_DAEMON_TAG}] Sync Successful to {local_username}@{ip}:{TUNA_DIR} from {TUNA_LAB_LOC}")
+    except subprocess.CalledProcessError as e:
+        print("[{REMOTE_DAEMON_TAG}] Sync Error Occurred")
+        print(e.stderr)
+
+with open("{WATCHFILES_PID_PATH(remote_username)}", "w") as f:
+    f.write(str(os.getpid()))
+
+for changes in watch({TUNA_LAB_LOC}):
+    sync_to_remote()
+
 """

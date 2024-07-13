@@ -73,6 +73,8 @@ def _handle_train_command(arg: str, args: list[str]) -> None:
             train(local=True, force=True)
         else: 
             train(local=True)
+    elif arg == Token.FORCE.value:
+        train(force=True)
     elif arg:
         log(WARNING_ICON, f"Invalid flag for 'train': '{arg}'. {HELP}")
     else:
@@ -143,7 +145,7 @@ def main() -> None:
     command = argv[1]
     arg = argv[2] if len(argv) > 2 else None
 
-    match command:
+    match command:        
         case Token.HELP.value | Token.HELP_SHORT.value:
             if arg:
                 _help(arg)
@@ -152,7 +154,7 @@ def main() -> None:
 
         case Token.VERSION.value | Token.VERSION_SHORT.value:
             _version()
-
+        
         case Token.INIT.value:
             init()
 

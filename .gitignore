@@ -18,6 +18,7 @@ env
 
 # testing 
 .pytest_cache/
+dev.auth.config.json
 
 # node 
 node_modules/

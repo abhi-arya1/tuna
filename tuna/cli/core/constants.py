@@ -25,14 +25,11 @@ CONFIG_FILE = TUNA_DIR / 'auth.config.json'
 TRAIN_DATA  = TUNA_DIR / 'train_dataset.jsonl'
 EVAL_DATA   = TUNA_DIR / 'eval_dataset.txt'
 TEST_DATA   = TUNA_DIR / 'test_dataset.txt'
-REMOTE_CFG  = TUNA_DIR / 'remote.config.json'
-
 
 TUNA_GITIGNORE     = """
 ipynb_checkpoints/
 auth.config.json
 """
-
 
 IPYNB_REQUIREMENTS = """
 transformers
@@ -41,8 +38,6 @@ peft
 trl
 python-dotenv
 """
-
-
 
 ################################################
 # CLI-Related Constants
@@ -61,7 +56,21 @@ PURPLE        = '\x1b[95m'
 BLUE          = '\x1b[34m'
 RESET         = '\x1b[0m'
 RED           = '\033[31m'
+BOLD          = '\033[1m'
+ITALIC        = '\033[3m'
 SPINNER_DOTS  = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+
+
+# Daemon Constants
+LOCAL_DAEMON_TAG  = "TUNA_LOCAL_D"
+REMOTE_DAEMON_TAG = "TUNA_REMOTE_D"
+REPORTER_TAG      = "TUNA_REPORTER"
+
+# Daemon Messages
+UNDEFINED_BEHV    = f"{RED}[{WARNING_ICON} {REPORTER_TAG} {BOLD}UNDEFINED BEHAVIOR]{RESET}"
+NO_NOTEBOOK       = f"{RED}[{WARNING_ICON} {REPORTER_TAG} {BOLD}NO NOTEBOOK]{RESET}"
+NO_COMMAND        = f"{RED}[{WARNING_ICON} {REPORTER_TAG} {BOLD}NO COMMAND]{RESET}"
+CANCELLED_CMD     = f"{RED}[{WARNING_ICON} {REPORTER_TAG} {BOLD}CANCELLED COMMAND]{RESET}"
 
 
 # Help Message
@@ -141,7 +150,9 @@ class FluidstackState(Enum):
 
 # FluidStack GPU OS Configuration
 STARTUP_SCRIPT_PATH    = lambda username: f'/home/{username}/startup.sh'
-PID_FILE_PATH          = lambda username: f'/home/{username}/jupyter_lab.pid'
+WATCHFILES_SCRIPT_PATH = lambda username: f'/home/{username}/watchfiles.py'
+JUPYTER_PID_PATH       = lambda username: f'/home/{username}/jupyter_lab.pid'
+WATCHFILES_PID_PATH    = lambda username: f'/home/{username}/tuna_daemon.pid'
 TOKEN_FILE_PATH        = lambda username: f'/home/{username}/jupyter_token.txt'
 
 

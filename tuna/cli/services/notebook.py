@@ -29,6 +29,22 @@ def _get_notebook(notebook_path: Path) -> nbf.notebooknode.NotebookNode:
 
 
 
+
+def validate_nb(notebook_path: Path) -> bool:
+    """
+    Validates if a Jupyter Notebook File exists.
+
+    Args:
+        notebook_path (pathlib.Path): The path to the Jupyter Notebook file.
+
+    Returns:
+        bool: True if the Jupyter Notebook file exists, else False.
+    """
+    return notebook_path.exists()
+
+
+
+
 def add_md_cell(notebook_path: Path, content: str) -> None:
     """
     Adds a Markdown Cell to a Jupyter Notebook File.
