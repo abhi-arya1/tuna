@@ -30,7 +30,7 @@ class JupyterBlock:
         """Return the type of the block"""
         return self._type
 
-    def content(self):
+    def blockcontent(self):
         """Return the content of the block"""
         return self._content
 

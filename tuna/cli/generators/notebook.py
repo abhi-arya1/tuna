@@ -11,7 +11,7 @@ from os import remove
 import inquirer
 from halo import Halo
 from tuna.cli.core.constants import \
-    OUTPUT_MODEL, ADAPTERS, NOTEBOOK, LEARN, INFO_ICON
+    OUTPUT_MODEL, ADAPTERS, NOTEBOOK, LEARN, INFO_ICON, TUNA_LAB_LOC
 from tuna.cli.util.nbutil import JupyterBlock, NbType, add_md_cell, add_code_cell, validate_nb
 from tuna.cli.util.genutil import log
 
@@ -42,9 +42,9 @@ def make_notebook():
     spinner.start()
     for block in blocks:
         if block.blocktype() == NbType.MARKDOWN:
-            add_md_cell(NOTEBOOK, block.content)
+            add_md_cell(NOTEBOOK, block.blockcontent())
         else:
-            add_code_cell(NOTEBOOK, block.content)
+            add_code_cell(NOTEBOOK, block.blockcontent())
 
     spinner.succeed("Notebook Generated Successfully!")
 
@@ -103,6 +103,7 @@ This includes setting up the model constants, system configuration, and other ne
 
 # Model Configuration
         JupyterBlock(f"""
+import json
 import torch
 from peft import LoraConfig
        
@@ -110,6 +111,11 @@ from peft import LoraConfig
 BASE_MODEL = "{base_model}"
 MODEL_PATH = "{OUTPUT_MODEL}"
 ADAPTERS   = "{ADAPTERS}"
+
+# Get HuggingFace Token 
+with open("{TUNA_LAB_LOC}/auth.config.json", 'r') as f:
+    data = json.load(f)
+HF_TOKEN = data.get('hf_api_key', None)
 
 # System Configuration
 
@@ -139,8 +145,35 @@ print("=================" + "=" * 70)
 """, NbType.CODE),
 
 
-# Model Training Configuration 
+# Model Training Setup
+        JupyterBlock("""
+# Model Training Setup 
+                     
+We'll now configure the model with HuggingFace, set up the training data, and prepare the model for training.
+This includes tokenizing, dataset building, and more!
+""", NbType.MARKDOWN),
 
+        JupyterBlock("""
+                              
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig
+)
+                     
+BITS_N_BYTES_CFG = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_use_double_quant=True
+)
+
+MODEL = AutoModelForCausalLM.from_pretrained(
+    BASE_MODEL,
+    quantization_config=BITS_N_BYTES_CFG,
+    token=HF_TOKEN
+)
+""", NbType.CODE),
     ]
 
     return blocks
