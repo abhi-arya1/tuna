@@ -55,22 +55,24 @@ RED           = '\033[31m'
 BOLD          = '\033[1m'
 ITALIC        = '\033[3m'
 SPINNER_DOTS  = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+CDOT          = "•"
 
 
 # Daemon Constants
 LOCAL_DAEMON_TAG  = "TUNA_LOCAL_D"
 REMOTE_DAEMON_TAG = "TUNA_REMOTE_D"
-REPORTER_TAG      = "TUNA_REPORTER"
+
 
 # Daemon Messages
-UNDEFINED_BEHV    = f"{RED}[{WARNING_ICON} {REPORTER_TAG} {BOLD}UNDEFINED BEHAVIOR]{RESET}"
-NO_NOTEBOOK       = f"{RED}[{WARNING_ICON} {REPORTER_TAG} {BOLD}NO NOTEBOOK]{RESET}"
-NO_COMMAND        = f"{RED}[{WARNING_ICON} {REPORTER_TAG} {BOLD}NO COMMAND]{RESET}"
-CANCELLED_CMD     = f"{RED}[{WARNING_ICON} {REPORTER_TAG} {BOLD}CANCELLED COMMAND]{RESET}"
+UNDEFINED_BEHV    = f"{RED}[{WARNING_ICON}{BOLD} UNDEFINED BEHAVIOR]{RESET}"
+NO_NOTEBOOK       = f"{RED}[{WARNING_ICON}{BOLD} NO NOTEBOOK]{RESET}"
+CANCELLED_CMD     = f"{RED}[{WARNING_ICON}{BOLD} CANCELLED CMD]{RESET}"
+NOT_IMPLEMENTED   = f"{RED}[{WARNING_ICON}{BOLD} NOT IMPLEMENTED]{RESET}"
 
 
 # Help Message
 HELP  = f"{DARK_GRAY}Run 'tuna [-h | --help] <command>' for help{RESET}"
+LEARN = lambda word: f"{DARK_GRAY}Run 'tuna learn {word}' for more information{RESET}"
 
 
 # Tuna Welcome Message
@@ -124,10 +126,27 @@ EXCLUDED_FILENAMES = (
 SSH_KEY = Path.home() / '.ssh' / 'id_rsa.pub'
 
 ################################################
-# Trainer and Remote Development Constants
+# Remote Development Constants
 
+class RemotePlatform(Enum):
+    """
+    Remote Development Platforms supported by Tuna
+    """
+    FLUIDSTACK    = "fluidstack"
+    AWS           = "aws"           # COMING SOON
+    GCP           = "gcp"           # COMING SOON
+    AZURE         = "azure"         # COMING SOON
+    AKASH         = "akash"         # COMING SOON
+    DIGITAL_OCEAN = "digital_ocean" # COMING SOON
+    INTEL_CLOUD   = "intel_cloud"   # COMING SOON
+
+
+# Remote JupyterLab Items
 TUNA_LAB_LOC  = '~/tunalab'
 TUNA_LOG_LOC  = '~/tunalab/tuna_remote.log'
+OUTPUT_MODEL  = '~/tunalab/trained'
+ADAPTERS      = '~/tunalab/adapters_lora'
+
 
 # FluidStack GPU Machine States
 class FluidstackState(Enum):
@@ -146,7 +165,7 @@ class FluidstackState(Enum):
 
 # FluidStack GPU OS Configuration
 STARTUP_SCRIPT_PATH    = lambda username: f'/home/{username}/startup.sh'
-SYNC_SCRIPT_PATH = lambda username: f'/home/{username}/watchfiles.py'
+SYNC_SCRIPT_PATH       = lambda username: f'/home/{username}/watchfiles.py'
 JUPYTER_PID_PATH       = lambda username: f'/home/{username}/jupyter_lab.pid'
 WATCHFILES_PID_PATH    = lambda username: f'/home/{username}/tuna_daemon.pid'
 TOKEN_FILE_PATH        = lambda username: f'/home/{username}/jupyter_token.txt'
@@ -160,26 +179,41 @@ class Token(Enum):
     Tokens for Tuna CLI Commands
     """
     # Command Tokens
-    INIT          = "init"
-    SERVE         = "serve"
-    REFRESH       = "refresh"
-    GITHUB, DOCS  = "github", "docs"
-    BROWSE        = "browse"
-    TRAIN         = "train"
-    FLUIDSTACK    = "fluidstack"
-    PURGE         = "purge"
-    DEV           = "dev"
-    MAKE          = "make"
-    DATASET       = "dataset"
-    NOTEBOOK      = "notebook"
+    INIT           = "init"
+    SERVE          = "serve"
+    REFRESH        = "refresh"
+    GITHUB, DOCS   = "github", "docs"
+    BROWSE         = "browse"
+    TRAIN          = "train"
+    FLUIDSTACK     = "fluidstack"
+    PURGE          = "purge"
+    DEV            = "dev"
+    MAKE           = "make"
+    DATASET        = "dataset"
+    NOTEBOOK       = "notebook"
+    NOTEBOOK_SHORT = "nb"
+    DATASET_SHORT  = "ds"
+    LEARN          = "learn"
+    REPORT_BUG     = "bug"
 
     # Command Flags
-    OPEN          = "--open"
-    NO_OPEN       = "--no-open"
-    LOCAL         = "--local"
-    MANAGE        = "--manage"
-    HELP          = "--help"
-    HELP_SHORT    = "-h"
-    VERSION       = "--version"
-    VERSION_SHORT = "-v"
-    FORCE         = "--force"
+    OPEN           = "--open"
+    NO_OPEN        = "--no-open"
+    LOCAL          = "--local"
+    MANAGE         = "--manage"
+    HELP           = "--help"
+    HELP_SHORT     = "-h"
+    VERSION        = "--version"
+    VERSION_SHORT  = "-v"
+    FORCE          = "--force"
+
+
+
+class TopicTokens(Enum):
+    """
+    Every technical term mentioned in Tuna can be 
+    defined with `tuna learn [word]`. All of those 
+    technical terms are shown here.
+    """
+    # pylint: disable=all
+    pass

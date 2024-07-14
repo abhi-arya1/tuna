@@ -109,25 +109,24 @@ def monitor_lab(process: subprocess.Popen, token: str="", username: str="", host
             watch_thread.daemon = True
             log(INFO_ICON, f"[{LOCAL_DAEMON_TAG}] Starting to watch for changes in {TUNA_DIR}")
             watch_thread.start()
-        try:
-            while True:
-                stdscr.refresh()
-                if p.is_running():
-                    cpu_usage = p.cpu_percent(interval=1)
-                    memory_usage = p.memory_info().rss / (1024 * 1024)
 
-                    cpu_color = curses.color_pair(1) if cpu_usage > 50 else curses.color_pair(3)
-                    mem_color = curses.color_pair(1) if memory_usage > 50 * 1024 else curses.color_pair(3)
+        while True:
+            stdscr.refresh()
+            if p.is_running():
+                cpu_usage = p.cpu_percent(interval=1)
+                memory_usage = p.memory_info().rss / (1024 * 1024)
 
-                    stdscr.addstr(4, 0, f"{pl}>>> CPU Usage: {cpu_usage}% ", cpu_color)
-                    stdscr.addstr(5, 0, f"{pl}>>> Memory Usage: {memory_usage} MB\n\n", mem_color)
-                    stdscr.clrtoeol()
+                cpu_color = curses.color_pair(1) if cpu_usage > 50 else curses.color_pair(3)
+                mem_color = curses.color_pair(1) if memory_usage > 50 * 1024 else curses.color_pair(3)
 
-                    if stdscr.getch() == ord('q'):
-                        break
-                time.sleep(5)
-        except KeyboardInterrupt:
-            pass
+                stdscr.addstr(4, 0, f"{pl}>>> CPU Usage: {cpu_usage}% ", cpu_color)
+                stdscr.addstr(5, 0, f"{pl}>>> Memory Usage: {memory_usage} MB\n\n", mem_color)
+                stdscr.clrtoeol()
+
+                if stdscr.getch() == ord('q'):
+                    break
+            time.sleep(5)
+
 
     curses.wrapper(draw_screen)
 
@@ -143,7 +142,7 @@ def kill_lab(process: subprocess.Popen) -> None:
     log(CHECK_ICON, "Ended Local TunaLab Server, Goodbye...")
     process.terminate()
     try:
-        process.wait(timeout=10)
+        process.wait(timeout=1)
     except subprocess.TimeoutExpired:
         process.kill()
 

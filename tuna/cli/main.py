@@ -9,11 +9,13 @@ This file manages all functionality for the Tuna CLI.
 
 from webbrowser import open as webopen
 from sys import argv, exit
-from tuna.cli.util.genutil import log, warn
+from tuna.cli.util.genutil import log
 from tuna.cli.core.constants import HELLO, INFO_ICON, WARNING_ICON, \
-    Token, HELP, VERSION, CANCELLED_CMD
+    Token, HELP, VERSION, LEARN
 from tuna.cli.core.docs import DOCS
+from tuna.cli.core.learn import LEARNER
 from tuna.cli.generators.dataset import build_dataset
+from tuna.cli.generators.notebook import make_notebook
 from tuna.cli.cmd.init import init
 from tuna.cli.cmd.serve import serve
 from tuna.cli.cmd.refresh import refresh
@@ -24,17 +26,31 @@ from tuna.cli.cmd.train import train
 
 
 
-def _help(token: str) -> None:
+def _help(arg: str) -> None:
     """
     Helper function to display information for a specific Tuna command.
     """
-    doc = DOCS.get(token, False) 
+    doc = DOCS.get(arg, False) 
     if not doc: 
         log(WARNING_ICON, f"Invalid help command '{argv[2]}'. \n- [-h | --help] only works with valid commands. \n- Run 'tuna' for some valid commands.")
         exit(1)
-    print(DOCS[token])
+    print(DOCS[arg])
     exit(0)
 
+
+
+
+def _learn(arg: str | None) -> None:
+    """
+    Helper function to display information for a specific Tuna command.
+    """
+    info = LEARNER.get(arg, False)
+    if not info:
+        log(WARNING_ICON, f"Invalid learn command '{argv[2]}'. {LEARN("words")}")
+        exit(1)
+    print(LEARNER[arg])
+    exit(0)
+    
 
 
 
@@ -102,14 +118,14 @@ def _handle_make_command(arg: str) -> None:
     """
     Handles the 'make' command with the provided argument.
     """
-    if arg == Token.DATASET.value:
+    if arg in [Token.DATASET.value, Token.DATASET_SHORT.value]:
         build_dataset()
-    elif arg == Token.NOTEBOOK.value:
-        log(WARNING_ICON, "This feature is not yet implemented. Please check back later.")
+    elif arg in [Token.NOTEBOOK.value, Token.NOTEBOOK_SHORT.value]:
+        make_notebook()
     elif arg:
         log(WARNING_ICON, f"Invalid option '{arg}'. {HELP}")
     else:
-        log(WARNING_ICON, f"`tuna make` requires a command, such as `tuna make [notebook | dataset]`. {HELP}")
+        log(WARNING_ICON, f"`tuna make` requires a command, such as `tuna make [notebook | nb | dataset | ds]`. {HELP}")
 
 
 
@@ -155,6 +171,12 @@ def main() -> None:
 
             case Token.VERSION.value | Token.VERSION_SHORT.value:
                 _version()
+
+            case Token.LEARN.value:
+                if arg: 
+                    _learn(arg)
+                else:
+                    log(WARNING_ICON, f"No argument provided for '{command}'. {LEARN("words")}")
             
             case Token.INIT.value:
                 init()
@@ -167,6 +189,9 @@ def main() -> None:
 
             case Token.GITHUB.value | Token.DOCS.value:
                 _open_url("https://github.com/abhi-arya1/tuna")
+
+            case Token.REPORT_BUG.value: 
+                _open_url("https://github.com/abhi-arya1/tuna/issues")
 
             case Token.BROWSE.value:
                 open_repository()

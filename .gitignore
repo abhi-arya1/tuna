@@ -19,6 +19,7 @@ env
 # testing 
 .pytest_cache/
 dev.auth.config.json
+.virtual_documents/
 
 # node 
 node_modules/

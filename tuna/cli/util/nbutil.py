@@ -5,7 +5,36 @@ Jupyter Notebook Management Utilities for Tuna CLI
 """
 
 from pathlib import Path
+from enum import Enum
 import nbformat as nbf
+
+
+class NbType(Enum):
+    """
+    Enum class to represent the type of a Jupyter Notebook block.
+    """
+    MARKDOWN = 1
+    CODE = 2
+
+
+
+class JupyterBlock:
+    """
+    JupyterBlock class to represent a block in a Jupyter Notebook.
+    """
+    def __init__(self, _content: str, _type: NbType):
+        self._content = _content
+        self._type = _type
+
+    def blocktype(self):
+        """Return the type of the block"""
+        return self._type
+
+    def content(self):
+        """Return the content of the block"""
+        return self._content
+
+
 
 
 def _get_notebook(notebook_path: Path) -> nbf.notebooknode.NotebookNode:

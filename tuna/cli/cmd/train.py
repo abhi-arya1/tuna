@@ -4,13 +4,15 @@ SSH Machine Training Setup for Tuna CLI
 
 """
 
+# pylint: disable=consider-using-sys-exit
+
 import GPUtil as gputil
 import inquirer
 from tabulate import tabulate
 from tuna.cli.util.nbutil import validate_nb
 from tuna.cli.core.authenticator import validate, validate_fs, validate_hf
 from tuna.cli.core.constants import INFO_ICON, SSH_KEY, WARNING_ICON, UNDEFINED_BEHV, \
-    NO_NOTEBOOK, NOTEBOOK
+    NO_NOTEBOOK, NOTEBOOK, RemotePlatform, NOT_IMPLEMENTED
 from tuna.cli.util.genutil import log, warn
 from tuna.cli.services.fluidstack import get_instances, spin_new_instance, \
     existing_or_new_trainer, select_gpu, spin_existing_instance
@@ -42,6 +44,13 @@ def train(local=False, force=False) -> None:
     else:
         warn(NO_NOTEBOOK, "Forcing remote training without notebook check...")
 
+    platform = _get_platform()
+
+    # pylint: disable=line-too-long
+    if platform != RemotePlatform.FLUIDSTACK:
+        warn(NOT_IMPLEMENTED, f"Only FluidStack is currently supported for remote training, {platform} coming soon!")
+        exit(1)
+
     fs_api_key = validate_fs()
     validate_hf()
 
@@ -60,6 +69,22 @@ def train(local=False, force=False) -> None:
     else:
         _train_from_existing(fs_api_key, instances)
 
+
+
+
+def _get_platform() -> RemotePlatform:
+    """
+    Gets the user's preferred training platform.
+    """
+    questions = [
+        inquirer.List('platform',
+                    message="Select the cloud platform for remote training",
+                    choices=RemotePlatform.__members__.keys()
+        )
+    ]
+    answers = inquirer.prompt(questions)
+
+    return RemotePlatform.__members__[answers['platform'].upper()]
 
 
 
