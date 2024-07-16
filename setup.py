@@ -32,6 +32,7 @@ setup(
         'scikit-learn',
         'tabulate',
         'paramiko',
+        'transformers'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',

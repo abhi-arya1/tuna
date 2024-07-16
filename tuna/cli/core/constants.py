@@ -72,7 +72,7 @@ NOT_IMPLEMENTED   = f"{RED}[{WARNING_ICON}{BOLD} NOT IMPLEMENTED]{RESET}"
 
 # Help Message
 HELP  = f"{DARK_GRAY}Run 'tuna [-h | --help] <command>' for help{RESET}"
-LEARN = lambda word: f"{DARK_GRAY}Run 'tuna learn {word}' for more information{RESET}"
+LEARN = lambda word: f"{DARK_GRAY}Run \'tuna learn {word}\' for more information{RESET}"
 
 
 # Tuna Welcome Message
@@ -142,10 +142,12 @@ class RemotePlatform(Enum):
 
 
 # Remote JupyterLab Items
-TUNA_LAB_LOC  = '~/tunalab'
-TUNA_LOG_LOC  = '~/tunalab/tuna_remote.log'
-OUTPUT_MODEL  = '~/tunalab/trained'
-ADAPTERS      = '~/tunalab/adapters_lora'
+R_TUNA_DIR       = '~/tunalab'
+R_TUNA_LOG       = '~/tunalab/tuna_remote.log'
+R_OUTPUT_MODEL   = '~/tunalab/trained_model'
+R_MODEL_ADAPTERS = '~/tunalab/adapters_lora'
+R_TRAIN_DATA     = '~/tunalab/train_dataset.jsonl'
+R_EVAL_DATA      = '~/tunalab/eval_dataset.jsonl'
 
 
 # FluidStack GPU Machine States

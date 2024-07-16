@@ -14,7 +14,7 @@ from tuna.cli.core.authenticator import validate, validate_fs, validate_hf
 from tuna.cli.core.constants import INFO_ICON, SSH_KEY, WARNING_ICON, UNDEFINED_BEHV, \
     NO_NOTEBOOK, NOTEBOOK, RemotePlatform, NOT_IMPLEMENTED
 from tuna.util.general import log, warn
-from tuna.services.fluidstack import get_instances, spin_new_instance, \
+from tuna.services.clouds.fluidstack import get_instances, spin_new_instance, \
     existing_or_new_trainer, select_gpu, spin_existing_instance
 from tuna.services.jupyter import connect_lab, connect_local_lab
 from tuna.cli.core.authenticator import validate_ip

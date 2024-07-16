@@ -24,13 +24,13 @@ from tuna.util.general import log, sync_to_remote
 from tuna.cli.core.watchfiles import LabWatcher
 
 # pylint: disable=unused-import
-from tuna.services.fluidstack import stop_instance
+from tuna.services.clouds.fluidstack import stop_instance
 from tuna.cli.core.authenticator import validate_ip
 
 from tuna.cli.core.scripts import FLUIDSTACK_CONFIGURATION_SCRIPT, SYNC_WITH_LOCAL_SCRIPT
 from tuna.cli.core.constants import TUNA_DIR, INFO_ICON, CHECK_ICON, \
     CURSOR_UP_ONE, ERASE_LINE, DARK_GRAY, PURPLE, RESET, SPINNER_DOTS, BLUE, \
-    STARTUP_SCRIPT_PATH, JUPYTER_PID_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC, LOCAL_DAEMON_TAG, \
+    STARTUP_SCRIPT_PATH, JUPYTER_PID_PATH, TOKEN_FILE_PATH, R_TUNA_DIR, LOCAL_DAEMON_TAG, \
     REMOTE_DAEMON_TAG, SYNC_SCRIPT_PATH, WATCHFILES_PID_PATH
 
 
@@ -72,7 +72,7 @@ def monitor_lab(process: subprocess.Popen, token: str="", username: str="", host
     """
     def watch_files():
         def on_change():
-            sync_to_remote(TUNA_DIR, TUNA_LAB_LOC, username, hostname, port)
+            sync_to_remote(TUNA_DIR, R_TUNA_DIR, username, hostname, port)
 
         event_handler = LabWatcher(function=on_change)
         observer = Observer()
@@ -283,7 +283,7 @@ def connect_lab(api_key: str, instance: dict, ssh_file: Path) -> None:
 
     try:
         # Run initial sync, start monitoring lab instance
-        sync_to_remote(TUNA_DIR, TUNA_LAB_LOC, username, hostname, port)
+        sync_to_remote(TUNA_DIR, R_TUNA_DIR, username, hostname, port)
         monitor_lab(local_process,
                     token=remote_token,
                     username=username,

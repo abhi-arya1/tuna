@@ -11,7 +11,7 @@ Usage:
 """
 
 # pylint: disable=unnecessary-lambda-assignment
-from tuna.cli.core.constants import JUPYTER_PID_PATH, TOKEN_FILE_PATH, TUNA_LAB_LOC, \
+from tuna.cli.core.constants import JUPYTER_PID_PATH, TOKEN_FILE_PATH, R_TUNA_DIR, \
     TUNA_DIR, REMOTE_DAEMON_TAG
 
 
@@ -32,7 +32,7 @@ if [ ! -d "tunalab" ]; then
     echo "TUNA: Installing JupyterLab"
     pip install jupyterlab
     
-    mkdir {TUNA_LAB_LOC}
+    mkdir {R_TUNA_DIR}
     echo "TUNA: TunaLab Workspace created." 
 else
     echo "TUNA: TunaLab Workspace instance exists."
@@ -81,7 +81,7 @@ import glob
 import subprocess
 
 def sync_to_remote():
-    remote_files = glob.glob(os.path.join('{TUNA_LAB_LOC}, "*"))
+    remote_files = glob.glob(os.path.join('{R_TUNA_DIR}, "*"))
     scp_command = [
         "scp",
         "-r",
@@ -89,9 +89,9 @@ def sync_to_remote():
     ] + remote_files + [f"{local_username}@{ip}:{TUNA_DIR}"]
 
     try:
-        print("[{REMOTE_DAEMON_TAG}] Syncing edits back from {TUNA_LAB_LOC}")
+        print("[{REMOTE_DAEMON_TAG}] Syncing edits back from {R_TUNA_DIR}")
         subprocess.run(scp_command, check=True, text=True, capture_output=True)
-        print("[{REMOTE_DAEMON_TAG}] Sync Successful to {local_username}@{ip}:{TUNA_DIR} from {TUNA_LAB_LOC}")
+        print("[{REMOTE_DAEMON_TAG}] Sync Successful to {local_username}@{ip}:{TUNA_DIR} from {R_TUNA_DIR}")
     except subprocess.CalledProcessError as e:
         print("[{REMOTE_DAEMON_TAG}] Sync Error Occurred")
         print(e.stderr)
