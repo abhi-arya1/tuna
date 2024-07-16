@@ -5,8 +5,8 @@ Refresh command for Tuna CLI
 """
 
 from tuna.cli.core.authenticator import validate
-from tuna.cli.services.github import reload
-from tuna.cli.util.genutil import log
+from tuna.services.github import reload
+from tuna.util.general import log
 from tuna.cli.core.constants import INFO_ICON, CHECK_ICON
 
 

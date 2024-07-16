@@ -12,8 +12,8 @@ import inquirer
 from halo import Halo
 from tuna.cli.core.constants import \
     OUTPUT_MODEL, ADAPTERS, NOTEBOOK, LEARN, INFO_ICON, TUNA_LAB_LOC
-from tuna.cli.util.nbutil import JupyterBlock, NbType, add_md_cell, add_code_cell, validate_nb
-from tuna.cli.util.genutil import log
+from tuna.util.nbutil import JupyterBlock, NbType, add_md_cell, add_code_cell, validate_nb
+from tuna.util.general import log
 
 INFO_ICON = "ⓘ"
 

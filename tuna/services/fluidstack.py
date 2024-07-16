@@ -14,7 +14,7 @@ import inquirer
 import requests
 from tabulate import tabulate
 from halo import Halo
-from tuna.cli.util.genutil import log
+from tuna.util.general import log
 from tuna.cli.core.constants import WARNING_ICON, CHECK_ICON, CROSS_ICON, \
     INFO_ICON, SSH_KEY, FluidstackState
 

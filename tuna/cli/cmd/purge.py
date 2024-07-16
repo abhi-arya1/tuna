@@ -7,7 +7,7 @@ Purge command for Tuna CLI
 import os
 from shutil import rmtree
 import inquirer
-from tuna.cli.util.genutil import log
+from tuna.util.general import log
 from tuna.cli.core.constants import INFO_ICON, TUNA_DIR, RED, RESET, WARNING_ICON
 
 

@@ -7,7 +7,7 @@ File Watch Clients for Remote Sync for Tuna CLI
 
 # from subprocess import run
 from watchdog.events import FileSystemEventHandler
-from tuna.cli.util.genutil import log
+from tuna.util.general import log
 from tuna.cli.core.constants import INFO_ICON
 
 

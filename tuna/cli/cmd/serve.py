@@ -5,7 +5,7 @@ Serve command for Tuna CLI
 """
 
 from tuna.cli.core.authenticator import validate
-from tuna.cli.services.jupyter import start_lab, monitor_lab, kill_lab
+from tuna.services.jupyter import start_lab, monitor_lab, kill_lab
 
 
 def serve(browser: bool=False) -> None:

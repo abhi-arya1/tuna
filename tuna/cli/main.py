@@ -9,13 +9,13 @@ This file manages all functionality for the Tuna CLI.
 
 from webbrowser import open as webopen
 from sys import argv, exit
-from tuna.cli.util.genutil import log
+from tuna.util.general import log
 from tuna.cli.core.constants import HELLO, INFO_ICON, WARNING_ICON, \
     Token, HELP, VERSION, LEARN
 from tuna.cli.core.docs import DOCS
 from tuna.cli.core.learn import LEARNER
-from tuna.cli.generators.dataset import build_dataset
-from tuna.cli.generators.notebook import make_notebook
+from tuna.generators.dataset import build_dataset
+from tuna.generators.notebook import make_notebook
 from tuna.cli.cmd.init import init
 from tuna.cli.cmd.serve import serve
 from tuna.cli.cmd.refresh import refresh
@@ -187,7 +187,10 @@ def main() -> None:
             case Token.REFRESH.value:
                 refresh()
 
-            case Token.GITHUB.value | Token.DOCS.value:
+            case Token.DOCS.value: 
+                _open_url("https://tuna.opennote.me")
+
+            case Token.GITHUB.value:
                 _open_url("https://github.com/abhi-arya1/tuna")
 
             case Token.REPORT_BUG.value: 

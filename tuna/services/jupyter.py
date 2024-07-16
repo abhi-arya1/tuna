@@ -20,11 +20,11 @@ from pathlib import Path
 import paramiko
 import psutil
 from watchdog.observers import Observer
-from tuna.cli.util.genutil import log, sync_to_remote
+from tuna.util.general import log, sync_to_remote
 from tuna.cli.core.watchfiles import LabWatcher
 
 # pylint: disable=unused-import
-from tuna.cli.services.fluidstack import stop_instance
+from tuna.services.fluidstack import stop_instance
 from tuna.cli.core.authenticator import validate_ip
 
 from tuna.cli.core.scripts import FLUIDSTACK_CONFIGURATION_SCRIPT, SYNC_WITH_LOCAL_SCRIPT

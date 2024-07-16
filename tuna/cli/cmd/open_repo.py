@@ -8,7 +8,7 @@ import json
 from webbrowser import open as webopen
 from tuna.cli.core.constants import REPO_FILE, INFO_ICON
 from tuna.cli.core.authenticator import validate
-from tuna.cli.util.genutil import log
+from tuna.util.general import log
 
 
 def open_repository() -> None:

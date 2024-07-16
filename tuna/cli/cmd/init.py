@@ -6,9 +6,9 @@ Initialize command for Tuna CLI
 
 import os
 from tuna.cli.core.constants import INFO_ICON, TUNA_DIR
-from tuna.cli.util.genutil import log
+from tuna.util.general import log
 from tuna.cli.core.authenticator import load_credentials, save_credentials, authenticate
-from tuna.cli.services.github import fetch
+from tuna.services.github import fetch
 
 
 def init() -> None:
