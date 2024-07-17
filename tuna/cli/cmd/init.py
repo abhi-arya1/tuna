@@ -11,9 +11,9 @@ from tuna.cli.core.authenticator import load_credentials, save_credentials, auth
 from tuna.services.github import fetch
 
 
-def init() -> None:
+def make_dir():
     """
-    Initialize `.tuna` in the current directory.
+    Make the `.tuna` directory in the current directory.
     """
     if os.path.exists(TUNA_DIR):
         # pylint: disable=line-too-long
@@ -22,6 +22,15 @@ def init() -> None:
         exit(1)
     print(f"[{INFO_ICON}] Let's get started...")
     TUNA_DIR.mkdir(exist_ok=True)
+
+
+
+
+def init() -> None:
+    """
+    Initialize `.tuna` in the current directory.
+    """
+    make_dir()
     username, token = load_credentials()
     if not username or not token:
         username, token = authenticate()

@@ -197,6 +197,7 @@ class Token(Enum):
     DATASET_SHORT  = "ds"
     LEARN          = "learn"
     REPORT_BUG     = "bug"
+    CLONE          = "clone"
 
     # Command Flags
     OPEN           = "--open"

@@ -1,12 +1,22 @@
 """
 
-Learning Docs for Tuna Learn Commands
+Learning Docs for Tuna Learn Commands and Quickstart Notebooks
 
 """
 
 from tuna.cli.core.constants import BLUE, RESET, ITALIC, BOLD, CDOT
 
 # pylint: disable=line-too-long
+
+
+NOTEBOOK_CONSTANTS = {
+    "mistral": "https://github.com/abhi-arya1/tuna/blob/main/notebooks/quickstarts/mistral.ipynb",
+    "llama"  : "https://github.com/abhi-arya1/tuna/blob/main/notebooks/quickstarts/llama.ipynb",
+    "gemma"  : "https://github.com/abhi-arya1/tuna/blob/main/notebooks/quickstarts/gemma.ipynb",
+}
+
+
+
 
 LEARNER = {
     "base_model": 

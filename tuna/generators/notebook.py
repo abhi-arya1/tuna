@@ -4,7 +4,6 @@ and code blocks for the notebook.
 """
 
 # pylint: disable=line-too-long
-
 from os import remove
 import inquirer
 from halo import Halo
@@ -13,7 +12,9 @@ from tuna.cli.core.constants import \
 from tuna.util.nbutil import JupyterBlock, NbType, add_md_cell, add_code_cell, validate_nb
 from tuna.util.general import log
 
+
 INFO_ICON = "ⓘ"
+
 
 def make_notebook():
     """
@@ -47,6 +48,9 @@ def make_notebook():
             add_code_cell(NOTEBOOK, block.blockcontent())
 
     spinner.succeed("Notebook Generated Successfully!")
+
+
+
 
 
 def get_nb(

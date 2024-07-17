@@ -28,4 +28,5 @@ node_modules/
 .vscode
 
 # notebooks 
-*.ipynb
+example1.ipynb    
+example2.ipynb

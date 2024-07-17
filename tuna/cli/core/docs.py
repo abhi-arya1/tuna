@@ -1,6 +1,6 @@
 """
 
-Functional Documentation for Tuna CLI Commands.
+Functional Documentation for Tuna CLI Commands
 
 """
 
@@ -20,6 +20,17 @@ DOCS = {
 
 This command sets up the necessary configuration files and folders for using Tuna.
 """,
+
+
+
+
+# CLONE
+    "clone": f"""
+{BLUE}USAGE{RESET}: tuna clone <url>
+{BLUE}DESCRIPTION{RESET}: Clone the GitHub repository or Tuna Notebook to the current directory.
+""",
+
+
 
 
 

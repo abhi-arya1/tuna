@@ -22,7 +22,7 @@ from tuna.cli.cmd.refresh import refresh
 from tuna.cli.cmd.open_repo import open_repository
 from tuna.cli.cmd.purge import purge
 from tuna.cli.cmd.train import train
-
+from tuna.cli.cmd.clone import clone
 
 
 
@@ -213,6 +213,9 @@ def main() -> None:
 
             case Token.DEV.value:
                 _handle_dev(arg)
+
+            case Token.CLONE.value:
+                clone(arg)
 
             case _:
                 log(WARNING_ICON, f"Invalid option '{command}'. {HELP}")

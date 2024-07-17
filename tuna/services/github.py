@@ -51,10 +51,7 @@ class GitHubFile:
                 self._name.lower() in EXCLUDED_FILENAMES:
             return mimetypes.guess_type(self._name)[0] or ''
         if self._content is None and not self._is_directory:
-            # pylint: disable=missing-timeout
-            # pylint: disable=fixme
-            # TODO: Fix this hang in the future
-            response = requests.get(self._url)
+            response = requests.get(self._url, timeout=5)
             response.raise_for_status()
             self._content = response.text
         return self._content
