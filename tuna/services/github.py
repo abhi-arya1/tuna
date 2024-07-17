@@ -13,7 +13,7 @@ import requests
 import inquirer
 from halo import Halo
 from tuna.cli.core.constants import REPO_FILE, EXCLUDED_EXTENSIONS, \
-    EXCLUDED_FILENAMES, CONFIG_FILE, CHECK_ICON
+    EXCLUDED_FILENAMES, AUTH_FILE, CHECK_ICON
 from tuna.util.general import log
 
 
@@ -211,7 +211,7 @@ def reload() -> None:
     """
     Reloads the GitHub configurations for the current `.tuna` project. 
     """
-    with open(CONFIG_FILE, 'r', encoding="utf-8") as f:
+    with open(AUTH_FILE, 'r', encoding="utf-8") as f:
         auth_data = json.load(f)
         username = auth_data['username']
         token = auth_data['token']
@@ -305,7 +305,7 @@ def fetch(username: str, token: str) -> dict:
 
         print(f"\033[92m\u2714 \033[1mSelected Project:\033[0m \033[92m{selected_repo_url}\033[0m")
 
-        with open(CONFIG_FILE, 'w', encoding="utf-8") as f:
+        with open(AUTH_FILE, 'w', encoding="utf-8") as f:
             json.dump({
             'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
             'username': username, 

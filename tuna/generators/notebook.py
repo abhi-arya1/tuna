@@ -8,15 +8,28 @@ from os import remove
 import inquirer
 from halo import Halo
 from tuna.cli.core.constants import \
-    R_OUTPUT_MODEL, R_MODEL_ADAPTERS, NOTEBOOK, LEARN, INFO_ICON, R_TUNA_DIR, R_TRAIN_DATA, R_EVAL_DATA
+    R_OUTPUT_MODEL, R_MODEL_ADAPTERS, NOTEBOOK, LEARN, INFO_ICON, \
+    R_TRAIN_DATA, R_EVAL_DATA, OUTPUT_MODEL, MODEL_ADAPTERS, TRAIN_DATA, \
+    EVAL_DATA, AUTH_FILE, R_AUTH_FILE
 from tuna.util.nbutil import JupyterBlock, NbType, add_md_cell, add_code_cell, validate_nb
-from tuna.util.general import log
+from tuna.util.general import log, validate_non_empty
 
 
 INFO_ICON = "ⓘ"
 
 
-def make_notebook():
+def _pick_paths(local: bool) -> tuple[str, str, str, str, str]:
+    """
+    Returns the paths for the notebook generation.
+    """
+    if local:
+        return OUTPUT_MODEL, MODEL_ADAPTERS, AUTH_FILE, TRAIN_DATA, EVAL_DATA
+    return R_OUTPUT_MODEL, R_MODEL_ADAPTERS, R_AUTH_FILE, R_TRAIN_DATA, R_EVAL_DATA
+
+
+
+
+def make_notebook(local=False):
     """
     Makes a new notebook given a base model prompt.
     """
@@ -31,13 +44,22 @@ def make_notebook():
         log(INFO_ICON, f"Notebook {NOTEBOOK} removed successfully!")
 
     questions = [
-        inquirer.Text("base_model", message=f"Enter the base model for the new notebook. {LEARN('base_model')}"),
-        inquirer.Text("base_prompt", message=f"Enter the base prompt for the new model. {LEARN('base_prompt')}")
+        inquirer.Text("base_model", message=f"Enter the base model for the new notebook. {LEARN('base_model')}", validate=validate_non_empty, default="mistralai/Mistral-7B-v0.3"),
+        inquirer.Text("base_prompt", message=f"Enter the base prompt for the new model. {LEARN('base_prompt')}", validate=validate_non_empty)
     ]
     answers = inquirer.prompt(questions)
     base_model = answers["base_model"]
     base_prompt = answers["base_prompt"]
-    blocks = get_nb(base_model, base_prompt)
+    output_path, adapters, auth, train, eval_path = _pick_paths(local)
+    blocks = get_nb(
+        base_model,
+        base_prompt,
+        output_path,
+        adapters,
+        auth,
+        train,
+        eval_path
+    )
 
     spinner = Halo(text="Generating Notebook", spinner="dots")
     spinner.start()
@@ -47,15 +69,20 @@ def make_notebook():
         else:
             add_code_cell(NOTEBOOK, block.blockcontent())
 
-    spinner.succeed("Notebook Generated Successfully!")
+    spinner.succeed(f"Tuna Notebook for '{base_model}' Generated Successfully!")
 
 
 
 
-
+# pylint: disable=too-many-arguments
 def get_nb(
     base_model: str,
-    base_prompt: str
+    base_prompt: str,
+    output_path: str,
+    model_adapters: str,
+    auth_file: str,
+    train_file: str,
+    eval_file: str
 ) -> list[JupyterBlock]:
     """
     Generates the markdown and code blocks for the notebook.
@@ -85,12 +112,10 @@ We're going to start by installing all of our tuning dependencies directly onto 
         # Requirements Install
         JupyterBlock("""
 # Only run this once per instance
-!pip install -q -U bitsandbytes
-!pip install -q -U git+https://github.com/huggingface/transformers.git
-!pip install -q -U git+https://github.com/huggingface/peft.git
-!pip install -q -U git+https://github.com/huggingface/accelerate.git
-!pip install -q -U datasets scipy ipywidgets matplotlib
-!pip install -q -U torch
+print("Installing Dependencies...")
+!pip install -q -U transformers peft accelerate datasets bitsandbytes
+!pip install -q -U scipy ipywidgets matplotlib numpy torch
+print("Finished installing dependencies!")
 """, NbType.CODE),
 
 
@@ -113,11 +138,11 @@ from peft import LoraConfig
        
 # Model Constants 
 BASE_MODEL = "{base_model}"
-MODEL_PATH = "{R_OUTPUT_MODEL}"
-ADAPTERS   = "{R_MODEL_ADAPTERS}"
+MODEL_PATH = "{output_path}"
+ADAPTERS   = "{model_adapters}"
 
 # Get HuggingFace Token 
-with open("{R_TUNA_DIR}/auth.config.json", 'r') as f:
+with open("{auth_file}", 'r') as f:
     data = json.load(f)
 HF_TOKEN = data.get('hf_api_key', None)
 
@@ -141,8 +166,8 @@ LORA_CONFIG = LoraConfig(
 
 print("= TRAINER CONFIG " + "=" * 70)
 print(f"[{INFO_ICON}] Base Model: {base_model}")
-print(f"[{INFO_ICON}] Model saving to: {R_OUTPUT_MODEL}")
-print(f"[{INFO_ICON}] Adapters saving to : {R_MODEL_ADAPTERS}")
+print(f"[{INFO_ICON}] Model saving to: {output_path}")
+print(f"[{INFO_ICON}] Adapters saving to : {model_adapters}")
 print(f"[{INFO_ICON}] Compute Device: {{DEVICE}}")
 print("=" * 70)
 """, NbType.CODE),
@@ -156,17 +181,19 @@ We'll now configure the model with HuggingFace, set up the training data, and pr
 This includes tokenizing, dataset building, and more!
 """, NbType.MARKDOWN),
 
-        JupyterBlock("""
+        JupyterBlock(f"""
+print("Using Model: {base_model}")
+
+from torch import bfloat16
 from transformers import (
     AutoModelForCausalLM,
-    AutoTokenizer,
     BitsAndBytesConfig
 )
                      
 BITS_N_BYTES_CFG = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_compute_dtype=bfloat16,
     bnb_4bit_use_double_quant=True
 )
 
@@ -189,8 +216,8 @@ In this section, we'll be setting up the generated dataset for training.
 from json import load
 from datasets import Dataset
 
-with open("{R_TRAIN_DATA}", 'r') as train, \
-     open("{R_EVAL_DATA}", 'r') as eval:
+with open("{train_file}", 'r') as train, \
+     open("{eval_file}", 'r') as eval:
     train_data = json.load(train)
     eval_data = json.load(eval)          
 
@@ -235,6 +262,58 @@ print(f"[{INFO_ICON}] Training Dataset: {{train_r}} rows, {{train_c}} columns, {
 print(f"[{INFO_ICON}] Evaluation Dataset: {{eval_r}} rows, {{eval_c}} columns, {{eval_dataset.size_in_bytes() // (2**30)}} GB")
 print("=" * 70)
 """, NbType.CODE),
+
+        JupyterBlock("""
+### 5.5. Dataset Validation 
+
+We're now going to make a distribution of our dataset's lengths, which'll provide
+us with a better understanding of the dataset's structure. The graph below will plot the 
+`max_length` of the input tokens, which will let us truncate to max length.
+""", NbType.MARKDOWN),
+
+        JupyterBlock("""
+import matplotlib.pyplot as plt 
+                     
+def plot_data(train_set, eval_set): 
+    lengths = [len(x['input_ids']) for x in train_set]
+    lengths += [len(x['input_ids']) for x in eval_set]
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(lengths, bins=20, alpha=0.7, color='blue')
+    plt.title("Distribution of lengths of \'input_ids\' in the Dataset")
+    plt.xlabel("Length of input_ids")
+    plt.ylabel("Frequency")
+    plt.show()
+                     
+plot_data(train_dataset, eval_dataset)
+""", NbType.CODE),
+
+        JupyterBlock("""
+import numpy as np
+
+def calculate_max_length(lengths, percentile=95):
+    max_length = int(np.percentile(lengths, percentile))
+    print(f"Calculated max_length at {percentile}th percentile: {max_length}")
+    return max_length
+
+lengths = plot_data_lengths(tokenized_train_dataset, tokenized_val_dataset)
+max_length = calculate_max_length(lengths, percentile=95)
+
+def clean_prompts(prompt, max_length):
+    result = tokenizer(
+        formatting_func(prompt),
+        truncation=True,
+        max_length=max_length,
+        padding="max_length",
+    )
+    result["labels"] = result["input_ids"].copy()
+    return result
+                     
+# We'll map the new tokenized inputs back to the dataset 
+train_dataset = train_dataset.map(clean_prompts)
+eval_dataset = eval_dataset.map(clean_prompts)
+""", NbType.CODE)
+
     ]
 
     return blocks

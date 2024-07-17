@@ -9,7 +9,7 @@ import requests
 from tuna.services.github import reload
 from tuna.cli.cmd.init import make_dir
 from tuna.cli.core.authenticator import load_credentials, save_credentials, authenticate
-from tuna.cli.core.constants import CONFIG_FILE, INFO_ICON, NOTEBOOK, WARNING_ICON
+from tuna.cli.core.constants import AUTH_FILE, INFO_ICON, NOTEBOOK, WARNING_ICON
 from tuna.cli.core.learn import NOTEBOOK_CONSTANTS
 from tuna.util.general import log
 
@@ -41,7 +41,7 @@ def clone(url: str) -> None:
 
         username = _parse_username_from_github_url(url)
 
-        with open(CONFIG_FILE, 'w', encoding="utf-8") as f:
+        with open(AUTH_FILE, 'w', encoding="utf-8") as f:
             json.dump({
             'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
             'username': username, 

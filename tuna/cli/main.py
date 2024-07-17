@@ -114,16 +114,22 @@ def _handle_fluidstack_command(arg: str) -> None:
 
 
 
-def _handle_make_command(arg: str) -> None:
+def _handle_make_command(arg: str, args: list[str]) -> None:
     """
     Handles the 'make' command with the provided argument.
     """
-    if arg in [Token.DATASET.value, Token.DATASET_SHORT.value]:
-        build_dataset()
-    elif arg in [Token.NOTEBOOK.value, Token.NOTEBOOK_SHORT.value]:
-        make_notebook()
+    if len(args) == 4: 
+        if args[-1] == Token.LOCAL.value and args[-2] in [Token.NOTEBOOK.value, Token.NOTEBOOK_SHORT.value]:
+            make_notebook(local=True)
+        else: 
+            log(WARNING_ICON, f"Invalid flag for 'make notebook': '{args[-1]}'. {HELP}") 
     elif arg:
-        log(WARNING_ICON, f"Invalid option '{arg}'. {HELP}")
+        if arg in [Token.DATASET.value, Token.DATASET_SHORT.value]:
+            build_dataset()
+        elif arg in [Token.NOTEBOOK.value, Token.NOTEBOOK_SHORT.value]:
+            make_notebook()
+        else:
+            log(WARNING_ICON, f"Invalid option '{arg}'. {HELP}")
     else:
         log(WARNING_ICON, f"`tuna make` requires a command, such as `tuna make [notebook | nb | dataset | ds]`. {HELP}")
 
@@ -209,7 +215,7 @@ def main() -> None:
                 purge()
 
             case Token.MAKE.value:
-                _handle_make_command(arg)
+                _handle_make_command(arg, argv)
 
             case Token.DEV.value:
                 _handle_dev(arg)

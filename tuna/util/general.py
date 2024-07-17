@@ -11,6 +11,17 @@ from pathlib import Path
 from tuna.cli.core.constants import BLUE, RESET, RED, WARNING_ICON, LOCAL_DAEMON_TAG
 
 
+def validate_non_empty(_, current):
+    """
+    Validate inqurier answers to be non-empty.
+    """
+    if not current.strip():
+        return False
+    return True
+
+
+
+
 def clear_terminal():
     """
     Clears the terminal screen.

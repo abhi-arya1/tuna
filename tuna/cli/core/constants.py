@@ -18,13 +18,27 @@ VERSION = LATEST_VERSION
 
 CWD = Path(getcwd())
 
-TUNA_DIR    = CWD / '.tuna'
-NOTEBOOK    = TUNA_DIR / 'tuna.ipynb'
-REPO_FILE   = TUNA_DIR / 'tuna.config.json'
-CONFIG_FILE = TUNA_DIR / 'auth.config.json'
-TRAIN_DATA  = TUNA_DIR / 'train_dataset.jsonl'
-EVAL_DATA   = TUNA_DIR / 'eval_dataset.txt'
-TEST_DATA   = TUNA_DIR / 'test_dataset.txt'
+TUNA_DIR       = CWD / '.tuna'
+NOTEBOOK       = TUNA_DIR / 'tuna.ipynb'
+REPO_FILE      = TUNA_DIR / 'tuna.config.json'
+AUTH_FILE    = TUNA_DIR / 'auth.config.json'
+TRAIN_DATA     = TUNA_DIR / 'train_dataset.jsonl'
+EVAL_DATA      = TUNA_DIR / 'eval_dataset.jsonl'
+OUTPUT_MODEL   = TUNA_DIR / 'trained_model'
+MODEL_ADAPTERS = TUNA_DIR / 'adapters_lora'
+
+
+# Remote JupyterLab Items
+R_TUNA_DIR       = '~/tunalab'
+R_NOTEBOOK       = '~/tunalab/tuna_remote.ipynb'
+R_TUNA_LOG       = '~/tunalab/tuna_remote.log'
+R_REPO_FILE      = '~/tunalab/tuna.config.json'
+R_AUTH_FILE    = '~/tunalab/auth.config.json'
+R_OUTPUT_MODEL   = '~/tunalab/trained_model'
+R_MODEL_ADAPTERS = '~/tunalab/adapters_lora'
+R_TRAIN_DATA     = '~/tunalab/train_dataset.jsonl'
+R_EVAL_DATA      = '~/tunalab/eval_dataset.jsonl'
+
 
 
 IPYNB_REQUIREMENTS = """
@@ -139,15 +153,6 @@ class RemotePlatform(Enum):
     AKASH         = "akash"         # COMING SOON
     DIGITAL_OCEAN = "digital_ocean" # COMING SOON
     INTEL_CLOUD   = "intel_cloud"   # COMING SOON
-
-
-# Remote JupyterLab Items
-R_TUNA_DIR       = '~/tunalab'
-R_TUNA_LOG       = '~/tunalab/tuna_remote.log'
-R_OUTPUT_MODEL   = '~/tunalab/trained_model'
-R_MODEL_ADAPTERS = '~/tunalab/adapters_lora'
-R_TRAIN_DATA     = '~/tunalab/train_dataset.jsonl'
-R_EVAL_DATA      = '~/tunalab/eval_dataset.jsonl'
 
 
 # FluidStack GPU Machine States

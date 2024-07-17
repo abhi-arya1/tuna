@@ -8,7 +8,7 @@ import os
 import json
 import socket
 import inquirer
-from tuna.cli.core.constants import CONFIG_FILE, WARNING_ICON, BOLD, RESET, ITALIC, INFO_ICON
+from tuna.cli.core.constants import AUTH_FILE, WARNING_ICON, BOLD, RESET, ITALIC, INFO_ICON
 from tuna.util.general import log
 
 
@@ -20,8 +20,8 @@ def load_credentials() -> tuple[str, str] | tuple[None, None]:
     Returns:
         tuple[str, str] | tuple[None, None]: The GitHub Username and Token if available, else `tuple[None, None]`
     """
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, 'r', encoding="utf-8") as f:
+    if os.path.exists(AUTH_FILE):
+        with open(AUTH_FILE, 'r', encoding="utf-8") as f:
             data = json.load(f)
             return data.get('username'), data.get('token')
     return None, None
@@ -37,7 +37,7 @@ def save_credentials(username: str, token: str) -> None:
         username (str): The GitHub Username
         token (str): The GitHub Token
     """
-    with open(CONFIG_FILE, 'w', encoding="utf-8") as f:
+    with open(AUTH_FILE, 'w', encoding="utf-8") as f:
         json.dump({
             'message': 'DO NOT DELETE -- If this gets deleted, run `tuna init` again.',
             'username': username, 
@@ -91,7 +91,7 @@ def validate_fs() -> str:
     Returns:
         str: The FluidStack API Key
     """
-    with open(CONFIG_FILE, 'r', encoding="utf-8") as f:
+    with open(AUTH_FILE, 'r', encoding="utf-8") as f:
         data = json.load(f)
         api_key = data.get('fs_api_key', None)
     if not api_key:
@@ -102,7 +102,7 @@ def validate_fs() -> str:
             ]
             answer = inquirer.prompt(questions)
             api_key = answer['api_key']
-            with open(CONFIG_FILE, 'w', encoding="utf-8") as f:
+            with open(AUTH_FILE, 'w', encoding="utf-8") as f:
                 data['fs_api_key'] = api_key
                 json.dump(data, f, indent=4)
         except TypeError: 
@@ -120,7 +120,7 @@ def validate_hf() -> str:
     Returns:
         str: The Hugging Face API Key
     """
-    with open(CONFIG_FILE, 'r', encoding="utf-8") as f:
+    with open(AUTH_FILE, 'r', encoding="utf-8") as f:
         data = json.load(f)
         api_key = data.get('hf_api_key', None)
     if not api_key:
@@ -131,7 +131,7 @@ def validate_hf() -> str:
             ]
             answer = inquirer.prompt(questions)
             api_key = answer['api_key']
-            with open(CONFIG_FILE, 'w', encoding="utf-8") as f:
+            with open(AUTH_FILE, 'w', encoding="utf-8") as f:
                 data['hf_api_key'] = api_key
                 json.dump(data, f, indent=4)
         except TypeError:
@@ -160,9 +160,9 @@ def validate_ip() -> tuple[str, str]:
         ip_address = '127.0.0.1'
     finally:
         s.close()
-    with open(CONFIG_FILE, 'r', encoding='utf-8') as f: 
+    with open(AUTH_FILE, 'r', encoding='utf-8') as f: 
         data = json.load(f) 
-    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+    with open(AUTH_FILE, 'w', encoding='utf-8') as f:
         data['user__ip_addr'] = ip_address
         data['user_hostname'] = hostname
         json.dump(data, f, indent=4)
