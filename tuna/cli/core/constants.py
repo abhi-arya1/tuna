@@ -29,15 +29,15 @@ MODEL_ADAPTERS = TUNA_DIR / 'adapters_lora'
 
 
 # Remote JupyterLab Items
-R_TUNA_DIR       = '~/tunalab'
-R_NOTEBOOK       = '~/tunalab/tuna_remote.ipynb'
-R_TUNA_LOG       = '~/tunalab/tuna_remote.log'
-R_REPO_FILE      = '~/tunalab/tuna.config.json'
-R_AUTH_FILE    = '~/tunalab/auth.config.json'
-R_OUTPUT_MODEL   = '~/tunalab/trained_model'
-R_MODEL_ADAPTERS = '~/tunalab/adapters_lora'
-R_TRAIN_DATA     = '~/tunalab/train_dataset.jsonl'
-R_EVAL_DATA      = '~/tunalab/eval_dataset.jsonl'
+R_TUNA_DIR       = '/home/ubuntu/tunalab'
+R_NOTEBOOK       = '/home/ubuntu/tunalab/tuna_remote.ipynb'
+R_TUNA_LOG       = '/home/ubuntu/tunalab/tuna_remote.log'
+R_REPO_FILE      = '/home/ubuntu/tunalab/tuna.config.json'
+R_AUTH_FILE      = '/home/ubuntu/tunalab/auth.config.json'
+R_OUTPUT_MODEL   = '/home/ubuntu/tunalab/trained_model'
+R_MODEL_ADAPTERS = '/home/ubuntu/tunalab/adapters_lora'
+R_TRAIN_DATA     = '/home/ubuntu/tunalab/train_dataset.jsonl'
+R_EVAL_DATA      = '/home/ubuntu/tunalab/eval_dataset.jsonl'
 
 
 

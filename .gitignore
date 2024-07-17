@@ -27,7 +27,10 @@ node_modules/
 # vscode 
 .vscode
 
-# notebooks 
+# other notebooks
 .ipynb_checkpoints/
-example1.ipynb    
-example2.ipynb
+*.ipynb
+
+# all notebook quickstarts
+!notebooks/
+!notebooks/*.ipynb
