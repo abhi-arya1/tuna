@@ -9,7 +9,7 @@ import requests
 from tuna.services.github import reload
 from tuna.cli.cmd.init import make_dir
 from tuna.cli.core.authenticator import load_credentials, save_credentials, authenticate
-from tuna.cli.core.constants import CONFIG_FILE, INFO_ICON, NOTEBOOK
+from tuna.cli.core.constants import CONFIG_FILE, INFO_ICON, NOTEBOOK, WARNING_ICON
 from tuna.cli.core.learn import NOTEBOOK_CONSTANTS
 from tuna.util.general import log
 
@@ -20,6 +20,9 @@ def clone(url: str) -> None:
     """
     Clone the GitHub repository or Tuna Notebook to the current directory.
     """
+    if not url:
+        log(WARNING_ICON, "'clone' requires a valid GitHub/Notebook URL or Tuna Notebook name, such as 'tuna clone <url>'")
+        exit(1)
 
     if url.endswith('.ipynb') or url in NOTEBOOK_CONSTANTS.keys():
         if url in NOTEBOOK_CONSTANTS.keys():
