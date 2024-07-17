@@ -113,8 +113,8 @@ We're going to start by installing all of our tuning dependencies directly onto 
         JupyterBlock("""
 # Only run this once per instance
 print("Installing Dependencies...")
-!pip install -q -U transformers peft accelerate datasets bitsandbytes
-!pip install -q -U scipy ipywidgets matplotlib numpy torch
+!pip install -U transformers peft accelerate datasets bitsandbytes
+!pip install -U scipy ipywidgets matplotlib numpy==1.26.4 torch
 print("Finished installing dependencies!")
 """, NbType.CODE),
 
