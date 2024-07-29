@@ -260,7 +260,7 @@ eval_dataset = eval_dataset.map(generate_and_tokenize)
 print("= DATASET INFORMATION " + "=" * 70)
 print(f"[{INFO_ICON}] Training Dataset: {{train_r}} rows, {{train_c}} columns, {{train_dataset.size_in_bytes() // (2**30)}} GB")
 print(f"[{INFO_ICON}] Evaluation Dataset: {{eval_r}} rows, {{eval_c}} columns, {{eval_dataset.size_in_bytes() // (2**30)}} GB")
-print("=" * 70)
+print("======================" + "=" * 70)
 """, NbType.CODE),
 
         JupyterBlock("""
@@ -312,6 +312,43 @@ def clean_prompts(prompt, max_length):
 # We'll map the new tokenized inputs back to the dataset 
 train_dataset = train_dataset.map(clean_prompts)
 eval_dataset = eval_dataset.map(clean_prompts)
+                     
+# And finally, we'll make sure the data lenghts are normalized.
+plot_data_lengths(train_dataset, eval_dataset)
+""", NbType.CODE),
+
+        JupyterBlock(f"""
+### 6. Baseline Evaluation 
+                     
+We're now going to give the base model, {base_model}, a chance to 
+prove its abilities out-of-the-box.
+
+For example, if I was tuning a bot to have a lot of context on my code repository, I can ask it something of the form below:
+
+```python 
+eval_prompt = \"\"\"Fix this issue for my repository: Issue for long load times in app/page.tsx\"\"\"
+```
+
+This should ideally give you a generalized output, ready for upgrades, and we recommend keeping this example prompt simple.
+""", NbType.MARKDOWN),
+
+        JupyterBlock(f"""
+example_tokenizer = AutoTokenizer.from_pretrained(
+    "{base_model}",
+    add_bos_token=True
+)
+
+example_prompt = str(input("Enter your evaluation prompt: "))
+
+model_input = example_tokenizer(example_prompt, return_tensors="pt").to(f"{{DEVICE}}")
+model.eval()
+
+with torch.no_grad():
+    response = eval_tokenizer.decode(model.generate**model_input, max_new_tokens=256, repetition_penalty=1.15)[0], skip_special_tokens=True))
+    print("= BASELINE EVALUATION " + "=" * 70)
+    print(f"[{INFO_ICON}] Prompt: {{example_prompt}}")
+    print(f"[{INFO_ICON}] Baseline Response from {base_model}: {{eval_}}")
+    print("======================" + "=" * 70)
 """, NbType.CODE)
 
     ]
