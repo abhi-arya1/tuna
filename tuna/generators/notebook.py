@@ -101,7 +101,12 @@ def get_nb(
         JupyterBlock(f"""
 # Tuna {base_model} Trainer
 
-Welcome to a new Tuna Notebook! In this notebook, we will be training a {base_model} model using the Tuna CLI.
+Welcome to a new Tuna Notebook! In this notebook, we will be training a {base_model} model using the Tuna interface.
+
+As we're training a CAUSAL_LM (Cause-and-Effect/Call-and-Response LLM), we'll be using LoRA (Low-Rank Adaptation) and PEFT (Parameter-Efficient Fine-Tuning)
+to train a minimal amount of parameters in a cost-effective manner, while still getting comparable results to foundational models trained on the same data. 
+
+Interested in learning more? Check out the QLoRA Paper on ArXiV: https://arxiv.org/abs/2305.14314
 
 ## 1. Dependencies 
 
@@ -127,6 +132,19 @@ Now that we've finished installing the necessary libraries, we can move on to th
                      
 In this section, we'll be configuring the model of choice, {base_model}, for training.
 This includes setting up the model constants, system configuration, and other necessary details.
+
+Let's quickly go through what the Lora Config means: 
+
+- `r`: Rank of the matrix used, controlling the parameters trained. More provides more detail, but uses more compute. 
+- `lora_alpha` = `alpha`: Scaling factor, i.e. how much the LoRA weights affect the model, scaled by `alpha/r`
+
+LoRA usually uses `alpha=16` and `r=64` parameters, but you can adjust these for your use cases. For example, 
+`r=32` and `alpha=64` allows for more emphasis on the fine-tuning with reduced computation, but this is up to you.
+
+- `target_modules` are the vector projections that this training is going to target. For more information, read: 
+- `bias=none` states that the model won't bias any data in its training, though this can be set to `all` (all bias) or `lora_only` (biased towards training)
+- `lora_dropout=0.05` states that 5% of the trained activations will be dropped during training, to avoid an overfitting of data. 
+- `task_type` is the type of task you're training for. Models that are text generators usually fall under `CAUSAL_LM`, as a large language model.
 """, NbType.MARKDOWN),
 
 
@@ -158,7 +176,16 @@ else:
 LORA_CONFIG = LoraConfig(
     r=16,
     lora_alpha=32,
-    target_modules=["q_proj", "k_proj", "v_proj"],
+    target_modules=[
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+        "lm_head",
+    ],
     lora_dropout=0.05,
     bias="none",
     task_type="CAUSAL_LM"
@@ -179,6 +206,9 @@ print("=" * 70)
                      
 We'll now configure the model with HuggingFace, set up the training data, and prepare the model for training.
 This includes tokenizing, dataset building, and more!
+                     
+If we have more than one GPU, we'll be using parallel processing to make everything faster!
+We'll end by printing out the model to see what we're working with, and how many parameters we can train.
 """, NbType.MARKDOWN),
 
         JupyterBlock(f"""
@@ -189,6 +219,7 @@ from transformers import (
     AutoModelForCausalLM,
     BitsAndBytesConfig
 )
+from peft import get_peft_model
                      
 BITS_N_BYTES_CFG = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -202,6 +233,27 @@ MODEL = AutoModelForCausalLM.from_pretrained(
     quantization_config=BITS_N_BYTES_CFG,
     token=HF_TOKEN
 )
+
+# If >1 GPU and using GPU training (no CPU/XPU)
+if DEVICE == "cuda" and torch.cuda.device_count() > 1:
+    MODEL.is_parallelizable = True
+    MODEL.model_parallel = True
+
+
+def print_Lora_stats(model):
+    trainable_params = 0
+    all_param = 0
+    for _, param in model.named_parameters():
+        all_param += param.numel()
+        if param.requires_grad:
+            trainable_params += param.numel()
+    print(
+        f"Trainable Parameters: {{trainable_params}} | All Parameters: {{all_param}} | Trainable %: {{100 * trainable_params / all_param}}"
+    )
+
+MODEL = get_peft_model(MODEL, LORA_CONFIG)
+print(MODEL)
+print_Lora_stats(MODEL)
 """, NbType.CODE),
 
 
@@ -296,7 +348,7 @@ def calculate_max_length(lengths, percentile=95):
     print(f"Calculated max_length at {percentile}th percentile: {max_length}")
     return max_length
 
-lengths = plot_data_lengths(tokenized_train_dataset, tokenized_val_dataset)
+lengths = plot_data_lengths(train_dataset, eval_dataset)
 max_length = calculate_max_length(lengths, percentile=95)
 
 def clean_prompts(prompt, max_length):
@@ -318,7 +370,7 @@ plot_data_lengths(train_dataset, eval_dataset)
 """, NbType.CODE),
 
         JupyterBlock(f"""
-### 6. Baseline Evaluation 
+## 6. Baseline Evaluation 
                      
 We're now going to give the base model, {base_model}, a chance to 
 prove its abilities out-of-the-box.
@@ -347,10 +399,72 @@ with torch.no_grad():
     response = eval_tokenizer.decode(model.generate**model_input, max_new_tokens=256, repetition_penalty=1.15)[0], skip_special_tokens=True))
     print("= BASELINE EVALUATION " + "=" * 70)
     print(f"[{INFO_ICON}] Prompt: {{example_prompt}}")
-    print(f"[{INFO_ICON}] Baseline Response from {base_model}: {{eval_}}")
+    print(f"[{INFO_ICON}] Baseline Response from {base_model}: {{response)}}")
     print("======================" + "=" * 70)
-""", NbType.CODE)
+""", NbType.CODE),
 
+        JupyterBlock("""
+## 7. Training
+                     
+Let's train our model. You can configure steps based on how intensive you want your tuning to be. 
+Note that the smaller your dataset, the less tuned your model will be unfortunately.
+                     
+#### 7.1. A Note on Overfit
+                     
+Overfitting a model is when the model is training well, but unable to infer further, because it's too restricted.
+When a model overfits significantly, it's important to shut off the training. We set `max_steps=250` below, but you can set this low or high, 
+based on whether you want to deal with this or not. 
+                     
+**Make sure to monitor your trainer**, since when training loss goes down (good), and validation loss goes up (bad), you have reached overfit.
+You can interrupt the training process by clicking `Kernel > Interrupt Kernel` in the Navbar, and the `peft` library will save all previous checkpoints for you, and you can load the best checkpoint.
+                     
+Let's do it 🔥
+""", NbType.MARKDOWN),
+
+        JupyterBlock("""
+from transformers import Trainer, TrainingArguments, DataCollatorForLanguageModeling
+from datetime import datetime
+                     
+PROJECT = str(input("Enter a project name: "))
+
+TUNA_TRAINER = Trainer(
+    model=MODEL,
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset,
+    args=TrainingArguments(
+        output_dir=MODEL_PATH
+        warmup_steps=2,
+        per_device_train_batch_size=2,
+        gradient_accumulation_steps=1,
+        gradient_checkpointing=True,
+        max_steps=250,
+        learning_rate=2.5e-5, # Want a small lr for finetuning
+        bf16=True,
+        optim="paged_adamw_8bit",
+        logging_steps=25,            
+        logging_dir="./logs",        
+        save_strategy="steps",       
+        save_steps=50,                
+        evaluation_strategy="steps", 
+        eval_steps=50,               
+        # do_eval=True, # Remove the comments to use WandB for Evaluation
+        # report_to="wandb", 
+        # run_name=f"{{PROJECT}}-{{BASE_MODEL}}-{{datetime.now().strftime('%Y-%m-%d-%H-%M')}}
+    )
+    data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False)
+)
+                     
+MODEL.config.use_cache = False
+TUNA_TRAINER.train()
+""", NbType.CODE),
+
+        JupyterBlock("""
+## 8. Run the Model
+                     
+We're done training (Hopefully)! We'll find that out for sure after trying it out. We're going to have to reload the model
+
+
+""", NbType.MARKDOWN)
     ]
 
     return blocks
