@@ -4,6 +4,7 @@
 # general 
 .env
 .DS_Store
+.anima
 
 # pip packaging and building
 build/
