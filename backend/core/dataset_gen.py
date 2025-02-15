@@ -120,7 +120,7 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
     })
 
     response, sources = await stream_pplx_response(planned_prompt, send_handler)
-    url = "https://sketchviz.com/graphviz-examples"
+    url = "https://graphs.grevian.org/example"
     
     async with websockets.connect("ws://localhost:8080/ws") as websocket:
         await websocket.send(json.dumps({

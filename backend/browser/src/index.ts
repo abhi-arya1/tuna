@@ -11,7 +11,7 @@ config({
   path: "../.env"
 });
 
-const app = new Hono()
+const app = new Hono();
 
 app.get('/', (c) => {
   return c.text(`Hello from Tuna-Stagehand`);
@@ -43,7 +43,7 @@ app.get(
           },
           modelName: "claude-3-5-sonnet-latest",
           modelClientOptions: {
-            apiKey: "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"
+            apiKey: process.env.ANTHROPIC_API_KEY!,
           }
         });
 
