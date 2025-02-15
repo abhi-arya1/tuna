@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 import pandas as pd
 from datetime import datetime
+from os import getenv
 
 class Perplexity:
     def __init__(self, api_key: str):
@@ -83,7 +84,7 @@ class Perplexity:
 
 
 async def main():
-    api_key = "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"
+    api_key = getenv("PPLX_API_KEY")
     generator = Perplexity(api_key)
 
     queries = [
