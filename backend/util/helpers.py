@@ -9,3 +9,14 @@ def make_json_serializable(data):
     elif isinstance(data, datetime):
         return data.isoformat()
     return data
+
+
+def get_time_for_log(): 
+    return datetime.now().strftime("%H:%M:%S")
+
+
+def get_log_format(msg: str, tuna_msg: bool = False):
+    if tuna_msg:
+        return f"<<{get_time_for_log()}>> [TUNA] {msg}..."
+    else: 
+        return f"<<{get_time_for_log()}>> {msg}"

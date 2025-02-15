@@ -16,7 +16,6 @@ active_socket: WebSocket | None = None
 async def read_root():
     return JSONResponse({"message": "Welcome to the Tuna API"}, status_code=200)
 
-
 @app.get('/models')
 async def get_model_list():
     return { "models": get_models() }
@@ -38,11 +37,6 @@ async def websocket_endpoint(websocket: WebSocket):
         print("WebSocket disconnected")
     finally:
         active_socket = None
-
-
-@app.get("/test2")
-def hf():
-    return get_model("nateraw/vit-base-beans")
 
 
 @app.get("/test")

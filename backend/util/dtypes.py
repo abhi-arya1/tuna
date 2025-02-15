@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Literal, Optional
 from pydantic import BaseModel
 from enum import Enum 
+from datetime import datetime
 
 ### AI TOOL CALL SDK (OPENAI STYLE)
 
@@ -65,6 +66,7 @@ class DSGeneration(BaseModel):
     dataset: list[dict]
     log: str 
     sources: list[str]
+    complete: bool = False
 
 class TrainInstanceSelection(BaseModel):
     type: str
@@ -80,3 +82,34 @@ class Deployment(BaseModel):
     type: str
     text: str 
     metadata: dict
+
+
+### PERPLEXITY STREAM TYPES 
+
+class UsageStats(BaseModel):
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+class MessageContent(BaseModel):
+    role: str
+    content: str
+
+class DeltaContent(BaseModel):
+    role: Optional[str] = None
+    content: Optional[str] = None
+
+class Choice(BaseModel):
+    index: int
+    finish_reason: Optional[str] = None
+    message: MessageContent
+    delta: DeltaContent
+
+class PerplexityStreamingResponse(BaseModel):
+    id: str
+    model: str
+    created: int
+    usage: UsageStats
+    citations: List[str]
+    object: str
+    choices: List[Choice]
