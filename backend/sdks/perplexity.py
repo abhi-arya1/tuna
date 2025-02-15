@@ -21,7 +21,8 @@ async def stream_pplx_response(
                 "content": "",
             }, 
             {
-
+                "role": "user",
+                "content": prompt
             }
         ],
         "max_tokens": 123,
