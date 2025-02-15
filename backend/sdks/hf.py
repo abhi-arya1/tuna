@@ -8,6 +8,8 @@ clean_models = lambda models: list(map(lambda x: make_json_serializable(asdict(x
 
 
 def get_models(): 
+    # Sort: possible values are "last_modified", "trending_score",
+    # "created_at", "downloads" and "likes".
     return clean_models(api.list_models(
             task=TASK_TEXT_GENERATION,
             sort="trending_score",

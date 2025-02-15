@@ -72,7 +72,7 @@ async def model_advice_response(data: WSRequest, send_handler: Callable[[dict, L
             IN NO MORE THAN TWO SENTENCES KEPT BRIEF AND CONCISE, 
             as to why this may help the user's use case. 
             DO NOT USE ANY MARKDOWN SYNTAX IN YOUR RESPONSE. 
-            RESPOND WITH RAW TEXT ONLY. NO MARKDOWN."""
+            RESPOND WITH RAW TEXT ONLY. NO MARKDOWN. Be casual and conversational."""
         }, {
             "role": "user",
             "content": data.text
