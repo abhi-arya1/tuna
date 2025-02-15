@@ -19,21 +19,35 @@ const DatasetGeneration = ({
   }, [logContent]);
 
   const mockStatusText = "Generating a synthetic dataset based on your model requirements. This process will take a few minutes.";
-  const mockLogContent = `Initializing dataset generator...
-[TUNA] Setting up environment variables
-Loading base templates...
-[TUNA] Configuring data pipelines
-Generating sample data structures...
-Validating data format...
-[TUNA] Optimizing memory allocation
-Applying transformations...
-Creating training splits...
-[TUNA] Validating data integrity
-Optimizing data distribution...
-[TUNA] Finalizing system checks
-Completing dataset generation...`;
+  const mockLogContent = `<<10:20:39>> Initializing dataset generator...
+<<10:20:40>> [TUNA] Setting up environment variables
+<<10:20:41>> Loading base templates...
+<<10:20:42>> [TUNA] Configuring data pipelines
+<<10:20:43>> Generating sample data structures...
+<<10:20:44>> Validating data format...
+<<10:20:45>> [TUNA] Optimizing memory allocation
+<<10:20:46>> Applying transformations...
+<<10:20:47>> Creating training splits...
+<<10:20:48>> [TUNA] Validating data integrity
+<<10:20:49>> Optimizing data distribution...
+<<10:20:50>> [TUNA] Finalizing system checks
+<<10:20:51>> Completing dataset generation...`;
 
   const logLines = (logContent || mockLogContent).split('\n');
+
+  const parseLogLine = (line: string) => {
+    const timeMatch = line.match(/^<<(\d{2}:\d{2}:\d{2})>> (.+)$/);
+    if (timeMatch) {
+      return {
+        timestamp: timeMatch[1],
+        message: timeMatch[2]
+      };
+    }
+    return {
+      timestamp: "",
+      message: line
+    };
+  };
 
   return (
     <div className="space-y-8">
@@ -76,7 +90,9 @@ Completing dataset generation...`;
           className="h-full overflow-y-auto font-mono text-sm whitespace-pre-wrap"
         >
           {logLines.map((line, index) => {
-            const isTunaLog = line.startsWith('[TUNA]');
+            const { timestamp, message } = parseLogLine(line);
+            const isTunaLog = message.startsWith('[TUNA]');
+
             return (
               <div
                 key={index}
@@ -86,11 +102,12 @@ Completing dataset generation...`;
                 `}
               >
                 <div className="w-full px-4 flex items-center">
+                  <span className="text-gray-500 min-w-[85px]">{timestamp}</span>
                   <span className="text-accent mr-2">→</span>
-                  {line}
+                  {message}
                 </div>
                 {isTunaLog && (
-                  <div className="absolute inset-0 -left-4 bg-[#1F808D]/10 -z-10" />
+                  <div className="absolute inset-0 -left-2 bg-[#1F808D]/10 -z-10" />
                 )}
               </div>
             );
