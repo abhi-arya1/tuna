@@ -48,6 +48,14 @@ async def get_plan(data: WSRequest, send_handler: Callable) -> str:
             "complete": False
         })
 
+    await send_handler({
+            "text": "",
+            "type": "ds_generation",
+            "dataset": [],
+            "log": "\n",
+            "sources": [],
+            "complete": False
+        })
     return final_prompt
 
 
@@ -88,8 +96,6 @@ async def get_initial_text(data, send_handler):
 
 
 async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, Literal["text"]], None]) -> None:
-    print(data)
-
     await send_handler({
             "text": "",
             "type": "ds_generation",
@@ -104,7 +110,16 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
         get_initial_text(data, send_handler)
     )
 
-    await stream_pplx_response(data, planned_prompt, send_handler)
+    await send_handler({
+        "text": "",
+        "type": "ds_generation",
+        "dataset": [],
+        "log": get_log_format("Searching for relevant resources...", tuna_msg=True),
+        "sources": [],
+        "complete": False
+    })
+
+    await stream_pplx_response(planned_prompt, send_handler)
 
 
     
