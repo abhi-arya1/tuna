@@ -1,17 +1,26 @@
+import asyncio
+import httpx
+import json
+import re 
 from typing import Optional, Callable, Literal
-from util.dtypes import PerplexityStreamingResponse
-import httpx, json
 from pydantic import ValidationError
-from util.models import PerplexityModel
 from os import getenv
+from util.dtypes import PerplexityStreamingResponse
+from util.models import PerplexityModel
 from util.helpers import get_log_format
+from dotenv import load_dotenv
+from pathlib import Path
 
+load_dotenv(Path(__file__).parent.parent / ".env")
+NUMBERED_SECTION_REGEX = re.compile(r"^\d+\.\s")
 
 async def stream_pplx_response(
     prompt: str,
     send_handler: Optional[Callable[[dict, Literal["text"]], None]] = None,
 ):
     final_req = ""
+    sources = []
+
     payload = {
         "model": PerplexityModel.SONAR_PRO.value,
         "messages": [
@@ -29,10 +38,7 @@ async def stream_pplx_response(
                 You should SPECIFICALLY look for sources that can be used to train a text-generation model.
                 """,
             }, 
-            {
-                "role": "user",
-                "content": prompt
-            }
+            {"role": "user", "content": prompt}
         ],
         "max_tokens": 256,
         "temperature": 0.2,
@@ -56,32 +62,38 @@ async def stream_pplx_response(
     async with httpx.AsyncClient() as client:
         async with client.stream("POST", "https://api.perplexity.ai/chat/completions", json=payload, headers=headers) as response:
             async for line in response.aiter_lines():
-                print(line)
-                if not line: 
+                if not line:
                     continue
                 if line.startswith("data: "):
                     try:
                         json_data = json.loads(line[6:])
                         parsed_response = PerplexityStreamingResponse.model_validate(json_data)
                         content = parsed_response.choices[0].delta.content
+
+                        is_new_section = bool(NUMBERED_SECTION_REGEX.match(content)) if content else False
+
                         await send_handler({
                             "text": "",
                             "type": "ds_generation",
                             "dataset": [],
-                            "log": (get_log_format(content) if not final_req else content) or "",
+                            "log": (get_log_format(content) if is_new_section else content) or "",
                             "sources": parsed_response.citations,
                             "complete": False
                         })
+
                         if content:
                             final_req += content
+                        if parsed_response.citations:
+                            sources = parsed_response.citations
+
                     except (json.JSONDecodeError, ValidationError) as e:
                         print(f"Error parsing response: {e}")
 
     await send_handler({
-            "text": "",
-            "type": "ds_generation",
-            "dataset": [],
-            "log": "\n",
-            "sources": [],
-            "complete": False
-        })
+        "text": "",
+        "type": "ds_generation",
+        "dataset": [],
+        "log": "\n",
+        "sources": sources,
+        "complete": False
+    })
