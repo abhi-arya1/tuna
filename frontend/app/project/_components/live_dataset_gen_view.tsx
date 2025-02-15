@@ -2,13 +2,18 @@
 
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-
 const DatasetGeneration = ({
   statusText,
-  logContent
+  logContent,
+  dataset, 
+  sources,
+  complete
 }: {
   statusText: string;
   logContent: string;
+  dataset: any[];
+  sources: string[];
+  complete: boolean;
 }) => {
   const logBoxRef = useRef<HTMLDivElement>(null);
 
@@ -18,20 +23,8 @@ const DatasetGeneration = ({
     }
   }, [logContent]);
 
-  const mockStatusText = "Generating a synthetic dataset based on your model requirements. This process will take a few minutes.";
   const mockLogContent = `<<10:20:39>> Initializing dataset generator...
-<<10:20:40>> [TUNA] Setting up environment variables
-<<10:20:41>> Loading base templates...
-<<10:20:42>> [TUNA] Configuring data pipelines
-<<10:20:43>> Generating sample data structures...
-<<10:20:44>> Validating data format...
-<<10:20:45>> [TUNA] Optimizing memory allocation
-<<10:20:46>> Applying transformations...
-<<10:20:47>> Creating training splits...
-<<10:20:48>> [TUNA] Validating data integrity
-<<10:20:49>> Optimizing data distribution...
-<<10:20:50>> [TUNA] Finalizing system checks
-<<10:20:51>> Completing dataset generation...`;
+<<10:20:40>> [TUNA] Starting your environment`;
 
   const logLines = (logContent || mockLogContent).split('\n');
 
@@ -76,7 +69,7 @@ const DatasetGeneration = ({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        {statusText || mockStatusText}
+        {statusText || "Generating a dataset..."}
       </motion.p>
 
       <motion.div

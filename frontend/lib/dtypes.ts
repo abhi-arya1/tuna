@@ -50,6 +50,7 @@ type HFModel = {
 enum ProjectMakeStatus {
     USER_INPUT="user_input",
     MODEL_ADVICE="model_advice",
+    DS_INPUT="dataset_input",
     DS_GENERATION="ds_generation",
     TRAIN_INST_SELECTION="train_inst_selection",
     TRAIN_DETAILS="train_details",

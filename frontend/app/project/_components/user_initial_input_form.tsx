@@ -21,7 +21,7 @@ const UserInitialInput = ({
     if (inputValue) {
       onMove(inputValue);
     } else {
-      setError("Please enter something...."); // FIXME: LATER
+      setError("Please enter details on your ideal model...."); // FIXME: LATER
     }
   });
 
@@ -100,7 +100,7 @@ const UserInitialInput = ({
               if(inputValue) {
                 onMove(inputValue);
               } else {
-                setError("Please enter something....") // FIXME: LATER
+                setError("Please enter details on your ideal model....") // FIXME: LATER
               }
             }}
           >

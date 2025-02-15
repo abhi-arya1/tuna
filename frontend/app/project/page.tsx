@@ -9,14 +9,24 @@ import { HFModel, ProjectMakeStatus } from '@/lib/dtypes';
 import DatasetGeneration from './_components/live_dataset_gen_view';
 
 const ProjectPage = () => {
-  const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.USER_INPUT);
+  const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.DS_INPUT);
 
   const wsRef = useRef<WebSocket | null>(null);
   const [connectionState, setConnectionState] = useState<"CONNECTING" | "OPEN" | "CLOSED">("CONNECTING");
+
+  // Model Recommendation States
   const [recommendationModel, setRecommendationModel] = useState<HFModel | null>(null);
   const [models, setModels] = useState<HFModel[]>([]);
   const [modelText, setModelText] = useState<string>("");
-  const [inputValue, setInputValue] = useState('');
+  const [modelIValue, setModelIValue] = useState('');
+
+  // Dataset Generation States
+  const [dsIValue, setDsIValue] = useState('');
+  const [dsOValue, setDsOValue] = useState('');
+  const [dataset, setDataset] = useState<any[]>([]);
+  const [logContent, setLogContent] = useState<string>("");
+  const [sources, setSources] = useState<string[]>([]);
+  const [complete, setComplete] = useState(false);
 
   const sendMessage = useCallback(
     (type: string, text?: string, button_reply?: any) => {
@@ -26,7 +36,6 @@ const ProjectPage = () => {
     },
     []
   );
-
 
   const connect = useCallback(() => {
     setConnectionState("CONNECTING");
@@ -45,6 +54,14 @@ const ProjectPage = () => {
       setConnectionState("CLOSED");
     };
 
+    // class DSGeneration(BaseModel):
+    // type: str
+    // text: str 
+    // dataset: list[dict]
+    // log: str 
+    // sources: list[str]
+    // complete: bool = False
+
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);
@@ -55,6 +72,13 @@ const ProjectPage = () => {
             setModelText((prev) => (prev + (msg?.text || "")));
             setModels(msg?.model_list || []);
             break;
+          case "ds_generation":
+            console.log(msg.log);
+            setDsOValue((prev) => prev + (msg?.text || ""));
+            setDataset(msg?.dataset || []);
+            setLogContent((prev) => prev + (msg?.log || ""));          
+            setSources(msg?.sources || []);
+            setComplete(msg?.complete || false);
           default:
             break;
         }
@@ -84,7 +108,12 @@ const ProjectPage = () => {
 
   const handleUserInitialInput = () => {
     setStep(ProjectMakeStatus.MODEL_ADVICE);
-    sendMessage("idea_input", inputValue);
+    sendMessage("idea_input", modelIValue);
+  }
+
+  const handleUserDatasetInput = () => {
+    setStep(ProjectMakeStatus.DS_GENERATION);
+    sendMessage("dataset_input", dsIValue);
   }
 
   return (
@@ -103,12 +132,12 @@ const ProjectPage = () => {
             transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="w-full"
           >
-            {/* {
+            {
               step === ProjectMakeStatus.USER_INPUT && (
                 <UserInitialInput
                   onMove={handleUserInitialInput}
-                  inputValue={inputValue}
-                  setInputValue={setInputValue}
+                  inputValue={modelIValue}
+                  setInputValue={setModelIValue}
                 />
               )
             }
@@ -123,11 +152,25 @@ const ProjectPage = () => {
               )
             }
             {
-              step === ProjectMakeStatus.DS_GENERATION && (
-                <UserDatasetGenInput />
+              step === ProjectMakeStatus.DS_INPUT && (
+                <UserDatasetGenInput  
+                  onMove={handleUserDatasetInput}
+                  inputValue={dsIValue}
+                  setInputValue={setDsIValue}
+                />
               )
-            } */}
-            <DatasetGeneration statusText='building' logEntries={["hello", "goodbye"]} />
+            }
+            {
+              step === ProjectMakeStatus.DS_GENERATION && (
+                <DatasetGeneration 
+                  statusText={dsOValue} 
+                  logContent={logContent} 
+                  dataset={dataset}
+                  sources={sources}
+                  complete={complete}
+                />
+              )
+            }
           </motion.div>
         </AnimatePresence>
       </div>

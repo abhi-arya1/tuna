@@ -15,7 +15,7 @@ from sdks.perplexity import stream_pplx_response
 async def get_plan(data: WSRequest, send_handler: Callable) -> str:
     final_prompt = ""
 
-    async for chunk in client.chat.completions.create(
+    async for chunk in await client.chat.completions.create(
         model=GroqModels.LLAMA_3_3_70B_VERSATILE.value,
         messages=[{
             "role": "system", 
@@ -42,7 +42,7 @@ async def get_plan(data: WSRequest, send_handler: Callable) -> str:
             "text": "",
             "type": "ds_generation",
             "dataset": [],
-            "log": get_log_format(content) or "",
+            "log": (get_log_format(content) if not final_prompt else content) or "",
             "sources": [],
             "complete": False
         })
@@ -87,11 +87,13 @@ async def get_initial_text(data, send_handler):
 
 
 async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, Literal["text"]], None]) -> None:
+    print(data)
+
     await send_handler({
             "text": "",
             "type": "ds_generation",
             "dataset": [],
-            "log": get_log_format("Planning prompts for dataset generation"),
+            "log": get_log_format("Planning prompts for dataset generation", tuna_msg=True),
             "sources": [],
             "complete": False
         })

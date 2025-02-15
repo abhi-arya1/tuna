@@ -4,8 +4,16 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useEnterSubmit } from '@/components/hooks/enter-submit';
 
-const UserDatasetGenInput: React.FC = () => {
-  const [inputValue, setInputValue] = useState('');
+const UserDatasetGenInput = ({
+  onMove,
+  inputValue,
+  setInputValue
+}: {
+  onMove: (input: string) => void; 
+  inputValue: string;
+  setInputValue: (input: string) => void;
+}) => {
+  const [error, setError] = useState("");
 
   return (
     <div className="space-y-8 bg-transparent">
@@ -16,7 +24,7 @@ const UserDatasetGenInput: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-            Train
+            Dataset Generation
         </motion.span>
         <motion.h2
           className="text-4xl font-normal"
@@ -24,7 +32,7 @@ const UserDatasetGenInput: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-            What should your model do?
+            What kind of dataset are you looking for?
         </motion.h2>
       </div>
 
@@ -50,7 +58,15 @@ const UserDatasetGenInput: React.FC = () => {
             </div>
           </div>
           <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
-                          flex items-center gap-2 transition-colors duration-200">
+                          flex items-center gap-2 transition-colors duration-200"
+            onClick={() => {
+              if(inputValue) {
+                onMove(inputValue);
+              } else {
+                setError("Please enter details on your ideal dataset....") // FIXME: LATER
+              }
+            }}           
+          >
             Continue
             <span className="text-sm py-0.5 text-gray-200">⏎</span>
           </button>

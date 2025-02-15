@@ -17,6 +17,6 @@ def get_time_for_log():
 
 def get_log_format(msg: str, tuna_msg: bool = False):
     if tuna_msg:
-        return f"<<{get_time_for_log()}>> [TUNA] {msg}..."
+        return f"<<{get_time_for_log()}>> [TUNA] {msg}...\n"
     else: 
         return f"<<{get_time_for_log()}>> {msg}"
