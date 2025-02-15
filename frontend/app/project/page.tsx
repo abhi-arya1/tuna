@@ -56,9 +56,9 @@ const ProjectPage = () => {
 
     // class DSGeneration(BaseModel):
     // type: str
-    // text: str 
+    // text: str
     // dataset: list[dict]
-    // log: str 
+    // log: str
     // sources: list[str]
     // complete: bool = False
 
@@ -73,10 +73,9 @@ const ProjectPage = () => {
             setModels(msg?.model_list || []);
             break;
           case "ds_generation":
-            console.log(msg.log);
             setDsOValue((prev) => prev + (msg?.text || ""));
             setDataset(msg?.dataset || []);
-            setLogContent((prev) => prev + (msg?.log || ""));          
+            setLogContent((prev) => prev + (msg?.log || ""));
             setSources(msg?.sources || []);
             setComplete(msg?.complete || false);
           default:
@@ -153,7 +152,7 @@ const ProjectPage = () => {
             }
             {
               step === ProjectMakeStatus.DS_INPUT && (
-                <UserDatasetGenInput  
+                <UserDatasetGenInput
                   onMove={handleUserDatasetInput}
                   inputValue={dsIValue}
                   setInputValue={setDsIValue}
@@ -162,9 +161,9 @@ const ProjectPage = () => {
             }
             {
               step === ProjectMakeStatus.DS_GENERATION && (
-                <DatasetGeneration 
-                  statusText={dsOValue} 
-                  logContent={logContent} 
+                <DatasetGeneration
+                  statusText={dsOValue}
+                  logContent={logContent}
                   dataset={dataset}
                   sources={sources}
                   complete={complete}
