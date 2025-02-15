@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, json, websockets
 from typing import Callable, Literal
 from util.dtypes import WSRequest
 from sdks.groqapi import groq as client, syncgroq
@@ -119,7 +119,65 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
         "complete": False
     })
 
-    await stream_pplx_response(planned_prompt, send_handler)
+    response, sources = await stream_pplx_response(planned_prompt, send_handler)
+    url = "https://sketchviz.com/graphviz-examples"
+    
+    async with websockets.connect("ws://localhost:8080/ws") as websocket:
+        await websocket.send(json.dumps({
+            "url": url,
+            "instruction": """
+            Please get me code examples of graphviz from this website.
+            The code itself should go in requested_item, with the detail 
+            of what the code represents in item_detail. Please pick varying 
+            examples to make sure that the dataset is diverse.
+            """
+        }))
+
+        await send_handler({
+            "text": "",
+            "type": "ds_generation",
+            "dataset": [],
+            "log": get_log_format("Scraping sources for data", tuna_msg=True),
+            "sources": sources,
+            "complete": False
+        })
+        
+        async for message in websocket: 
+            print("Recieved data: ", message)
+            data = json.loads(message)
+            if data["complete"] == True: 
+                await send_handler({
+                    "type": "ds_generation",
+                    "text": "",
+                    "dataset": [],
+                    "sources": sources,
+                    "complete": False,
+                    "log": get_log_format(f"{data["data"]["examples"]}\n"),
+                })
+                break 
+
+            log = data["log"]["message"].strip()
+            if log == "LLM cache miss - no cached response found":
+                log = "Scraped data example successfully. Moving to next."
+            await send_handler({
+                "type": "ds_generation",
+                "text": "",
+                "dataset": [],
+                "sources": sources,
+                "complete": False,
+                "log": get_log_format(f"{log}\n"),
+            })
+
+        await send_handler({
+            "type": "ds_generation",
+            "text": "",
+            "dataset": [],
+            "sources": sources,
+            "complete": False,
+            "log": get_log_format("Scraping complete. Generating dataset file", tuna_msg=True),
+        })
+
+    
 
 
     

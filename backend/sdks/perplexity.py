@@ -17,8 +17,9 @@ NUMBERED_SECTION_REGEX = re.compile(r"^\d+\.\s")
 async def stream_pplx_response(
     prompt: str,
     send_handler: Optional[Callable[[dict, Literal["text"]], None]] = None,
-):
+) -> PerplexityStreamingResponse:
     final_req = ""
+    final_response = None
     sources = []
 
     payload = {
@@ -85,6 +86,7 @@ async def stream_pplx_response(
                             final_req += content
                         if parsed_response.citations:
                             sources = parsed_response.citations
+                        final_response = parsed_response
 
                     except (json.JSONDecodeError, ValidationError) as e:
                         print(f"Error parsing response: {e}")
@@ -97,3 +99,5 @@ async def stream_pplx_response(
         "sources": sources,
         "complete": False
     })
+
+    return final_response, sources
