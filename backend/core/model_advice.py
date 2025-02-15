@@ -84,7 +84,7 @@ async def model_advice_response(data: WSRequest, send_handler: Callable[[dict, L
             "content": "In exactly two sentences, breifly describe why you chose this model."
         }],
         temperature=1,
-        max_completion_tokens=512,
+        max_tokens=512,
         top_p=1,
         stream=True,
         stop=None,
