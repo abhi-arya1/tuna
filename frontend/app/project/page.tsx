@@ -6,6 +6,7 @@ import UserInitialInput from './_components/user_initial_input_form';
 import UserDatasetGenInput from './_components/user_dataset_gen_input';
 import ModelAdvice from './_components/user_model_advice';
 import { HFModel, ProjectMakeStatus } from '@/lib/dtypes';
+import DatasetGeneration from './_components/live_dataset_gen_view';
 
 const ProjectPage = () => {
   const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.USER_INPUT);
@@ -102,10 +103,10 @@ const ProjectPage = () => {
             transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="w-full"
           >
-            {
+            {/* {
               step === ProjectMakeStatus.USER_INPUT && (
-                <UserInitialInput 
-                  onMove={handleUserInitialInput} 
+                <UserInitialInput
+                  onMove={handleUserInitialInput}
                   inputValue={inputValue}
                   setInputValue={setInputValue}
                 />
@@ -113,9 +114,9 @@ const ProjectPage = () => {
             }
             {
               step === ProjectMakeStatus.MODEL_ADVICE && (
-                <ModelAdvice 
-                  models={models} 
-                  modelText={modelText} 
+                <ModelAdvice
+                  models={models}
+                  modelText={modelText}
                   recommendationModel={recommendationModel}
                   // onMove={handleUserInitialInput}
                 />
@@ -125,7 +126,8 @@ const ProjectPage = () => {
               step === ProjectMakeStatus.DS_GENERATION && (
                 <UserDatasetGenInput />
               )
-            }
+            } */}
+            <DatasetGeneration statusText='building' logEntries={["hello", "goodbye"]} />
           </motion.div>
         </AnimatePresence>
       </div>
