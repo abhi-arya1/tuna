@@ -13,6 +13,7 @@ async def stream_pplx_response(
     prompt: str,
     send_handler: Optional[Callable[[dict, Literal["text"]], None]] = None,
 ):
+    final_req = ""
     payload = {
         "model": PerplexityModel.SONAR_PRO.value,
         "messages": [
@@ -51,13 +52,15 @@ async def stream_pplx_response(
                     try:
                         json_data = json.loads(line[6:])
                         parsed_response = PerplexityStreamingResponse.model_validate(json_data)
+                        content = parsed_response.choices[0].delta.content
                         await send_handler({
                             "text": "",
                             "type": "ds_generation",
                             "dataset": [],
-                            "log": get_log_format(parsed_response.choices[0].delta.content),
+                            "log": (get_log_format(content) if not final_req else content) or "",
                             "sources": parsed_response.citations,
                             "complete": False
                         })
+                        final_req += content
                     except (json.JSONDecodeError, ValidationError) as e:
                         print(f"Error parsing response: {e}")

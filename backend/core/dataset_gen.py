@@ -1,3 +1,4 @@
+import asyncio
 from typing import Callable, Literal
 from util.dtypes import WSRequest
 from sdks.groqapi import groq as client, syncgroq
@@ -98,8 +99,11 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
             "complete": False
         })
 
-    planned_prompt = await get_plan(data, send_handler)
-    await get_initial_text(data, send_handler)
+    planned_prompt, _ = await asyncio.gather(
+        get_plan(data, send_handler), 
+        get_initial_text(data, send_handler)
+    )
+
     await stream_pplx_response(data, planned_prompt, send_handler)
 
 
