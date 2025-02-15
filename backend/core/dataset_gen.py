@@ -114,7 +114,7 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
         "text": "",
         "type": "ds_generation",
         "dataset": [],
-        "log": get_log_format("Searching for relevant resources...", tuna_msg=True),
+        "log": get_log_format("Searching for relevant resources", tuna_msg=True),
         "sources": [],
         "complete": False
     })
