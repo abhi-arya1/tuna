@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from fastapi.responses import JSONResponse, HTMLResponse
 from core.response import respond
-from sdks.hf import get_models
+from sdks.hf import get_models, get_model
 from util.dtypes import WSRequest
 
 load_dotenv(Path(__file__).parent / ".env")
@@ -40,6 +40,9 @@ async def websocket_endpoint(websocket: WebSocket):
         active_socket = None
 
 
+@app.get("/test2")
+def hf():
+    return get_model("nateraw/vit-base-beans")
 
 
 @app.get("/test")

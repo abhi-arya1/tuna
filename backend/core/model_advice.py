@@ -19,14 +19,19 @@ async def model_advice_response(data: WSRequest, send_handler: Callable[[dict, L
             model=GroqModels.LLAMA_3_3_70B_VERSATILE.value,
             messages=[{
                 "role": "system",
-                "content": "You are a model picking agent. Based on a user query, your job is to pick a model exactly by name from the list of models provided that best fits the user's needs."
+                "content": """
+                You are a model picking agent. Based on a user query, your job is to 
+                pick a model exactly by name from the list of models provided that 
+                best fits the user's needs. DO NOT USE ANY MARKDOWN SYNTAX IN YOUR RESPONSE.
+                DO NOT ALWAYS PICK LLAMA. YOU MUST CHOOSE AN EDUCATED GUESS OF AN APPROPRIATE MODEL.
+                For example, code generation models should choose bigcoder or codex, while 
+                language applications should choose the most accurate option."""
             }, {
                 "role": "user",
                 "content": data.text
             }, {
                 "role": "assistant",
-                "type": "function",
-                "function": {
+                "function_call": {
                     "name": "get_models",
                 }
             }, {
@@ -55,7 +60,8 @@ async def model_advice_response(data: WSRequest, send_handler: Callable[[dict, L
             function_args = loads(tool_call.function.arguments)
             recommendation = function_args.get("model", recommendation)
             break
-    except BadRequestError as e:
+    except Exception as e:
+        print(e)
         pass
 
     chosen_model = next(model for model in models if model["id"] == recommendation)
@@ -90,7 +96,6 @@ async def model_advice_response(data: WSRequest, send_handler: Callable[[dict, L
         stop=None,
     ):
         content = chunk.choices[0].delta.content
-        print(content)
         await send_handler({
             "type": "model_advice",
             "text": content or "",
