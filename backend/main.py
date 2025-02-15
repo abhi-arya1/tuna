@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi.responses import JSONResponse, HTMLResponse
 from core.response import build_response
 from sdks.hf import get_models
-
+from util.dtypes import WSRequest
 
 load_dotenv(Path(__file__).parent / ".env")
 
@@ -32,6 +32,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_json()
+            data = WSRequest(**data)
             await build_response(data, websocket.send_json)
     except WebSocketDisconnect:
         print("WebSocket disconnected")

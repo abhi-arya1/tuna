@@ -1,7 +1,10 @@
 import asyncio
-from typing import Any, AsyncGenerator, Callable, Literal
+from typing import Any, Callable, Literal
 from sdks.groqapi import groq as client
 from util.models import GroqModels
+from util.dtypes import WSRequest
+
+from core.model_advice import model_advice_response
 
 async def build_response(data: Any, send_handler: Callable[[dict, Literal["text"]], None]) -> None:
     async for chunk in await client.chat.completions.create(
@@ -19,5 +22,9 @@ async def build_response(data: Any, send_handler: Callable[[dict, Literal["text"
 
 
 
-async def respond():
-    pass
+async def respond(data: WSRequest, send_handler: Callable[[dict, Literal["text"]], None]) -> None:
+    if(data.type == "idea_input"):
+        await model_advice_response(data, send_handler)
+    elif (data.type == "dataset_input"):
+        pass 
+
