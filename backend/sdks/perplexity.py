@@ -1,17 +1,29 @@
-from typing import AsyncIterator, Optional
+from typing import Optional, Callable, Literal
 from util.dtypes import PerplexityStreamingResponse
 import httpx, json
 from pydantic import ValidationError
 from util.models import PerplexityModel
 from os import getenv
+from util.dtypes import WSRequest
+from util.helpers import get_log_format
 
 
 async def stream_pplx_response(
-    messages: list[dict]
-) -> AsyncIterator[PerplexityStreamingResponse]:
+    data: WSRequest,
+    prompt: str,
+    send_handler: Optional[Callable[[dict, Literal["text"]], None]] = None,
+):
     payload = {
-        "model": "sonar",
-        "messages": messages,
+        "model": PerplexityModel.SONAR_PRO.value,
+        "messages": [
+            {
+                "role": "system",
+                "content": "",
+            }, 
+            {
+
+            }
+        ],
         "max_tokens": 123,
         "temperature": 0.2,
         "top_p": 0.9,
@@ -38,6 +50,13 @@ async def stream_pplx_response(
                     try:
                         json_data = json.loads(line[6:])
                         parsed_response = PerplexityStreamingResponse.model_validate(json_data)
-                        yield parsed_response
+                        await send_handler({
+                            "text": "",
+                            "type": "ds_generation",
+                            "dataset": [],
+                            "log": get_log_format(parsed_response.choices[0].delta.content),
+                            "sources": parsed_response.citations,
+                            "complete": False
+                        })
                     except (json.JSONDecodeError, ValidationError) as e:
                         print(f"Error parsing response: {e}")

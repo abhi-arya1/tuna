@@ -3,6 +3,7 @@ from util.dtypes import WSRequest
 from sdks.groqapi import groq as client, syncgroq
 from util.models import GroqModels
 from util.helpers import get_log_format
+from sdks.perplexity import stream_pplx_response
 
 # class DSGeneration(BaseModel):
 #     type: str
@@ -11,7 +12,9 @@ from util.helpers import get_log_format
 #     log: str 
 #     sources: list[str]
 
-async def get_plan(data: WSRequest, send_handler: Callable):
+async def get_plan(data: WSRequest, send_handler: Callable) -> str:
+    final_prompt = ""
+
     async for chunk in client.chat.completions.create(
         model=GroqModels.LLAMA_3_3_70B_VERSATILE.value,
         messages=[{
@@ -32,6 +35,9 @@ async def get_plan(data: WSRequest, send_handler: Callable):
         stop=None,
     ):
         content = chunk.choices[0].delta.content
+        if content:
+            final_prompt += content
+
         await send_handler({
             "text": "",
             "type": "ds_generation",
@@ -40,6 +46,8 @@ async def get_plan(data: WSRequest, send_handler: Callable):
             "sources": [],
             "complete": False
         })
+
+    return final_prompt
 
 
 
@@ -88,8 +96,9 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
             "complete": False
         })
 
-    await get_plan(data, send_handler)
+    planned_prompt = await get_plan(data, send_handler)
     await get_initial_text(data, send_handler)
+    await stream_pplx_response(data, planned_prompt, send_handler)
 
 
     
