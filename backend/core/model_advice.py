@@ -68,7 +68,8 @@ async def model_advice_response(data: WSRequest, send_handler: Callable[[dict, L
             You are an AI expert who is assisting in selecting an AI model for a user. 
             Based on a user query, your job is to recommend a model from the list of models 
             provided that best fits the user's needs. Once recommended, you must provide a 
-            brief explanation of your choice, NO MORE THAN TWO SENTENCES KEPT BRIEF AND CONCISE, 
+            brief explanation of your choice phrased as a recommendation to the user, 
+            IN NO MORE THAN TWO SENTENCES KEPT BRIEF AND CONCISE, 
             as to why this may help the user's use case. 
             DO NOT USE ANY MARKDOWN SYNTAX IN YOUR RESPONSE. 
             RESPOND WITH RAW TEXT ONLY. NO MARKDOWN."""
@@ -89,8 +90,10 @@ async def model_advice_response(data: WSRequest, send_handler: Callable[[dict, L
         stop=None,
     ):
         content = chunk.choices[0].delta.content
+        print(content)
         await send_handler({
+            "type": "model_advice",
             "text": content or "",
             "recommendation": chosen_model,
-            "model_list": model_list
+            "model_list": models
         })

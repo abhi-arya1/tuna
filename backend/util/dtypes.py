@@ -50,27 +50,33 @@ class WSRequest(BaseModel):
 ### RESPONSE TYPE MODELS 
 
 class UserInput(BaseModel):
+    type: str
     text: str 
 
 class ModelAdvice(BaseModel):
+    type: str
     text: str 
     recommendation: str 
     model_list: str 
 
 class DSGeneration(BaseModel):
+    type: str
     text: str 
     dataset: list[dict]
     log: str 
     sources: list[str]
 
 class TrainInstanceSelection(BaseModel):
+    type: str
     text: str 
     instances: list[dict]
 
 class TrainDetails(BaseModel):
+    type: str
     text: str 
     log: str 
 
 class Deployment(BaseModel):
+    type: str
     text: str 
     metadata: dict

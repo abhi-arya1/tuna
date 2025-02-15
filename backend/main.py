@@ -3,7 +3,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from dotenv import load_dotenv  
 from pathlib import Path
 from fastapi.responses import JSONResponse, HTMLResponse
-from core.response import build_response
+from core.response import respond
 from sdks.hf import get_models
 from util.dtypes import WSRequest
 
@@ -33,7 +33,7 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_json()
             data = WSRequest(**data)
-            await build_response(data, websocket.send_json)
+            await respond(data, websocket.send_json)
     except WebSocketDisconnect:
         print("WebSocket disconnected")
     finally:

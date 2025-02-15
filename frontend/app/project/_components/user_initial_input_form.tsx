@@ -2,9 +2,18 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { ProjectMakeStatus } from '@/lib/dtypes';
 
-const UserInitialInput: React.FC = () => {
-  const [inputValue, setInputValue] = useState('');
+const UserInitialInput = ({
+  onMove,
+  inputValue, 
+  setInputValue
+}: {
+  onMove: (input: string) => void;
+  inputValue: string;
+  setInputValue: (input: string) => void;
+}) => {
+  const [error, setError] = useState("");
 
   return (
     <div className="space-y-8 bg-transparent">
@@ -49,7 +58,15 @@ const UserInitialInput: React.FC = () => {
             </div>
           </div>
           <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
-                          flex items-center gap-2 transition-colors duration-200">
+                          flex items-center gap-2 transition-colors duration-200"
+            onClick={() => {
+              if(inputValue) {
+                onMove(inputValue);
+              } else {
+                setError("Please enter something....") // FIXME: LATER
+              }
+            }}                
+          >
             Continue
             <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
           </button>

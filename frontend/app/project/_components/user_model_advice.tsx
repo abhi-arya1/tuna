@@ -3,37 +3,19 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { HFModel } from '@/lib/dtypes';
 
-interface Model {
-  id: string;
-  name: string;
-  provider: string;
-  type: string;
-}
 
-const ModelAdvice: React.FC = () => {
+const ModelAdvice = ({
+  models,
+  modelText,
+  recommendationModel
+}: {
+  models: HFModel[];
+  modelText: string;
+  recommendationModel: HFModel | null;
+}) => {
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
-
-  const recommendationRationale = "Based on your use case, we recommend a model with strong instruction-following capabilities and high accuracy.";
-  const recommendedModel: Model = {
-    id: 'gpt-4-turbo',
-    name: 'GPT-4 Turbo',
-    provider: 'OpenAI',
-    type: 'Large Language Model'
-  };
-
-  const modelList: Model[] = [
-    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: 'OpenAI', type: 'Language Model' },
-    { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic', type: 'Language Model' },
-    { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', provider: 'Anthropic', type: 'Language Model' },
-    { id: 'gemini-pro', name: 'Gemini Pro', provider: 'Google', type: 'Language Model' },
-    { id: 'mistral-large', name: 'Mistral Large', provider: 'Mistral AI', type: 'Language Model' },
-    { id: 'mixtral-8x7b', name: 'Mixtral 8x7B', provider: 'Mistral AI', type: 'Language Model' },
-    { id: 'llama-2-70b', name: 'LLaMA 2 70B', provider: 'Meta', type: 'Language Model' },
-    { id: 'cohere-command', name: 'Command', provider: 'Cohere', type: 'Language Model' },
-    { id: 'palm-2', name: 'PaLM 2', provider: 'Google', type: 'Language Model' },
-    { id: 'j2-ultra', name: 'J2-Ultra', provider: 'AI21', type: 'Language Model' },
-  ];
 
   return (
     <div className="space-y-8">
@@ -52,7 +34,7 @@ const ModelAdvice: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          Select your preferred model
+          Select your preferred Model
         </motion.h2>
       </div>
 
@@ -62,7 +44,7 @@ const ModelAdvice: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        {recommendationRationale}
+        {modelText ? modelText : "LOADING"}
       </motion.p>
 
       <motion.div
@@ -74,16 +56,17 @@ const ModelAdvice: React.FC = () => {
         <label className="flex items-start space-x-4 cursor-pointer">
           <input
             type="checkbox"
-            checked={selectedModel === recommendedModel.id}
-            onChange={() => setSelectedModel(recommendedModel.id)}
+            checked={selectedModel === recommendationModel?.id}
+            // onChange={() => setSelectedModel(recommendationModel?.id)}
+            onChange={() => {}}
             className="mt-1.5 h-4 w-4 border-gray-700 rounded-sm checked:bg-accent hover:border-accent focus:ring-accent"
           />
           <div className="flex-1">
             <div className="text-lg font-medium flex items-center gap-2">
-              {recommendedModel.name}
+              {recommendationModel?.id}
               <span className="text-accent text-sm border border-accent px-2 py-0.5">Recommended</span>
             </div>
-            <div className="text-gray-400 text-sm">{recommendedModel.provider} · {recommendedModel.type}</div>
+            <div className="text-gray-400 text-sm">{recommendationModel?.created_at} · {recommendationModel?.downloads}</div>
           </div>
         </label>
       </motion.div>
@@ -95,20 +78,20 @@ const ModelAdvice: React.FC = () => {
         className="border border-gray-700 max-h-[300px] overflow-y-auto"
       >
         <div className="p-2 space-y-2">
-          {modelList.map((model) => (
+          {models.map((HFModel) => (
             <label
-              key={model.id}
+              key={HFModel.id}
               className="flex items-start space-x-4 p-2 cursor-pointer hover:bg-white/5 transition-colors duration-200"
             >
               <input
                 type="checkbox"
-                checked={selectedModel === model.id}
-                onChange={() => setSelectedModel(model.id)}
+                checked={selectedModel === HFModel.id}
+                onChange={() => setSelectedModel(HFModel.id)}
                 className="mt-1.5 h-4 w-4 border-gray-700 rounded-sm checked:bg-accent hover:border-accent focus:ring-accent"
               />
               <div className="flex-1">
-                <div className="text-lg">{model.name}</div>
-                <div className="text-gray-400 text-sm">{model.provider} · {model.type}</div>
+                <div className="text-lg">{HFModel.id}</div>
+                <div className="text-gray-400 text-sm">{HFModel.created_at} · {HFModel.downloads}</div>
               </div>
             </label>
           ))}
