@@ -1,7 +1,103 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+
+const LogSection = ({
+  title,
+  isOpen,
+  onToggle,
+  otherSectionOpen,
+  children
+}: {
+  title: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  otherSectionOpen: boolean;
+  children: React.ReactNode;
+}) => (
+  <div className="border border-gray-700 bg-background">
+    <button
+      onClick={onToggle}
+      className="w-full px-4 py-2 flex items-center justify-between text-gray-300 hover:text-white border-b border-gray-700"
+    >
+      <span className="text-sm font-medium">{title}</span>
+      {isOpen ?
+        <ChevronUp className="h-4 w-4" /> :
+        <ChevronDown className="h-4 w-4" />
+      }
+    </button>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ height: 0 }}
+          animate={{ height: otherSectionOpen ? "200px" : "400px" }}
+          exit={{ height: 0 }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
+
+const LogContent = ({ lines }: { lines: string[] }) => {
+  const logBoxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (logBoxRef.current) {
+      logBoxRef.current.scrollTop = logBoxRef.current.scrollHeight;
+    }
+  }, [lines]);
+
+  const parseLogLine = (line: string) => {
+    const timeMatch = line.match(/^<<(\d{2}:\d{2}:\d{2})>> (.+)$/);
+    if (timeMatch) {
+      return {
+        timestamp: timeMatch[1],
+        message: timeMatch[2]
+      };
+    }
+    return {
+      timestamp: "",
+      message: line
+    };
+  };
+
+  return (
+    <div
+      ref={logBoxRef}
+      className="h-full overflow-y-auto font-mono text-sm"
+    >
+      {lines.map((line, index) => {
+        const { timestamp, message } = parseLogLine(line);
+        const isTunaLog = message.startsWith('[TUNA]');
+
+        return (
+          <div
+            key={index}
+            className={`
+              text-gray-300 relative min-h-[32px] py-1
+              ${isTunaLog ? 'bg-[#1F808D]/10' : ''}
+            `}
+          >
+            <div className="w-full px-4 flex items-start">
+              <span className="text-gray-500 shrink-0 w-[85px]">{timestamp}</span>
+              <span className="text-accent mr-2 shrink-0">→</span>
+              <span className="break-words whitespace-pre-wrap">{message}</span>
+            </div>
+            {isTunaLog && (
+              <div className="absolute inset-0 -left-2 bg-[#1F808D]/10 -z-10" />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const DatasetGeneration = ({
   statusText,
@@ -16,31 +112,26 @@ const DatasetGeneration = ({
   sources: string[];
   complete: boolean;
 }) => {
-  const logBoxRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (logBoxRef.current) {
-      logBoxRef.current.scrollTop = logBoxRef.current.scrollHeight;
-    }
-  }, [logContent]);
+  const [mainLogOpen, setMainLogOpen] = useState(true);
+  const [sourcesLogOpen, setSourcesLogOpen] = useState(false);
 
   const mockLogContent = `<<10:20:39>> Initializing dataset generator...
 <<10:20:40>> [TUNA] Starting your environment`;
 
   const logLines = (logContent || mockLogContent).split('\n');
 
-  const parseLogLine = (line: string) => {
-    const timeMatch = line.match(/^<<(\d{2}:\d{2}:\d{2})>> (.+)$/);
-    if (timeMatch) {
-      return {
-        timestamp: timeMatch[1],
-        message: timeMatch[2]
-      };
+  const toggleMainLog = () => {
+    setMainLogOpen(!mainLogOpen);
+    if (!mainLogOpen && sourcesLogOpen) {
+      setSourcesLogOpen(false);
     }
-    return {
-      timestamp: "",
-      message: line
-    };
+  };
+
+  const toggleSourcesLog = () => {
+    setSourcesLogOpen(!sourcesLogOpen);
+    if (!sourcesLogOpen && mainLogOpen) {
+      setMainLogOpen(false);
+    }
   };
 
   return (
@@ -74,39 +165,28 @@ const DatasetGeneration = ({
       </motion.p>
 
       <motion.div
+        className="space-y-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="border border-gray-700 h-[400px] rounded-none bg-background"
       >
-        <div
-          ref={logBoxRef}
-          className="h-full overflow-y-auto font-mono text-sm"
+        <LogSection
+          title="Dataset Log"
+          isOpen={mainLogOpen}
+          onToggle={toggleMainLog}
+          otherSectionOpen={sourcesLogOpen}
         >
-          {logLines.map((line, index) => {
-            const { timestamp, message } = parseLogLine(line);
-            const isTunaLog = message.startsWith('[TUNA]');
+          <LogContent lines={logLines} />
+        </LogSection>
 
-            return (
-              <div
-                key={index}
-                className={`
-                  text-gray-300 relative min-h-[32px] py-1
-                  ${isTunaLog ? 'bg-[#1F808D]/10' : ''}
-                `}
-              >
-                <div className="w-full px-4 flex items-start">
-                  <span className="text-gray-500 shrink-0 w-[85px]">{timestamp}</span>
-                  <span className="text-accent mr-2 shrink-0">→</span>
-                  <span className="break-words whitespace-pre-wrap">{message}</span>
-                </div>
-                {isTunaLog && (
-                  <div className="absolute inset-0 -left-2 bg-[#1F808D]/10 -z-10" />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <LogSection
+          title="Sources"
+          isOpen={sourcesLogOpen}
+          onToggle={toggleSourcesLog}
+          otherSectionOpen={mainLogOpen}
+        >
+          <LogContent lines={logLines} />
+        </LogSection>
       </motion.div>
 
       <motion.div
