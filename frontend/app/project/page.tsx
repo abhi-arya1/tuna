@@ -103,7 +103,7 @@ const ProjectPage = () => {
             transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="w-full"
           >
-            {/* {
+            {
               step === ProjectMakeStatus.USER_INPUT && (
                 <UserInitialInput
                   onMove={handleUserInitialInput}
@@ -126,8 +126,8 @@ const ProjectPage = () => {
               step === ProjectMakeStatus.DS_GENERATION && (
                 <UserDatasetGenInput />
               )
-            } */}
-            <DatasetGeneration statusText='building' logEntries={["hello", "goodbye"]} />
+            }
+            {/* <DatasetGeneration statusText='building' logContent='hello'/> */}
           </motion.div>
         </AnimatePresence>
       </div>
