@@ -67,12 +67,14 @@ const LogContent = ({ lines }: { lines: string[] }) => {
     };
   };
 
+  const validLines = lines.filter(line => line && line.trim().length > 0);
+
   return (
     <div
       ref={logBoxRef}
       className="h-full overflow-y-auto font-mono text-sm"
     >
-      {lines.map((line, index) => {
+      {validLines.map((line, index) => {
         const { timestamp, message } = parseLogLine(line);
         const isTunaLog = message.startsWith('[TUNA]');
 
@@ -115,10 +117,18 @@ const DatasetGeneration = ({
   const [mainLogOpen, setMainLogOpen] = useState(true);
   const [sourcesLogOpen, setSourcesLogOpen] = useState(false);
 
-  const mockLogContent = `<<10:20:39>> Initializing dataset generator...
-<<10:20:40>> [TUNA] Starting your environment`;
+  const logLines = (logContent || "").split('\n');
 
-  const logLines = (logContent || mockLogContent).split('\n');
+  const sourcesLines = sources.map(source => {
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    return `<<${time}>> ${source}`;
+  });
 
   const toggleMainLog = () => {
     setMainLogOpen(!mainLogOpen);
@@ -185,7 +195,7 @@ const DatasetGeneration = ({
           onToggle={toggleSourcesLog}
           otherSectionOpen={mainLogOpen}
         >
-          <LogContent lines={logLines} />
+          <LogContent lines={sourcesLines} />
         </LogSection>
       </motion.div>
 

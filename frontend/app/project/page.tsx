@@ -76,7 +76,7 @@ const ProjectPage = () => {
             setDsOValue((prev) => prev + (msg?.text || ""));
             setDataset(msg?.dataset || []);
             setLogContent((prev) => prev + (msg?.log || ""));
-            setSources(msg?.sources || []);
+            setSources(msg?.sources);
             setComplete(msg?.complete || false);
           default:
             break;
