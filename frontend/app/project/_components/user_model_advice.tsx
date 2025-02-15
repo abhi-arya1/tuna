@@ -1,4 +1,3 @@
-// app/projects/components/ModelAdvice.tsx
 "use client";
 
 import React, { useState } from 'react';
@@ -62,9 +61,9 @@ const ModelAdvice = ({
             className="mt-1.5 h-4 w-4 border-gray-700 rounded-sm checked:bg-accent hover:border-accent focus:ring-accent"
           />
           <div className="flex-1">
-            <div className="text-lg font-medium flex items-center gap-2">
-              {recommendationModel?.id}
-              <span className="text-accent text-sm border border-accent px-2 py-0.5">Recommended</span>
+            <div className="flex items-center justify-between">
+            <span className="text-lg font-medium">{recommendationModel?.id}</span>
+            <span className="text-accent text-sm border border-accent px-2 py-0.5 ml-2">Recommended</span>
             </div>
             <div className="text-gray-400 text-sm">{recommendationModel?.created_at} · {recommendationModel?.downloads}</div>
           </div>

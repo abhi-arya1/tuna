@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useEnterSubmit } from '@/components/hooks/enter-submit';
 
 const UserDatasetGenInput: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
