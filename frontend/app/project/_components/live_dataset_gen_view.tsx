@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+
 const DatasetGeneration = ({
   statusText,
   logContent,
-  dataset, 
+  dataset,
   sources,
   complete
 }: {
@@ -80,7 +81,7 @@ const DatasetGeneration = ({
       >
         <div
           ref={logBoxRef}
-          className="h-full overflow-y-auto font-mono text-sm whitespace-pre-wrap"
+          className="h-full overflow-y-auto font-mono text-sm"
         >
           {logLines.map((line, index) => {
             const { timestamp, message } = parseLogLine(line);
@@ -90,14 +91,14 @@ const DatasetGeneration = ({
               <div
                 key={index}
                 className={`
-                  text-gray-300 relative h-8 flex items-center
+                  text-gray-300 relative min-h-[32px] py-1
                   ${isTunaLog ? 'bg-[#1F808D]/10' : ''}
                 `}
               >
-                <div className="w-full px-4 flex items-center">
-                  <span className="text-gray-500 min-w-[85px]">{timestamp}</span>
-                  <span className="text-accent mr-2">→</span>
-                  {message}
+                <div className="w-full px-4 flex items-start">
+                  <span className="text-gray-500 shrink-0 w-[85px]">{timestamp}</span>
+                  <span className="text-accent mr-2 shrink-0">→</span>
+                  <span className="break-words whitespace-pre-wrap">{message}</span>
                 </div>
                 {isTunaLog && (
                   <div className="absolute inset-0 -left-2 bg-[#1F808D]/10 -z-10" />

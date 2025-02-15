@@ -7,9 +7,9 @@ from sdks.perplexity import stream_pplx_response
 
 # class DSGeneration(BaseModel):
 #     type: str
-#     text: str 
+#     text: str
 #     dataset: list[dict]
-#     log: str 
+#     log: str
 #     sources: list[str]
 
 async def get_plan(data: WSRequest, send_handler: Callable) -> str:
@@ -18,9 +18,9 @@ async def get_plan(data: WSRequest, send_handler: Callable) -> str:
     async for chunk in await client.chat.completions.create(
         model=GroqModels.LLAMA_3_3_70B_VERSATILE.value,
         messages=[{
-            "role": "system", 
+            "role": "system",
             "content": """
-            You are a dataset building planner. Your job is to create a question for a semantic web-scraper 
+            You are a dataset building planner. Your job is to create a question for a semantic web-scraper
             to generate the sources that you can then scrape to build the dataset of choice, based on the user's
             query. DO NOT INCLUDE ANYTHING IN YOUR RESPONSE BEYOND THE QUESTION FOR THE WEB-SCRAPER LLM.
             """
@@ -55,9 +55,9 @@ async def get_initial_text(data, send_handler):
     async for chunk in await client.chat.completions.create(
         model=GroqModels.LLAMA_3_3_70B_VERSATILE.value,
         messages=[{
-            "role": "system", 
+            "role": "system",
             "content": """
-            You are a dataset building response agent. You work very closely with a user that wants to 
+            You are a dataset building response agent. You work very closely with a user that wants to
             create a dataset to fine-tune their AI model. Your job is to provide a VERY BRIEF detail
             into the plan for building the dataset. DO NOT USE ANY MARKDOWN SYNTAX IN YOUR RESPONSE.
             YOUR RESPONSE MUST BE AT MAXIMUM TWO SENTENCES, AND BRIEFLY DESCRIBE THE PLAN IN A HUMAN-READABLE WAY
@@ -100,7 +100,4 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
 
     planned_prompt = await get_plan(data, send_handler)
     await get_initial_text(data, send_handler)
-    await stream_pplx_response(data, planned_prompt, send_handler)
-
-
-    
+    # await stream_pplx_response(data, planned_prompt, send_handler)
