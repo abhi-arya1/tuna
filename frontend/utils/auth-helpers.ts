@@ -46,7 +46,8 @@ export async function signOut(): Promise<string> {
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();
     if (error) { 
-        return '/auth/error';
+        console.log(error)
+        return '/';
     }
     // location.reload();
     return '/';
