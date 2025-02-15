@@ -51,7 +51,7 @@ const UserDatasetGenInput: React.FC = () => {
           <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
                           flex items-center gap-2 transition-colors duration-200">
             Continue
-            <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
+            <span className="text-sm py-0.5 text-gray-200">⏎</span>
           </button>
         </div>
       </motion.div>

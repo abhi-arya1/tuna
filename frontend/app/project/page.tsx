@@ -9,9 +9,9 @@ import ModelAdvice from './_components/user_model_advice';
 const ProjectPage = () => {
   return (
     <main className="min-h-screen bg-background text-white overflow-hidden">
-      <div className="fixed top-0 left-0 right-0 h-1 bg-gray-800">
+      {/* <div className="fixed top-0 left-0 right-0 h-1 bg-gray-800">
         <div className="h-full w-[16.67%] bg-accent transition-all duration-300" />
-      </div>
+      </div> */}
 
       <div className="max-w-4xl mx-auto min-h-screen flex items-center justify-center p-8">
         <AnimatePresence mode="wait">
@@ -24,8 +24,8 @@ const ProjectPage = () => {
             className="w-full"
           >
             {/* <UserInitialInput /> */}
-            {/* <ModelAdvice /> */}
-            <UserDatasetGenInput />
+            <ModelAdvice />
+            {/* <UserDatasetGenInput /> */}
           </motion.div>
         </AnimatePresence>
       </div>
