@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useEnterSubmit } from '@/components/hooks/enter-submit';
 import type { KeyboardEvent } from 'react';
 
 const UserDatasetGenInput = ({
@@ -72,9 +71,6 @@ const UserDatasetGenInput = ({
                         focus:outline-none focus:border-accent
                         transition-all duration-200"
             />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">
-              Press Enter
-            </div>
           </div>
           <button
             className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
@@ -82,7 +78,6 @@ const UserDatasetGenInput = ({
             onClick={handleSubmit}
           >
             Continue
-            <span className="text-sm py-0.5 text-gray-200">⏎</span>
           </button>
         </div>
         {error && (

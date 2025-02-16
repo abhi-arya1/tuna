@@ -177,8 +177,7 @@ const LiveTrainingView = ({
                      flex items-center gap-2 transition-colors duration-200"
           onClick={() => onMove()}
         >
-          Continue
-          <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
+            Deploy
         </button>
       </motion.div>
     </div>

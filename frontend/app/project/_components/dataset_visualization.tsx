@@ -105,7 +105,6 @@ const DatasetViewer: React.FC<DatasetViewerProps> = ({
             onClick={onMove}
           >
             Continue
-            <span className="text-sm py-0.5 text-gray-200">⏎</span>
           </button>
         </div>
       </motion.div>

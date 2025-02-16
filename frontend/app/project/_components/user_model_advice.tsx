@@ -3,21 +3,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { HFModel } from '@/lib/dtypes';
 
-const useEnter = (callback: () => void) => {
-  const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      callback();
-    }
-  }, [callback]);
-
-  useEffect(() => {
-    document.addEventListener('keypress', handleKeyPress);
-    return () => {
-      document.removeEventListener('keypress', handleKeyPress);
-    };
-  }, [handleKeyPress]);
-};
-
 const ModelSkeleton = () => (
   <div className="flex items-start space-x-4 p-2">
     <div className="mt-1.5 h-4 w-4 bg-gray-800 rounded-sm animate-pulse" />
@@ -56,13 +41,6 @@ const ModelAdvice = ({
 }) => {
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
 
-  const handleSubmit = useCallback(() => {
-      if (selectedModel) {
-        onMove(selectedModel);
-      }
-    }, [selectedModel, onMove]);
-
-    useEnter(handleSubmit);
 
   const filteredModels = models?.filter(model => model.id !== recommendationModel?.id) ?? [];
 
@@ -183,7 +161,6 @@ const ModelAdvice = ({
                           flex items-center gap-2 transition-colors duration-200"
                           onClick={() => onMove(selectedModel)}>
           Continue
-          <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
         </button>
       </motion.div>
     </div>

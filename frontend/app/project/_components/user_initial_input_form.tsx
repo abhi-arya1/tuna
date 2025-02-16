@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useEnterSubmit } from '@/components/hooks/enter-submit';
 import { haloGrotesk } from '@/app/fonts';
 
 const UserInitialInput = ({
@@ -15,16 +14,7 @@ const UserInitialInput = ({
   setInputValue: (input: string) => void;
 }) => {
   const [error, setError] = useState("");
-  const [showEnterHint, setShowEnterHint] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEnterSubmit(() => {
-    if (inputValue) {
-      onMove(inputValue);
-    } else {
-      setError("Please enter details on your ideal model...."); // FIXME: LATER
-    }
-  });
 
   useEffect(() => {
     const checkOverlap = () => {
@@ -43,7 +33,6 @@ const UserInitialInput = ({
       const inputWidth = input.offsetWidth;
       document.body.removeChild(span);
 
-      setShowEnterHint(textWidth < inputWidth - 100);
     };
 
     checkOverlap();
@@ -88,11 +77,6 @@ const UserInitialInput = ({
                         focus:outline-none focus:border-accent
                         transition-all duration-200"
             />
-            {showEnterHint && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm transition-opacity duration-200">
-                Press Enter
-              </div>
-            )}
           </div>
           <button
             className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
@@ -106,7 +90,6 @@ const UserInitialInput = ({
             }}
           >
             Continue
-            <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
           </button>
         </div>
         {error && (

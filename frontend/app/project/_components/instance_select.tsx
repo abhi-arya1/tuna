@@ -110,7 +110,6 @@ const InstanceSelect = ({
                           flex items-center gap-2 transition-colors duration-200"
                           onClick={() => onMove(selectedInstance || EC2_P5)}>
           Continue
-          <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
         </button>
       </motion.div>
     </div>

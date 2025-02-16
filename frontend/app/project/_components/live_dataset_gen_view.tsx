@@ -222,7 +222,6 @@ const DatasetGeneration = ({
 
   return (
     <div className="space-y-8">
-      {/* Header and status text remain the same */}
       <div className="space-y-2">
         <motion.span
           className="text-gray-400 text-sm"
@@ -288,7 +287,6 @@ const DatasetGeneration = ({
           onClick={() => onMove()}
         >
           Continue
-          <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
         </button>
       </motion.div>
     </div>
