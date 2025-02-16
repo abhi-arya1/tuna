@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useEnterSubmit } from '@/components/hooks/enter-submit';
 import { motion } from 'framer-motion';
 import { ProjectMakeStatus } from '@/lib/dtypes';
 import { useRouter } from 'next/navigation';
@@ -27,14 +26,6 @@ const SearchInput = () => {
       setError('Please tell us about your ideal model...');
     }
   };
-
-  useEnterSubmit(() => {
-    if (inputValue) {
-      handleMove();
-    } else {
-      setError('Please tell us about your ideal model...');
-    }
-  });
 
   useEffect(() => {
     const checkOverlap = () => {
