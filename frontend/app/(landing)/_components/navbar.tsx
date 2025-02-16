@@ -50,9 +50,9 @@ const Navbar: React.FC = () => {
           <Logo />
 
           <div className="flex items-center gap-8">
-            <NavLink href="#docs" label="Docs" />
-            <NavLink href="#use-cases" label="Use Cases" />
-            <NavLink href="#blog" label="Blog" />
+            {/* <NavLink href="#docs" label="Docs" /> */}
+            {/* <NavLink href="#use-cases" label="Use Cases" /> */}
+            {/* <NavLink href="#blog" label="Blog" /> */}
 
             <div className="flex items-center gap-4">
               <Button variant="primary">
