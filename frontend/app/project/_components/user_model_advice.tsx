@@ -1,7 +1,22 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { HFModel } from '@/lib/dtypes';
+
+const useEnter = (callback: () => void) => {
+  const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      callback();
+    }
+  }, [callback]);
+
+  useEffect(() => {
+    document.addEventListener('keypress', handleKeyPress);
+    return () => {
+      document.removeEventListener('keypress', handleKeyPress);
+    };
+  }, [handleKeyPress]);
+};
 
 const ModelSkeleton = () => (
   <div className="flex items-start space-x-4 p-2">
@@ -40,6 +55,14 @@ const ModelAdvice = ({
     recommendationModel: HFModel | null;
 }) => {
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
+
+  const handleSubmit = useCallback(() => {
+      if (selectedModel) {
+        onMove(selectedModel);
+      }
+    }, [selectedModel, onMove]);
+
+    useEnter(handleSubmit);
 
   const filteredModels = models?.filter(model => model.id !== recommendationModel?.id) ?? [];
 

@@ -1,19 +1,34 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useEnterSubmit } from '@/components/hooks/enter-submit';
+import type { KeyboardEvent } from 'react';
 
 const UserDatasetGenInput = ({
   onMove,
   inputValue,
   setInputValue
 }: {
-  onMove: (input: string) => void; 
+  onMove: (input: string) => void;
   inputValue: string;
   setInputValue: (input: string) => void;
 }) => {
   const [error, setError] = useState("");
+
+  const handleSubmit = useCallback(() => {
+    if (inputValue) {
+      onMove(inputValue);
+    } else {
+      setError("Please enter details on your ideal dataset....");
+    }
+  }, [inputValue, onMove]);
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
 
   return (
     <div className="space-y-8 bg-transparent">
@@ -47,7 +62,11 @@ const UserDatasetGenInput = ({
             <input
               type="text"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                if (error) setError("");
+              }}
+              onKeyDown={handleKeyDown}
               className="w-full h-12 bg-transparent border border-gray-700
                         text-white/90 placeholder-gray-600 px-4
                         focus:outline-none focus:border-accent
@@ -57,20 +76,24 @@ const UserDatasetGenInput = ({
               Press Enter
             </div>
           </div>
-          <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
-                          flex items-center gap-2 transition-colors duration-200"
-            onClick={() => {
-              if(inputValue) {
-                onMove(inputValue);
-              } else {
-                setError("Please enter details on your ideal dataset....") // FIXME: LATER
-              }
-            }}           
+          <button
+            className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
+                      flex items-center gap-2 transition-colors duration-200"
+            onClick={handleSubmit}
           >
             Continue
             <span className="text-sm py-0.5 text-gray-200">⏎</span>
           </button>
         </div>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-red-500 mt-2 text-sm"
+          >
+            {error}
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );
