@@ -183,11 +183,19 @@ async def build_dataset(
     
     # print(final_prompt)
     with open("data/dataset.jsonl", "w") as f:
-        cleaned_prompt = "\n".join(
-            re.sub(r'^[^a-zA-Z0-9{]+|[^a-zA-Z0-9}]+$', '', line.strip())  # Removes unwanted leading/trailing chars
-            for line in final_prompt.split("\n")
-        )
-        f.write(cleaned_prompt)
+        valid_lines = []
+        for line in final_prompt.split("\n"):
+            line = line.strip()
+            cleaned_line = re.sub(r'^[^a-zA-Z0-9{]+|[^a-zA-Z0-9}]+$', '', line)
+            if cleaned_line.startswith("{") and cleaned_line.endswith("}"):
+                try:
+                    # Validate JSON format
+                    json.loads(cleaned_line)
+                    valid_lines.append(cleaned_line)
+                except json.JSONDecodeError:
+                    continue
+
+        f.write("\n".join(valid_lines))
 
 
 #### FINAL DELIVERY
@@ -228,10 +236,10 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
         
         await websocket.send(json.dumps({
             "url": url,
-            "instruction": """
-            Please get me code examples of graphviz from this website.
-            The code itself should go in requested_item, with the detail 
-            of what the code represents in item_detail. Please pick varying 
+            "instruction": f"""
+            Please get me examples that go along these lines: {usrprompt}.
+            The response itself should go in requested_item, with the detail 
+            of what the response represents in item_detail. Please pick varying 
             examples to make sure that the dataset is diverse.
             """
         }))

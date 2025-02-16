@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Literal, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from enum import Enum 
 from datetime import datetime
 
@@ -42,6 +42,27 @@ class ChatTypes(Enum):
 
 
 ### REQUEST TYPE MODELS 
+
+class Message(BaseModel):
+    role: Literal["system", "user", "assistant"]
+    content: str
+
+class ChatCompletionRequest(BaseModel):
+    model: str
+    messages: List[Message]
+    temperature: Optional[float] = 0.7
+    top_p: Optional[float] = 0.9
+    max_tokens: Optional[int] = 1000
+    stream: Optional[bool] = True
+
+class ChatCompletionResponse(BaseModel):
+    id: str = Field(default="chatcmpl-default")
+    object: str = "chat.completion"
+    created: int
+    model: str
+    choices: List[dict]
+    usage: dict
+    
 
 class WSRequest(BaseModel):
     type: Literal["idea_input", "dataset_input", "model_choice", "train_instance_choice", "train", "deploy"]

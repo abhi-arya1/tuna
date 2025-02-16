@@ -10,7 +10,6 @@ import DatasetGeneration from './_components/live_dataset_gen_view';
 import DatasetViewer from './_components/dataset_visualization';
 import InstanceSelect from './_components/instance_select';
 import LiveTrainingView from './_components/live_training_view';
-import { SendToBack } from 'lucide-react';
 import Playground from './_components/playground';
 
 const ProjectPage = () => {
@@ -124,7 +123,7 @@ const ProjectPage = () => {
     connect();
   };
 
-  const handleUserInitialInput = () => {
+  const handleUserInitialInput = (_: string) => {
     setStep(ProjectMakeStatus.MODEL_ADVICE);
     sendMessage("idea_input", modelIValue);
   }

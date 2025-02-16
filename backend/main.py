@@ -1,12 +1,13 @@
-import asyncio, paramiko
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+import asyncio, paramiko, json, time
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from dotenv import load_dotenv  
 from pathlib import Path
 from os import getenv
-from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse, StreamingResponse
 from core.response import respond
 from sdks.hf import get_models, get_model
-from util.dtypes import WSRequest
+from util.dtypes import WSRequest, ChatCompletionRequest, ChatCompletionResponse, Message
+from util.helpers import stream_from_ssh
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv(Path(__file__).parent / ".env")
@@ -40,16 +41,35 @@ async def get_dataset():
 
 
 @app.post("/v1/chat/completions")
-async def generate(request: ChatRequest):
+async def create_chat_completion(request: ChatCompletionRequest):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(username="ubuntu", hostname=getenv("SSH_HOST_H100"))
+        ssh.connect(
+            hostname=getenv("SSH_HOST_H100"),
+            username="ubuntu",
+            key_filename=getenv("SSH_KEY_PATH")
+        )
 
+        command = (
+            'source /home/ubuntu/runway/.venv/bin/activate && '
+            'python3 /home/ubuntu/runway/output.py'
+        )
+        stdin, stdout, stderr = ssh.exec_command(command)
         
+        json_request = json.dumps(request.dict())
+        stdin.write(json_request)
+        stdin.channel.shutdown_write()
         
-    
+        output = stdout.read().decode("utf-8")
+        # print(f"<<{output.strip()}>>")
+        ssh.close()
+        
+        response_data = json.loads(output)
+        # print(f"<<{response_data}>>")
+        return JSONResponse(response_data)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

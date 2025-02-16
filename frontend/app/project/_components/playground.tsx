@@ -4,6 +4,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Loader2 } from 'lucide-react';
 import type { KeyboardEvent } from 'react';
+import OpenAI from "openai";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -56,32 +57,30 @@ const Playground = ({ modelId, onError }: PlaygroundProps) => {
       content: input.trim()
     };
 
+    const inputMessages = [...messages, userMessage];
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
-      // FIXME: Replace with actual API call
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          modelId,
-          messages: [...messages, userMessage],
-        }),
+      const openai = new OpenAI({
+        apiKey: "runway_key",
+        baseURL: "http://localhost:8000/v1",
+        dangerouslyAllowBrowser: true
       });
 
-      if (!response.ok) throw new Error('Failed to get response');
-
-      const data = await response.json();
+      const response = await openai.chat.completions.create({
+        model: "runway_base",
+        messages: inputMessages
+      });
 
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: data.response
+        content: response.choices[0].message.content || ""
       }]);
     } catch (error) {
+      console.error(error);
       onError?.(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsLoading(false);
