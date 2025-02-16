@@ -120,6 +120,14 @@ const ProjectPage = () => {
     sendMessage("dataset_input", dsIValue);
   }
 
+    const handleDatasetGeneration = () => {
+        setStep(ProjectMakeStatus.DS_VISUALIZATION);
+    }
+
+  // const handleDatasetVisualization = () => {
+  //     setStep(ProjectMakeStatus.DS_VISUALIZATION);
+  // }
+
   return (
     <main className="min-h-screen bg-background text-white overflow-hidden">
       {/* <div className="fixed top-0 left-0 right-0 h-1 bg-gray-800">
@@ -167,17 +175,19 @@ const ProjectPage = () => {
             {
               step === ProjectMakeStatus.DS_GENERATION && (
                 <DatasetGeneration
-                  statusText={dsOValue}
-                  logContent={logContent}
-                  dataset={dataset}
-                  sources={sources}
-                  complete={complete}
+                    onMove={handleDatasetGeneration}
+                    statusText={dsOValue}
+                    logContent={logContent}
+                    dataset={dataset}
+                    sources={sources}
+                    complete={complete}
                 />
               )
             }
             {
               step === ProjectMakeStatus.DS_VISUALIZATION && (
                 <DatasetViewer
+                    // onMove={handleDatasetVisualization}
                     data={dataset}
                 />
               )
