@@ -27,7 +27,7 @@ const LandingPage: React.FC = () => {
         </div>
 
         <div className="flex flex-col py-1 mt-20">
-          <h3 className="text-gray-400 text-center">Takeoff at speed, powered by</h3>
+          <h3 className={`${haloGrotesk.className} text-gray-400 text-center`}>Takeoff at speed, powered by</h3>
           <div className="flex flex-row gap-x-4 justify-center items-center pt-4">
             <img src="/groq.png" alt="Hero Image" className="h-8" />
             <img src="/perplexity.png" alt="Hero Image" className="h-8" />

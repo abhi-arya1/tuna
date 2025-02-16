@@ -8,6 +8,9 @@ import { gothicFont, haloGrotesk } from "./fonts";
 export const metadata: Metadata = {
   title: "Runway",
   description: "The Vercel for AI Models",
+  icons: {
+      icon: '/favicon.ico',
+    },
 };
 
 export default function RootLayout({
