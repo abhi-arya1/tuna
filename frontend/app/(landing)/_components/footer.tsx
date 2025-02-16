@@ -18,12 +18,17 @@ const Footer = () => {
                     </div>
 
                     <p className="w-[300px] text-gray-300 tracking-wide text-xs">
-                        <span className={inter.className}>©</span> 2025 Runway<br/><br/>Built with ❤️ at TreeHacks 2025
-
-                        <br/>by the team at:<br/>
-                        <a href="https://opennote.me" target="_blank">
-                            <img src="/opennotebanner.png" alt="Opennote Logo" className="w-36 inline-block" />
+                        <span className={inter.className}>©</span> 2025 Runway<br/><br/>Built with ❤️ at TreeHacks 2025 by:<br/>
+                        <a href="https://www.instagram.com/rishisrihari/" target="_blank" className="hover:text-accent">
+                           Rishi Srihari
                         </a>
+                        <span> and </span>
+                        <a href="https://www.instagram.com/abhi.aaaaaa/" target="_blank" className="hover:text-accent">
+                            Abhi Arya
+                        </a>
+                        {/* <a href="https://opennote.me" target="_blank">
+                            <img src="/opennotebanner.png" alt="Opennote Logo" className="w-36 inline-block" />
+                        </a> */}
                     </p>
                     <div className="flex flex-col gap-y-2 mt-4">
                         <div className="flex flex-row items-start gap-x-6">
