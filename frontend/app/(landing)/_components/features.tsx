@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Brain, Cloud, BookOpen, Database, Workflow, Stars, Cpu, Code } from 'lucide-react';
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 
 interface Feature {
   icon: React.ReactNode;
@@ -52,6 +52,8 @@ const features = [
 ];
 
 const FeatureGrid = () => {
+  const router = useRouter();
+
   return (
     <div className="w-full py-20">
       <div className="max-w-[1200px] mx-auto px-6">
@@ -77,9 +79,9 @@ const FeatureGrid = () => {
             <p className="text-[20px] leading-[1.6] text-[#888] mb-8">
               Create rich datasets, train production models, and deploy to enterprise infrastructure—all through natural language.
             </p>
-            <div className="flex gap-4">
-              <button className="px-6 py-3 bg-white text-black hover:bg-gray-200 transition-colors"
-                onClick={() => redirect('/project')}
+            <div className="flex gap-4 pointer-events-auto">
+              <button className="px-6 py-3 pointer-events-auto hover:cursor-pointer bg-white text-black hover:bg-gray-400 transition-colors"
+                onClick={() => router.push('/project')}
               >
                 Start Building
               </button>
