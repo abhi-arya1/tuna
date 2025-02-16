@@ -49,18 +49,27 @@ const LogContent = ({ lines }: { lines: string[] }) => {
       const timestamp = timeMatch[1];
       const rawMessage = timeMatch[2];
       const isTunaLog = rawMessage.startsWith('[TUNA]');
-      const message = isTunaLog ? rawMessage.replace('[TUNA] ', '') : rawMessage;
+      const isErrorLog = rawMessage.startsWith('[ERROR]');
+      let message = rawMessage;
+
+      if (isTunaLog) {
+        message = rawMessage.replace('[TUNA] ', '');
+      } else if (isErrorLog) {
+        message = rawMessage.replace('[ERROR] ', '');
+      }
 
       return {
         timestamp,
         message,
-        isTunaLog
+        isTunaLog,
+        isErrorLog
       };
     }
     return {
       timestamp: "",
       message: line,
-      isTunaLog: line.startsWith('[TUNA]')
+      isTunaLog: line.startsWith('[TUNA]'),
+      isErrorLog: line.startsWith('[ERROR]')
     };
   };
 
@@ -72,7 +81,7 @@ const LogContent = ({ lines }: { lines: string[] }) => {
       className="h-full overflow-y-auto font-mono text-sm"
     >
       {validLines.map((line, index) => {
-        const { timestamp, message, isTunaLog } = parseLogLine(line);
+        const { timestamp, message, isTunaLog, isErrorLog } = parseLogLine(line);
 
         return (
           <div
@@ -80,15 +89,19 @@ const LogContent = ({ lines }: { lines: string[] }) => {
             className={`
               text-gray-300 relative min-h-[32px] py-1
               ${isTunaLog ? 'bg-[#1F808D]/10' : ''}
+              ${isErrorLog ? 'bg-[#440C13]' : ''}
             `}
           >
             <div className="w-full px-4 flex items-start">
               <span className="text-gray-500 shrink-0 w-[85px]">{timestamp}</span>
-              <span className="text-accent mr-2 shrink-0">→</span>
+              <span className={`mr-2 shrink-0 ${isErrorLog ? 'text-red-400' : 'text-accent'}`}>→</span>
               <span className="break-words whitespace-pre-wrap">{message}</span>
             </div>
             {isTunaLog && (
               <div className="absolute inset-0 -left-2 bg-[#1F808D]/10 -z-10" />
+            )}
+            {isErrorLog && (
+              <div className="absolute inset-0 -left-2 bg-[#440C13] -z-10" />
             )}
           </div>
         );
