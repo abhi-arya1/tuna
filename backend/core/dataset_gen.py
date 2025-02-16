@@ -217,8 +217,14 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
     response, sources = await stream_pplx_response(planned_prompt, send_handler)
     
     async with websockets.connect("ws://localhost:8080/ws") as websocket:
+        url = response.citations[0]
+        if response.citations[0].endswith(".pdf"):
+            url = response.citations[1]
+        if "github" in response.citations[0]:
+            url = response.citations[1]
+        
         await websocket.send(json.dumps({
-            "url": response.citations[0],
+            "url": url,
             "instruction": """
             Please get me code examples of graphviz from this website.
             The code itself should go in requested_item, with the detail 

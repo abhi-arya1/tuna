@@ -6,10 +6,19 @@ from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse
 from core.response import respond
 from sdks.hf import get_models, get_model
 from util.dtypes import WSRequest
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv(Path(__file__).parent / ".env")
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS", "PUT"],
+    allow_headers=["*"],
+)
+
 active_socket: WebSocket | None = None 
 
 @app.get("/")
@@ -23,7 +32,9 @@ async def get_model_list():
 @app.get('/dataset')
 async def get_dataset():
     with open("data/dataset.jsonl", "r") as file:
-        return PlainTextResponse(content=file.read())
+        return JSONResponse(content={
+            "dataset": file.read().splitlines()
+        }, status_code=200)
 
 @app.websocket("/wsc")
 async def websocket_endpoint(websocket: WebSocket):
