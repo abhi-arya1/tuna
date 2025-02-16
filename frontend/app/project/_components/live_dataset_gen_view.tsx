@@ -56,14 +56,21 @@ const LogContent = ({ lines }: { lines: string[] }) => {
   const parseLogLine = (line: string) => {
     const timeMatch = line.match(/^<<(\d{2}:\d{2}:\d{2})>> (.+)$/);
     if (timeMatch) {
+      const timestamp = timeMatch[1];
+      const rawMessage = timeMatch[2];
+      const isTunaLog = rawMessage.startsWith('[TUNA]');
+      const message = isTunaLog ? rawMessage.replace('[TUNA] ', '') : rawMessage;
+
       return {
-        timestamp: timeMatch[1],
-        message: timeMatch[2]
+        timestamp,
+        message,
+        isTunaLog
       };
     }
     return {
       timestamp: "",
-      message: line
+      message: line,
+      isTunaLog: line.startsWith('[TUNA]')
     };
   };
 
@@ -75,8 +82,7 @@ const LogContent = ({ lines }: { lines: string[] }) => {
       className="h-full overflow-y-auto font-mono text-sm"
     >
       {validLines.map((line, index) => {
-        const { timestamp, message } = parseLogLine(line);
-        const isTunaLog = message.startsWith('[TUNA]');
+        const { timestamp, message, isTunaLog } = parseLogLine(line);
 
         return (
           <div
