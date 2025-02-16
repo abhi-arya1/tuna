@@ -21,7 +21,7 @@ const ProjectPage = () => {
             transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="w-full"
           >
-            <UserInput />
+            {/* <UserInput /> */}
           </motion.div>
         </AnimatePresence>
       </div>
