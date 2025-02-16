@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import SearchInput from './_components/search-input';
+import EasyUse from './_components/easy_use';
+import FeatureGrid from './_components/features';
+import { Zap, BookOpen, Database, Globe, Cpu, Code } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
   return (
@@ -23,6 +26,19 @@ const LandingPage: React.FC = () => {
         <div className="pointer-events-auto px-4 max-w-[900px] w-full mx-auto">
             <SearchInput />
         </div>
+
+        {/* <div className="pt-12">
+            <EasyUse />
+        </div> */}
+
+        <div className="py-12">
+            <img src="/images/hero.png" alt="Hero Image" className="w-full max-w-3xl mx-auto" />
+        </div>
+
+        <div className="mb-6 mt-24">
+          <FeatureGrid />
+        </div>
+
       </div>
     </main>
   );
