@@ -2,7 +2,7 @@ import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from dotenv import load_dotenv  
 from pathlib import Path
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 from core.response import respond
 from sdks.hf import get_models, get_model
 from util.dtypes import WSRequest
@@ -19,6 +19,10 @@ async def read_root():
 @app.get('/models')
 async def get_model_list():
     return { "models": get_models() }
+
+@app.get('/dataset')
+async def get_dataset():
+    return FileResponse("data/dataset.jsonl")
 
 @app.websocket("/wsc")
 async def websocket_endpoint(websocket: WebSocket):

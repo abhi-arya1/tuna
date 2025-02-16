@@ -13,6 +13,8 @@ from sdks.perplexity import stream_pplx_response
 #     log: str
 #     sources: list[str]
 
+#### GET PROMPT/PLAN FOR DATASET SCRAPING
+
 async def get_plan(data: WSRequest, send_handler: Callable) -> str:
     final_prompt = ""
 
@@ -24,6 +26,18 @@ async def get_plan(data: WSRequest, send_handler: Callable) -> str:
             You are a dataset building planner. Your job is to create a question for a semantic web-scraper
             to generate the sources that you can then scrape to build the dataset of choice, based on the user's
             query. DO NOT INCLUDE ANYTHING IN YOUR RESPONSE BEYOND THE QUESTION FOR THE WEB-SCRAPER LLM.
+            
+            THIS IS THE PROMPT THAT THE SCRAPER RECIEVES. YOUR QUESTION SHOULD BE OPTIMIZED TO THIS: 
+                You are a model in a dataset generation pipeline. 
+                Your job is to use the user query to search for relevant sources that can
+                supplement the dataset. Explain the sources you provide in very brief detail,
+                All sources will then be used to turn into an input/output dataset for a text-generation
+                model or agent. 
+                You will be given a query from your friend in the pipeline that will guide you towards the 
+                relevant URLs required.
+                You should SPECIFICALLY look for sources that can be used to train a text-generation model.
+                Rank your sources based on the quality of code/output examples and details they can provide.
+                HIGHEST QUALITY SOURCES/CITATIONS SHOULD COME FIRST.
             """
         }, {
             "role": "user",
@@ -59,6 +73,7 @@ async def get_plan(data: WSRequest, send_handler: Callable) -> str:
     return final_prompt
 
 
+#### GET TEXT REPLY
 
 async def get_initial_text(data, send_handler):
     async for chunk in await client.chat.completions.create(
@@ -93,9 +108,89 @@ async def get_initial_text(data, send_handler):
         })
 
 
+#### BUILD DATASET FILE
 
+async def build_dataset(
+    sources: list,
+    data: str, 
+    planner_prompt: str, 
+    scrape_detail: dict, 
+    send_handler: Callable[[dict, Literal["text"]], None]
+) -> None:
+    final_prompt = ""
+    async for chunk in await client.chat.completions.create(
+        model=GroqModels.QWEN_2_5_CODER_32B.value,
+        messages=[{
+            "role": "system",
+            "content": """
+            You are a dataset generation code generation agent. Your job is to create inputs and outputs
+            in the JSONL format given some background information. You will be given the user's initial query 
+            to generate this dataset, as well as the details from an accurate web-scraper that has 
+            the actual formatted model response in `requested_item` and the details of the response for your information in `item_detail`.
+            Given these details, generate the code for the file in the following format.
+
+            { "input": "<A realistic query that the user would provide to the model>", "output": "<The response/requested_item>" }
+
+            You MUST provide nothing at all but the code here, and YOU MUST ALWAYS INCLUDE AT LEAST 20 ENTRIES. Good luck! 
+            """
+        }, {
+            "role": "user",
+            "content": f"""
+            My initial query {data} was used to plan the dataset generation request. 
+            The plan was {planner_prompt}. The web-scraper provided the following details about 
+            accurate input-output based on this: 
+            {scrape_detail}
+            Now, its your job to generate the dataset file in JSONL format.
+            """
+        }],
+        temperature=1,
+        max_tokens=4092,
+        top_p=1,
+        stream=True,
+        stop=None,
+    ):
+        if chunk.choices[0].delta.content:
+            content = chunk.choices[0].delta.content.replace("```", "").replace("json", "").replace("```", "").replace("jsonl", "")
+            final_prompt += content
+        else:
+            continue
+
+        await send_handler({
+            "text": "",
+            "type": "ds_generation",
+            "dataset": [],
+            "log": f"{content if final_prompt else get_log_format(content)}" or "",
+            "sources": sources,
+            "complete": False
+        })
+    
+    await send_handler({
+            "text": "",
+            "type": "ds_generation",
+            "dataset": [],
+            "log": "\n",
+            "sources": sources,
+            "complete": False
+        })
+    await send_handler({
+            "text": "",
+            "type": "ds_generation",
+            "dataset": [],
+            "log": get_log_format(f"Dataset file generated successfully. Time to train", tuna_msg=True),
+            "sources": sources,
+            "complete": False
+        })
+    
+    # print(final_prompt)
+    with open("data/dataset.jsonl", "w") as f:
+        f.write(final_prompt)
+    return final_prompt
+
+
+#### FINAL DELIVERY
 
 async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, Literal["text"]], None]) -> None:
+    usrprompt = data.text
     await send_handler({
             "text": "",
             "type": "ds_generation",
@@ -120,11 +215,10 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
     })
 
     response, sources = await stream_pplx_response(planned_prompt, send_handler)
-    url = "https://graphs.grevian.org/example"
     
     async with websockets.connect("ws://localhost:8080/ws") as websocket:
         await websocket.send(json.dumps({
-            "url": url,
+            "url": response.citations[0],
             "instruction": """
             Please get me code examples of graphviz from this website.
             The code itself should go in requested_item, with the detail 
@@ -143,7 +237,7 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
         })
         
         async for message in websocket: 
-            print("Recieved data: ", message)
+            # print("Recieved data: ", message)
             data = json.loads(message)
             if data["complete"] == True: 
                 await send_handler({
@@ -176,6 +270,9 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
             "complete": False,
             "log": get_log_format("Scraping complete. Generating dataset file", tuna_msg=True),
         })
+
+
+    await build_dataset(sources, usrprompt, planned_prompt, response, send_handler)
 
     
 

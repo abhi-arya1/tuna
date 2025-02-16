@@ -17,7 +17,7 @@ NUMBERED_SECTION_REGEX = re.compile(r"^\d+\.\s")
 async def stream_pplx_response(
     prompt: str,
     send_handler: Optional[Callable[[dict, Literal["text"]], None]] = None,
-) -> PerplexityStreamingResponse:
+) -> tuple[PerplexityStreamingResponse, list]:
     final_req = ""
     final_response = None
     sources = []
@@ -37,6 +37,8 @@ async def stream_pplx_response(
                 You will be given a query from your friend in the pipeline that will guide you towards the 
                 relevant URLs required.
                 You should SPECIFICALLY look for sources that can be used to train a text-generation model.
+                Rank your sources based on the quality of code/output examples and details they can provide.
+                HIGHEST QUALITY SOURCES/CITATIONS SHOULD COME FIRST. DO NOT USE GITHUB URLS AS SOURCES IN ANY WAY.
                 """,
             }, 
             {"role": "user", "content": prompt}
