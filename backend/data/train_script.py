@@ -17,8 +17,14 @@ import json
 from typing import Dict
 from huggingface_hub import login
 
-with open("/home/ubuntu/runway/secrets.txt") as f:
+with open("/home/ubuntu/runway/secrets.txt", "r") as f:
     login(token=f.read().strip())
+
+with open("/home/ubuntu/runway/config.json", "r") as js:
+    config = json.load(js)
+    MODEL = config["model"]
+
+
 
 class CustomCallback(TrainerCallback):
     def __init__(self):
@@ -71,7 +77,7 @@ def main():
 
         # Load Tokenizer
         logger.log("Loading tokenizer...")
-        model_name = "meta-llama/Llama-3.1-8B"
+        model_name = MODEL
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         tokenizer.pad_token = tokenizer.eos_token
         logger.log("Tokenizer loaded successfully")

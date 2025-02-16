@@ -17,10 +17,15 @@ from datetime import datetime
 # )
 #logger = logging.get#logger(__name__)
 
+with open("/home/ubuntu/runway/config.json", "r") as js:
+    config = json.load(js)
+
+MODEL = config["model"]
+
 def load_model():
     #logger.info("Loading base model: meta-llama/Llama-3.1-8B")
     base_model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.1-8B",
+        MODEL,
         torch_dtype=torch.float16,
         device_map="auto"
     )
@@ -79,6 +84,14 @@ try:
     
     #logger.info("Generating response...")
     response_text = generate_response(model, tokenizer, messages, max_tokens, temperature, top_p)
+    assistant_marker = "Assistant:"
+    last_index = response_text.rfind(assistant_marker)
+    if last_index != -1:
+        # Slice the string right after the last occurrence of the marker
+        result = response_text[last_index + len(assistant_marker):].strip()
+    else:
+        result = response_text
+
     #logger.info(f"Response generated: {response_text}")
     
     # Build the full response in one go
