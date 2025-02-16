@@ -29,7 +29,7 @@ const SearchInput: React.FC = () => {
                        text-white/90 placeholder-gray-600 px-4
                        focus:outline-none focus:border-accent
                        transition-all duration-200"
-            placeholder="Enter your OpenAI key..."
+            placeholder="Tell us about your ideal model..."
           />
           <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm">
             Press Enter

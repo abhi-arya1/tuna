@@ -8,7 +8,7 @@ import { Zap, BookOpen, Database, Globe, Cpu, Code } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-12 md:p-24 overflow-x-hidden w-screen bg-background">
+    <main className="flex min-h-screen flex-col items-center justify-center p-12 md:p-24 overflow-x-hidden w-screen bg-background">
       <div className="-z-10 absolute h-[200vw] max-h-[2000px] md:max-h-[1000px] lg:max-h-[1000px] left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
 
       <div className="pointer-events-none mt-[4rem] md:mt-80">
@@ -31,11 +31,12 @@ const LandingPage: React.FC = () => {
             <EasyUse />
         </div> */}
 
-        <div className="py-12">
-            <img src="/images/hero.png" alt="Hero Image" className="w-full max-w-3xl mx-auto" />
+        <div className="flex flex-row gap-x-4 justify-center items-center py-12">
+            <img src="/groq.png" alt="Hero Image" className="h-8" />
+            <img src="/perplexity.png" alt="Hero Image" className="h-8" />
         </div>
 
-        <div className="mb-6 mt-24">
+        <div className="mb-6 mt-5">
           <FeatureGrid />
         </div>
 
