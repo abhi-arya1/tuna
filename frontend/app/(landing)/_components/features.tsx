@@ -35,7 +35,7 @@ const features = [
   {
     icon: <Workflow className="w-4 h-4" />,
     label: "Natural Deployment",
-    title: "Deploy production-ready models by describing what you need.",
+    title: "Deploy production-ready models with OpenAI API Compliance by describing what you need.",
     description: "Tell us your scaling, latency, and cost requirements, and we'll handle the infrastructure decisions automatically."
   },
   {
@@ -47,7 +47,7 @@ const features = [
   {
     icon: <Zap className="w-4 h-4" />,
     label: "State-of-the-Art Hardware",
-    title: "Production-ready infrastructure, accessible through natural language.",
+    title: "Access your own dedicated GPUs for training and inference, or use our shared infrastructure.",
     description: "The same powerful tools used by industry leaders, but with a natural language interface anyone can use."
   }
 ];

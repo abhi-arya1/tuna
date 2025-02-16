@@ -74,10 +74,10 @@ const EC2_P5: EC2Instance = {
     id: "ec2_p5",
     aws_id: "p5.48xlarge",
     provider: "NVIDIA",
-    platform: "AWS",
+    platform: "Lambda",
     gpu: "H100",
     memory_gb: 2048,
-    storage_gb: 30400,
+    storage_gb: 5000,
     vcpus: 192,
 }
 
@@ -85,8 +85,8 @@ const EC2_G4DN: EC2Instance = {
     id: "ec2_g4dn",
     aws_id: "g4dn.8xlarge",
     provider: "NVIDIA",
-    platform: "AWS",
-    gpu: "T4",
+    platform: "Lambda",
+    gpu: "A100",
     memory_gb: 128,
     storage_gb: 900,
     vcpus: 32,
