@@ -26,14 +26,16 @@ import json
 async def respond(data: WSRequest, send_handler: Callable[[dict, Literal["text"]], None]) -> None:
     if(data.type == "idea_input"):
         await model_advice_response(data, send_handler)
-        with open('data/config.json') as f: 
+        with open('data/config.json', 'w') as f: 
             json.dump({
                 "model": ""
             }, f, indent=4)
     if(data.type == "model_choice"):
-        with open('data/config.json') as f:
+        with open('data/config.json', 'r') as f:
             config = json.load(f)
-            config["model"] = data.text
+        
+        config["model"] = data.text
+        with open('data/config.json', 'w') as f:
             json.dump(config, f, indent=4)
     elif (data.type == "dataset_input"):
         await dataset_build_response(data, send_handler)
