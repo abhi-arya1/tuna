@@ -102,17 +102,19 @@ const LogContent = ({ lines }: { lines: string[] }) => {
 };
 
 const DatasetGeneration = ({
-  statusText,
-  logContent,
-  dataset,
-  sources,
-  complete
+    onMove,
+    statusText,
+    logContent,
+    dataset,
+    sources,
+    complete
 }: {
-  statusText: string;
-  logContent: string;
-  dataset: any[];
-  sources: string[];
-  complete: boolean;
+    onMove: () => void;
+    statusText: string;
+    logContent: string;
+    dataset: any[];
+    sources: string[];
+    complete: boolean;
 }) => {
   const [mainLogOpen, setMainLogOpen] = useState(true);
   const [sourcesLogOpen, setSourcesLogOpen] = useState(false);
@@ -206,7 +208,9 @@ const DatasetGeneration = ({
         transition={{ delay: 0.6 }}
       >
         <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
-                          flex items-center gap-2 transition-colors duration-200">
+                          flex items-center gap-2 transition-colors duration-200"
+                          onClick={() => onMove()}
+        >
           Continue
           <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
         </button>

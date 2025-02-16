@@ -10,13 +10,15 @@ interface DatasetEntry {
 }
 
 interface DatasetViewerProps {
-  data: DatasetEntry[];
-  title?: string;
+    // onMove: () => void;
+    data: DatasetEntry[];
+    title?: string;
 }
 
 const DatasetViewer: React.FC<DatasetViewerProps> = ({
-  data,
-  title = "Dataset Preview"
+    // onMove,
+    data,
+    title = "Dataset Preview"
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const entriesPerPage = 2;
@@ -95,6 +97,12 @@ const DatasetViewer: React.FC<DatasetViewerProps> = ({
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
+          <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
+                          flex items-center gap-2 transition-colors duration-200"
+          >
+            Continue
+            <span className="text-sm py-0.5 text-gray-200">⏎</span>
+          </button>
         </div>
       </motion.div>
     </div>
