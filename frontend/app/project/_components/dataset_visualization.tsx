@@ -11,7 +11,7 @@ interface DatasetEntry {
 
 interface DatasetViewerProps {
     // onMove: () => void;
-    data: DatasetEntry[];
+    data: string[];
     title?: string;
 }
 
@@ -20,6 +20,7 @@ const DatasetViewer: React.FC<DatasetViewerProps> = ({
     data,
     title = "Dataset Preview"
 }) => {
+  console.log(data);
   const [currentPage, setCurrentPage] = useState(0);
   const entriesPerPage = 2;
   const totalPages = Math.ceil(data.length / entriesPerPage);
@@ -62,16 +63,18 @@ const DatasetViewer: React.FC<DatasetViewerProps> = ({
         </div>
 
         <div className="divide-y divide-gray-700">
-          {currentEntries.map((entry, index) => (
+          {currentEntries.map((entry, index) => {
+            const item = JSON.parse(entry);
+            return (
             <div key={index} className="grid grid-cols-2 hover:bg-gray-800/50 transition-colors">
               <div className="p-6 font-mono text-sm text-white whitespace-pre-wrap">
-                {entry.input}
+                {item.input}
               </div>
               <div className="p-6 font-mono text-sm text-white whitespace-pre-wrap border-l border-gray-700">
-                {entry.output}
+                {item.output}
               </div>
             </div>
-          ))}
+          )})}
         </div>
 
         <div className="border-t border-gray-700 p-4 flex items-center justify-between">

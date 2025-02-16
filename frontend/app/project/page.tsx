@@ -23,7 +23,7 @@ const ProjectPage = () => {
 
   const [dsIValue, setDsIValue] = useState('');
   const [dsOValue, setDsOValue] = useState('');
-  const [dataset, setDataset] = useState<any[]>([]);
+  const [dataset, setDataset] = useState<string[]>([]);
   const [logContent, setLogContent] = useState<string>("");
   const [sources, setSources] = useState<string[]>([]);
   const [complete, setComplete] = useState(false);
@@ -79,9 +79,8 @@ const ProjectPage = () => {
                 setSources(msg?.sources);
                 setComplete(msg?.complete || false);
             case "ds_visualization":
-                fetch(`${process.env.NEXT_PUBLIC_API_URL!}/dataset`).then((text: any) => {
-                    console.log(text)
-                    setDataset(text)
+                fetch(`${process.env.NEXT_PUBLIC_API_URL!}/dataset`).then((data: Response) => {
+                    data.json().then((data: any) => {console.log(data); setDataset(data.dataset)})
                 })
             default:
                 break;
@@ -125,9 +124,9 @@ const ProjectPage = () => {
     sendMessage("dataset_input", dsIValue);
   }
 
-    const handleDatasetGeneration = () => {
-        setStep(ProjectMakeStatus.DS_VISUALIZATION);
-    }
+  const handleDatasetGeneration = () => {
+      setStep(ProjectMakeStatus.DS_VISUALIZATION);
+  }
 
   // const handleDatasetVisualization = () => {
   //     setStep(ProjectMakeStatus.DS_VISUALIZATION);
@@ -183,7 +182,7 @@ const ProjectPage = () => {
                     onMove={handleDatasetGeneration}
                     statusText={dsOValue}
                     logContent={logContent}
-                    dataset={dataset}
+                    dataset={[]}
                     sources={sources}
                     complete={complete}
                 />
