@@ -10,13 +10,13 @@ interface DatasetEntry {
 }
 
 interface DatasetViewerProps {
-    // onMove: () => void;
+    onMove: () => void;
     data: string[];
     title?: string;
 }
 
 const DatasetViewer: React.FC<DatasetViewerProps> = ({
-    // onMove,
+    onMove,
     data,
     title = "Dataset Preview"
 }) => {
@@ -102,6 +102,7 @@ const DatasetViewer: React.FC<DatasetViewerProps> = ({
           </div>
           <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
                           flex items-center gap-2 transition-colors duration-200"
+            onClick={onMove}
           >
             Continue
             <span className="text-sm py-0.5 text-gray-200">⏎</span>

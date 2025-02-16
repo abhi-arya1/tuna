@@ -59,6 +59,39 @@ enum ProjectMakeStatus {
     ERROR="error"
 }
 
+type EC2Instance = {
+    id: string;
+    aws_id: string;
+    provider: string;
+    platform: string;
+    gpu: string;
+    memory_gb: number;
+    storage_gb: number;
+    vcpus: number;
+}
+
+const EC2_P5: EC2Instance = {
+    id: "ec2_p5",
+    aws_id: "p5.48xlarge",
+    provider: "NVIDIA",
+    platform: "AWS",
+    gpu: "H100",
+    memory_gb: 2048,
+    storage_gb: 30400,
+    vcpus: 192,
+}
+
+const EC2_G4DN: EC2Instance = {
+    id: "ec2_g4dn",
+    aws_id: "g4dn.8xlarge",
+    provider: "NVIDIA",
+    platform: "AWS",
+    gpu: "T4",
+    memory_gb: 128,
+    storage_gb: 900,
+    vcpus: 32,
+}
+
 // class UserInput(BaseModel):
 //     text: str 
 
@@ -87,10 +120,13 @@ enum ProjectMakeStatus {
 
 export { 
     ProjectMakeStatus,
+    EC2_P5,
+    EC2_G4DN
 }
 
 export type {
     User,
     Project,
-    HFModel
+    HFModel,
+    EC2Instance
 };

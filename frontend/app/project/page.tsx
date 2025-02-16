@@ -8,6 +8,7 @@ import ModelAdvice from './_components/user_model_advice';
 import { HFModel, ProjectMakeStatus } from '@/lib/dtypes';
 import DatasetGeneration from './_components/live_dataset_gen_view';
 import DatasetViewer from './_components/dataset_visualization';
+import InstanceSelect from './_components/instance_select';
 
 const ProjectPage = () => {
   const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.USER_INPUT);
@@ -191,8 +192,15 @@ const ProjectPage = () => {
             {
               step === ProjectMakeStatus.DS_VISUALIZATION && (
                 <DatasetViewer
-                    // onMove={handleDatasetVisualization}
+                    onMove={() => setStep(ProjectMakeStatus.TRAIN_INST_SELECTION)}
                     data={dataset}
+                />
+              )
+            }
+            {
+              step === ProjectMakeStatus.TRAIN_INST_SELECTION && (
+                <InstanceSelect
+                    onMove={() => {}}
                 />
               )
             }
