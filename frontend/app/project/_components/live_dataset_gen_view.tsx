@@ -2,7 +2,12 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Globe } from 'lucide-react';
+
+interface SourceInfo {
+  name: string;
+  favicon: string;
+}
 
 const LogSection = ({
   title,
@@ -107,6 +112,80 @@ const LogContent = ({ lines }: { lines: string[] }) => {
   );
 };
 
+const getSourceInfo = async (url: string): Promise<SourceInfo> => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    const title = response.headers.get('title') || new URL(url).hostname.split('.')[0];
+    return {
+      name: title.charAt(0).toUpperCase() + title.slice(1),
+      favicon: `https://${new URL(url).hostname}/favicon.ico`
+    };
+  } catch (error) {
+    return {
+      name: new URL(url).hostname.split('.')[0],
+      favicon: ''
+    };
+  }
+}
+
+const SourceButton = ({ source }: { source: string }) => {
+  const [sourceInfo, setSourceInfo] = useState<SourceInfo>({
+    name: new URL(source).hostname.split('.')[0],
+    favicon: ''
+  });
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    getSourceInfo(source).then(setSourceInfo);
+  }, [source]);
+
+  return (
+    <a
+      href={source}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-center gap-3 p-3 border border-gray-700
+                 hover:bg-gray-800/50 transition-all duration-200"
+    >
+      <div className="w-8 h-8 shrink-0 rounded-full overflow-hidden border border-gray-700
+                    group-hover:border-accent transition-colors duration-200 bg-gray-800
+                    flex items-center justify-center">
+        {(!sourceInfo.favicon || imageError) ? (
+          <Globe className="w-4 h-4 text-gray-400 group-hover:text-accent transition-colors duration-200" />
+        ) : (
+          <img
+            src={sourceInfo.favicon}
+            alt={sourceInfo.name}
+            className="w-full h-full object-cover"
+            onError={() => setImageError(true)}
+          />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-gray-300 truncate group-hover:text-white transition-colors duration-200">
+          {sourceInfo.name}
+        </div>
+        <div className="text-sm text-gray-500 truncate">
+          {new URL(source).hostname}
+        </div>
+      </div>
+    </a>
+  );
+};
+
+const SourcesContent = ({ sources }: { sources: string[] }) => {
+  return (
+    <div className="h-full overflow-y-auto p-4">
+      <div className="grid grid-cols-1 gap-3">
+        {sources.map((source, index) => (
+          <SourceButton key={index} source={source} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
 const DatasetGeneration = ({
     onMove,
     statusText,
@@ -127,17 +206,6 @@ const DatasetGeneration = ({
 
   const logLines = (logContent || "").split('\n');
 
-  const sourcesLines = sources.map(source => {
-    const now = new Date();
-    const time = now.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-    return `<<${time}>> ${source}`;
-  });
-
   const toggleMainLog = () => {
     setMainLogOpen(!mainLogOpen);
     if (!mainLogOpen && sourcesLogOpen) {
@@ -154,6 +222,7 @@ const DatasetGeneration = ({
 
   return (
     <div className="space-y-8">
+      {/* Header and status text remain the same */}
       <div className="space-y-2">
         <motion.span
           className="text-gray-400 text-sm"
@@ -203,7 +272,7 @@ const DatasetGeneration = ({
           onToggle={toggleSourcesLog}
           otherSectionOpen={mainLogOpen}
         >
-          <LogContent lines={sourcesLines} />
+          <SourcesContent sources={sources} />
         </LogSection>
       </motion.div>
 
@@ -213,9 +282,10 @@ const DatasetGeneration = ({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
       >
-        <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
-                          flex items-center gap-2 transition-colors duration-200"
-                          onClick={() => onMove()}
+        <button
+          className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
+                    flex items-center gap-2 transition-colors duration-200"
+          onClick={() => onMove()}
         >
           Continue
           <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
