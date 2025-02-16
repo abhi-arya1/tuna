@@ -21,7 +21,7 @@ export default function RootLayout({
       <body
         className={`${haloGrotesk.className} antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        {children}
       </body>
     </html>
   );
