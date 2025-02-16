@@ -7,6 +7,7 @@ import UserDatasetGenInput from './_components/user_dataset_gen_input';
 import ModelAdvice from './_components/user_model_advice';
 import { HFModel, ProjectMakeStatus } from '@/lib/dtypes';
 import DatasetGeneration from './_components/live_dataset_gen_view';
+import DatasetViewer from './_components/dataset_visualization';
 
 const ProjectPage = () => {
   const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.DS_INPUT);
@@ -20,7 +21,6 @@ const ProjectPage = () => {
   const [modelText, setModelText] = useState<string>("");
   const [modelIValue, setModelIValue] = useState('');
 
-  // Dataset Generation States
   const [dsIValue, setDsIValue] = useState('');
   const [dsOValue, setDsOValue] = useState('');
   const [dataset, setDataset] = useState<any[]>([]);
@@ -67,19 +67,24 @@ const ProjectPage = () => {
         const msg = JSON.parse(event.data);
 
         switch (msg.type) {
-          case "model_advice":
-            setRecommendationModel(msg?.recommendation || null);
-            setModelText((prev) => (prev + (msg?.text || "")));
-            setModels(msg?.model_list || []);
-            break;
-          case "ds_generation":
-            setDsOValue((prev) => prev + (msg?.text || ""));
-            setDataset(msg?.dataset || []);
-            setLogContent((prev) => prev + (msg?.log || ""));
-            setSources(msg?.sources);
-            setComplete(msg?.complete || false);
-          default:
-            break;
+            case "model_advice":
+                setRecommendationModel(msg?.recommendation || null);
+                setModelText((prev) => (prev + (msg?.text || "")));
+                setModels(msg?.model_list || []);
+                break;
+            case "ds_generation":
+                setDsOValue((prev) => prev + (msg?.text || ""));
+                setDataset(msg?.dataset || []);
+                setLogContent((prev) => prev + (msg?.log || ""));
+                setSources(msg?.sources);
+                setComplete(msg?.complete || false);
+            case "ds_visualization":
+                fetch(`${process.env.NEXT_PUBLIC_API_URL!}/dataset`).then((text: any) => {
+                    console.log(text)
+                    setDataset(text)
+                })
+            default:
+                break;
         }
       } catch (err) {
         console.error("Error parsing WebSocket message:", err);
@@ -167,6 +172,13 @@ const ProjectPage = () => {
                   dataset={dataset}
                   sources={sources}
                   complete={complete}
+                />
+              )
+            }
+            {
+              step === ProjectMakeStatus.DS_VISUALIZATION && (
+                <DatasetViewer
+                    data={dataset}
                 />
               )
             }
