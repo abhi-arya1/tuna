@@ -66,7 +66,7 @@ const UserInitialInput = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          What are you building?
+          What are you using your model for?
         </motion.h2>
       </div>
 

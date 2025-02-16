@@ -47,7 +47,7 @@ const UserDatasetGenInput = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-            What kind of dataset are you looking for?
+            How do you want your input/output to look?
         </motion.h2>
       </div>
 
