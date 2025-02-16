@@ -37,10 +37,8 @@ const Button: React.FC<ButtonProps> = ({ variant, children, className = '', ...p
 
 const Logo: React.FC = () => (
   <div className="flex items-center gap-3">
-    <div className="w-10 h-10 bg-accent text-white flex items-center justify-center">
-      <span className="font-bold text-lg">T</span>
-    </div>
-    <span className="font-bold text-lg text-white">Tuna</span>
+    <img src="/runway.png" alt="Runway Logo" className="w-10 h-10" />
+    <span className="font-bold text-lg text-white">Runway</span>
   </div>
 );
 

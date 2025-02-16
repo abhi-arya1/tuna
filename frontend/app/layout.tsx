@@ -7,7 +7,7 @@ import { AuthProvider } from "@/components/hooks/auth-provider";
 
 
 export const metadata: Metadata = {
-  title: "Tuna",
+  title: "Runway",
   description: "The Vercel for AI Models",
 };
 

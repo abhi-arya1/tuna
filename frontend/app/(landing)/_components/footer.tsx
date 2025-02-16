@@ -14,15 +14,14 @@ const Footer = () => {
             <div className="container mx-auto flex tracking-wide flex-col md:flex-row gap-y-4 justify-between pt-10 pb-14 items-start">
                 <div className="flex flex-col items-start gap-y-2">
                     <div className="flex items-center gap-x-2">
-                        <h2 className="text-xl text-white">Tuna</h2>
+                        <h2 className="text-xl text-white">Runway</h2>
                     </div>
 
                     <p className="w-[300px] text-gray-300 tracking-wide text-xs">
-                        <span className={inter.className}>©</span> 2025 Tuna
+                        <span className={inter.className}>©</span> 2025 Runway
                     </p>
                     <div className="flex flex-col gap-y-2 mt-4">
                         <div className="flex flex-row items-start gap-x-6">
-                            {/* Partner logos section */}
                         </div>
                     </div>
                 </div>
