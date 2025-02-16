@@ -9,6 +9,7 @@ import { HFModel, ProjectMakeStatus } from '@/lib/dtypes';
 import DatasetGeneration from './_components/live_dataset_gen_view';
 import DatasetViewer from './_components/dataset_visualization';
 import InstanceSelect from './_components/instance_select';
+import LiveTrainingView from './_components/live_training_view';
 
 const ProjectPage = () => {
   const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.USER_INPUT);
@@ -200,10 +201,26 @@ const ProjectPage = () => {
             {
               step === ProjectMakeStatus.TRAIN_INST_SELECTION && (
                 <InstanceSelect
-                    onMove={() => {}}
+                    onMove={() => {setStep(ProjectMakeStatus.TRAIN_DETAILS)}}
                 />
               )
             }
+            {
+              step === ProjectMakeStatus.TRAIN_DETAILS && (
+                <LiveTrainingView
+                    onMove={() => {setStep(ProjectMakeStatus.DEPLOYMENT)}}
+                    logContent={logContent}
+                    complete={complete}
+                />
+              )
+            }
+
+            {/* <LiveTrainingView
+                onMove={() => {setStep(ProjectMakeStatus.DEPLOYMENT)}}
+                logContent={logContent}
+                complete={complete}
+            /> */}
+
           </motion.div>
         </AnimatePresence>
       </div>
