@@ -11,6 +11,7 @@ import DatasetViewer from './_components/dataset_visualization';
 import InstanceSelect from './_components/instance_select';
 import LiveTrainingView from './_components/live_training_view';
 import { SendToBack } from 'lucide-react';
+import Playground from './_components/playground';
 
 const ProjectPage = () => {
   const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.USER_INPUT);
@@ -227,6 +228,14 @@ const ProjectPage = () => {
                     onMove={() => {setStep(ProjectMakeStatus.DEPLOYMENT)}}
                     logContent={logContent}
                     complete={complete}
+                />
+              )
+            }
+            {
+              step === ProjectMakeStatus.DEPLOYMENT && (
+                <Playground
+                    modelId={"modelId"}
+                    onError={() => {console.log("Error")}}
                 />
               )
             }
