@@ -34,6 +34,7 @@ class ChatTypes(Enum):
     USER_INPUT="user_input"
     MODEL_ADVICE="model_advice"
     DS_GENERATION="ds_generation"
+    DS_VISUALIZATION="ds_visualization"
     TRAIN_INST_SELECTION="train_inst_selection"
     TRAIN_DETAILS="train_details"
     DEPLOYMENT="deployment"
@@ -113,3 +114,6 @@ class PerplexityStreamingResponse(BaseModel):
     citations: List[str]
     object: str
     choices: List[Choice]
+
+
+#### EC2 INSTANCE ROLLOUT SYSTEM

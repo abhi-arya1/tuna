@@ -52,6 +52,7 @@ enum ProjectMakeStatus {
     MODEL_ADVICE="model_advice",
     DS_INPUT="dataset_input",
     DS_GENERATION="ds_generation",
+    DS_VISUALIZATION="ds_visualization",
     TRAIN_INST_SELECTION="train_inst_selection",
     TRAIN_DETAILS="train_details",
     DEPLOYMENT="deployment",
