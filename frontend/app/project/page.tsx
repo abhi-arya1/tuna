@@ -114,6 +114,11 @@ const ProjectPage = () => {
     sendMessage("idea_input", modelIValue);
   }
 
+  const handleModelSelection = (model: string) => {
+    setStep(ProjectMakeStatus.DS_INPUT);
+    sendMessage("model_choice", model);
+  }
+
   const handleUserDatasetInput = () => {
     setStep(ProjectMakeStatus.DS_GENERATION);
     sendMessage("dataset_input", dsIValue);
@@ -155,10 +160,10 @@ const ProjectPage = () => {
             {
               step === ProjectMakeStatus.MODEL_ADVICE && (
                 <ModelAdvice
-                  models={models}
-                  modelText={modelText}
-                  recommendationModel={recommendationModel}
-                  // onMove={handleUserInitialInput}
+                    onMove={handleModelSelection}
+                    models={models}
+                    modelText={modelText}
+                    recommendationModel={recommendationModel}
                 />
               )
             }

@@ -29,13 +29,15 @@ const RecommendedModelSkeleton = () => (
 );
 
 const ModelAdvice = ({
-  models,
-  modelText,
-  recommendationModel
+    onMove,
+    models,
+    modelText,
+    recommendationModel
 }: {
-  models: HFModel[];
-  modelText: string;
-  recommendationModel: HFModel | null;
+    onMove: (model: string) => void;
+    models: HFModel[];
+    modelText: string;
+    recommendationModel: HFModel | null;
 }) => {
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
 
@@ -155,7 +157,8 @@ const ModelAdvice = ({
         transition={{ delay: 0.7 }}
       >
         <button className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
-                          flex items-center gap-2 transition-colors duration-200">
+                          flex items-center gap-2 transition-colors duration-200"
+                          onClick={() => onMove(selectedModel)}>
           Continue
           <span className="text-sm px-2 py-0.5 bg-black/20">⏎</span>
         </button>
