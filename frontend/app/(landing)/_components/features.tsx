@@ -86,9 +86,9 @@ const FeatureGrid = () => {
               >
                 Start Building
               </button>
-              <button className="px-6 py-3 border border-[#333] text-white hover:bg-white hover:text-black transition-colors">
+              {/* <button className="px-6 py-3 border border-[#333] text-white hover:bg-white hover:text-black transition-colors">
                 Book a Demo
-              </button>
+              </button> */}
             </div>
           </div>
         </motion.div>
