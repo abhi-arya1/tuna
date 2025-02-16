@@ -84,7 +84,7 @@ const FeatureGrid = () => {
                 Start Building
               </button>
               <button className="px-6 py-3 border border-[#333] text-white hover:bg-[#111] transition-colors">
-                View Documentation
+                Book a Demo
               </button>
             </div>
           </div>
