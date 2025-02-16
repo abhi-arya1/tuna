@@ -10,7 +10,7 @@ import DatasetGeneration from './_components/live_dataset_gen_view';
 import DatasetViewer from './_components/dataset_visualization';
 
 const ProjectPage = () => {
-  const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.DS_INPUT);
+  const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.USER_INPUT);
 
   const wsRef = useRef<WebSocket | null>(null);
   const [connectionState, setConnectionState] = useState<"CONNECTING" | "OPEN" | "CLOSED">("CONNECTING");
