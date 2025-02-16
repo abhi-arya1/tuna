@@ -28,9 +28,10 @@ async def respond(data: WSRequest, send_handler: Callable[[dict, Literal["text"]
         await model_advice_response(data, send_handler)
         with open('data/config.json', 'w') as f: 
             json.dump({
-                "model": ""
+                "model": "",
+                "instance": ""
             }, f, indent=4)
-    if(data.type == "model_choice"):
+    elif(data.type == "model_choice"):
         with open('data/config.json', 'r') as f:
             config = json.load(f)
         
@@ -39,4 +40,13 @@ async def respond(data: WSRequest, send_handler: Callable[[dict, Literal["text"]
             json.dump(config, f, indent=4)
     elif (data.type == "dataset_input"):
         await dataset_build_response(data, send_handler)
+    elif (data.type ==  "train_instance_choice"):
+        with open('data/config.json', 'r') as f:
+            config = json.load(f)
+        
+        config["instance"] = data.text
+        with open('data/config.json', 'w') as f:
+            json.dump(config, f, indent=4)
+    elif (data.type == "train"):
+        pass
 

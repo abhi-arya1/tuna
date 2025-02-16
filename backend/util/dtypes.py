@@ -44,7 +44,7 @@ class ChatTypes(Enum):
 ### REQUEST TYPE MODELS 
 
 class WSRequest(BaseModel):
-    type: Literal["idea_input", "dataset_input", "model_choice", "train_instance_choice", "deploy"]
+    type: Literal["idea_input", "dataset_input", "model_choice", "train_instance_choice", "train", "deploy"]
     text: Optional[str] = None 
     button: Optional[dict | Any] = None
 
