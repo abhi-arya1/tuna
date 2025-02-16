@@ -7,7 +7,6 @@ import { Send, Loader2 } from 'lucide-react';
 import type { KeyboardEvent } from 'react';
 import OpenAI from "openai";
 import { pinwheel } from 'ldrs'
-import PinwheelLoader from '@/components/loaders/pinwheel';
 
 pinwheel.register();
 
