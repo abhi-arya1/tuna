@@ -19,6 +19,11 @@ const Footer = () => {
 
                     <p className="w-[300px] text-gray-300 tracking-wide text-xs">
                         <span className={inter.className}>©</span> 2025 Runway<br/><br/>Built with ❤️ at TreeHacks 2025
+
+                        <br/>by the team at:<br/>
+                        <a href="https://opennote.me" target="_blank">
+                            <img src="/opennotebanner.png" alt="Opennote Logo" className="w-36 inline-block" />
+                        </a>
                     </p>
                     <div className="flex flex-col gap-y-2 mt-4">
                         <div className="flex flex-row items-start gap-x-6">

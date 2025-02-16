@@ -18,7 +18,7 @@ const LandingPage: React.FC = () => {
       <div className="pointer-events-none mt-[4rem] md:mt-32">
         <div className="text-center mb-6">
           <h1 className={`${haloGrotesk.className} text-8xl md:text-8xl font-bold text-white mb-4`}>
-            The Vercel for AI Models
+            Your Vercel for AI Models
           </h1>
         </div>
 
