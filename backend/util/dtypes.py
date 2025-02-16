@@ -78,6 +78,7 @@ class TrainDetails(BaseModel):
     type: str
     text: str 
     log: str 
+    complete: bool = False
 
 class Deployment(BaseModel):
     type: str

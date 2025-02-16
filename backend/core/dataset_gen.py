@@ -1,4 +1,4 @@
-import asyncio, json, websockets
+import asyncio, json, websockets, re
 from typing import Callable, Literal
 from util.dtypes import WSRequest
 from sdks.groqapi import groq as client, syncgroq
@@ -104,7 +104,7 @@ async def get_initial_text(data, send_handler):
             "dataset": [],
             "log": "",
             "sources": [],
-            "complete": True
+            "complete": False
         })
 
 
@@ -161,7 +161,7 @@ async def build_dataset(
             "dataset": [],
             "log": f"{content if final_prompt else get_log_format(content)}" or "",
             "sources": sources,
-            "complete": False
+            "complete": True
         })
     
     await send_handler({
@@ -170,21 +170,24 @@ async def build_dataset(
             "dataset": [],
             "log": "\n",
             "sources": sources,
-            "complete": False
+            "complete": True
         })
     await send_handler({
             "text": "",
             "type": "ds_generation",
             "dataset": [],
-            "log": get_log_format(f"Dataset file generated successfully. Time to train", tuna_msg=True),
+            "log": get_log_format(f"Dataset file generated successfully. Click \"Continue\" to train.", tuna_msg=True),
             "sources": sources,
-            "complete": False
+            "complete": True
         })
     
     # print(final_prompt)
     with open("data/dataset.jsonl", "w") as f:
-        f.write(final_prompt)
-    return final_prompt
+        cleaned_prompt = "\n".join(
+            re.sub(r'^[^a-zA-Z0-9{]+|[^a-zA-Z0-9}]+$', '', line.strip())  # Removes unwanted leading/trailing chars
+            for line in final_prompt.split("\n")
+        )
+        f.write(cleaned_prompt)
 
 
 #### FINAL DELIVERY
@@ -273,7 +276,7 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
             "text": "",
             "dataset": [],
             "sources": sources,
-            "complete": False,
+            "complete": True,
             "log": get_log_format("Scraping complete. Generating dataset file", tuna_msg=True),
         })
 

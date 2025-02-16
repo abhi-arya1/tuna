@@ -1,3 +1,4 @@
 {
-    "model": "bigcode/starcoder"
+    "model": "meta-llama/Meta-Llama-3-8B",
+    "instance": ""
 }

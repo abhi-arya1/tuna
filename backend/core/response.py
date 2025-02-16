@@ -6,6 +6,7 @@ from util.dtypes import WSRequest
 
 from core.model_advice import model_advice_response
 from core.dataset_gen import dataset_build_response
+from core.trainer import train_model_response
 
 import json
 
@@ -48,5 +49,5 @@ async def respond(data: WSRequest, send_handler: Callable[[dict, Literal["text"]
         with open('data/config.json', 'w') as f:
             json.dump(config, f, indent=4)
     elif (data.type == "train"):
-        pass
+        await train_model_response(data, send_handler)
 

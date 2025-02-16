@@ -69,6 +69,8 @@ app.get(
               data: content,
               log: "Completed data extraction"
             }));
+
+            await stagehand.close();
             break;
 
           } catch (error) {

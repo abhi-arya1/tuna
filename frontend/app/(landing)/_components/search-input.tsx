@@ -11,7 +11,7 @@ interface SearchInputProps {
   sendMessage: (type: string, text?: string, button_reply?: any) => void;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ setStep, setModelIValue, sendMessage }) => {
+const SearchInput = () => {
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState('');
   const [showEnterHint, setShowEnterHint] = useState(true);
@@ -19,9 +19,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ setStep, setModelIValue, send
 
   const handleMove = () => {
     if (inputValue) {
-      setModelIValue(inputValue);
-      setStep(ProjectMakeStatus.MODEL_ADVICE);
-      sendMessage("idea_input", inputValue);
     } else {
       setError('Please tell us about your ideal model...');
     }

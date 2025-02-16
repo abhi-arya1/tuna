@@ -10,6 +10,7 @@ import DatasetGeneration from './_components/live_dataset_gen_view';
 import DatasetViewer from './_components/dataset_visualization';
 import InstanceSelect from './_components/instance_select';
 import LiveTrainingView from './_components/live_training_view';
+import { SendToBack } from 'lucide-react';
 
 const ProjectPage = () => {
   const [step, setStep] = useState<ProjectMakeStatus>(ProjectMakeStatus.USER_INPUT);
@@ -80,10 +81,14 @@ const ProjectPage = () => {
                 setLogContent((prev) => prev + (msg?.log || ""));
                 setSources(msg?.sources);
                 setComplete(msg?.complete || false);
+                break;
             case "ds_visualization":
-                fetch(`${process.env.NEXT_PUBLIC_API_URL!}/dataset`).then((data: Response) => {
-                    data.json().then((data: any) => {console.log(data); setDataset(data.dataset)})
-                })
+                setComplete(false);
+                break;
+            case "train_details":
+                setLogContent((prev) => prev + (msg?.log || ""));
+                setComplete(msg?.complete || false);
+                break;
             default:
                 break;
         }
@@ -128,11 +133,12 @@ const ProjectPage = () => {
 
   const handleDatasetGeneration = () => {
       setStep(ProjectMakeStatus.DS_VISUALIZATION);
+      fetch(`${process.env.NEXT_PUBLIC_API_URL!}/dataset`).then((data: Response) => {
+          console.log(data);
+          data.json().then((data: any) => {console.log(data); setDataset(data.dataset)})
+      })
+      setLogContent("");
   }
-
-  // const handleDatasetVisualization = () => {
-  //     setStep(ProjectMakeStatus.DS_VISUALIZATION);
-  // }
 
   return (
     <main className="min-h-screen bg-background text-white overflow-hidden">
@@ -201,7 +207,10 @@ const ProjectPage = () => {
             {
               step === ProjectMakeStatus.TRAIN_INST_SELECTION && (
                 <InstanceSelect
-                    onMove={() => {setStep(ProjectMakeStatus.TRAIN_DETAILS)}}
+                    onMove={() => {
+                      sendMessage("train", "");
+                      setStep(ProjectMakeStatus.TRAIN_DETAILS)
+                    }}
                 />
               )
             }
