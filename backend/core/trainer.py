@@ -58,25 +58,28 @@ async def train_model_response(data: WSRequest, send_handler: Callable[[dict, Li
         ssh.connect(SSH_HOST, username=SSH_USERNAME)
 
         await transfer_file(ssh, "data/dataset.jsonl", "/home/ubuntu/runway/dataset.jsonl", send_handler)
+        await transfer_file(ssh, "data/output.py", "/home/ubuntu/runway/output.py", send_handler)
         await transfer_file(ssh, "data/setup.sh", "/home/ubuntu/runway/setup.sh", send_handler)
         await transfer_file(ssh, "data/run.sh", "/home/ubuntu/runway/run.sh", send_handler)
         await transfer_file(ssh, "data/secrets.txt", "/home/ubuntu/runway/secrets.txt", send_handler)
+        
         await run_command(ssh, "cd /home/ubuntu/runway && chmod +x ./setup.sh", send_handler)
         await run_command(ssh, "cd /home/ubuntu/runway && chmod +x ./run.sh", send_handler)
+
         await transfer_file(ssh, "data/train_script.py", "/home/ubuntu/runway/train_script.py", send_handler)
         await transfer_file(ssh, "data/config.json", "/home/ubuntu/runway/config.json", send_handler)
 
         await send_handler({
             "type": "train_details",
-            "text": "Setting up instance...",
-            "log": get_log_format("Beginning training pipeline", tuna_msg=True),
+            "text": "We're setting up instance for you...",
+            "log": get_log_format("Checking instance configuration", tuna_msg=True),
             "complete": False
         })
 
         await run_command(ssh, "cd /home/ubuntu/runway && ./setup.sh", send_handler)
         await send_handler({
             "type": "train_details",
-            "text": "Training model...",
+            "text": "We're now training your model...",
             "log": get_log_format("Setup complete. Beginning training", tuna_msg=True),
             "complete": False
         })
@@ -84,7 +87,7 @@ async def train_model_response(data: WSRequest, send_handler: Callable[[dict, Li
 
         await send_handler({
             "type": "train_details",
-            "text": "Completed training. Saving weights!",
+            "text": "We've completed training, and saved the weights to ../runway_lora. Ready to deploy!",
             "log": get_log_format(f"Completed model training", tuna_msg=True),
             "complete": True
         })
