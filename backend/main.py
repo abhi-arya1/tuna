@@ -22,7 +22,7 @@ async def get_model_list():
 
 @app.get('/dataset')
 async def get_dataset():
-    with open("data/dataset.json", "r") as file:
+    with open("data/dataset.jsonl", "r") as file:
         return PlainTextResponse(content=file.read())
 
 @app.websocket("/wsc")
