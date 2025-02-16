@@ -7,6 +7,7 @@ from os import getenv
 SSH_USERNAME = "ubuntu"
 SSH_HOST = getenv("SSH_HOST_H100")
 
+
 async def run_command(ssh: paramiko.SSHClient, command: str, send_handler: Callable[[dict, Literal["text"]], None]) -> None:
     stdin, stdout, stderr = ssh.exec_command(command)
 
