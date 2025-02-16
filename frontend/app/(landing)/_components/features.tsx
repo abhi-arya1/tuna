@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Brain, Cloud, BookOpen, Database, Workflow, Stars, Cpu, Code } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 interface Feature {
   icon: React.ReactNode;
@@ -77,7 +78,9 @@ const FeatureGrid = () => {
               Create rich datasets, train production models, and deploy to enterprise infrastructure—all through natural language.
             </p>
             <div className="flex gap-4">
-              <button className="px-6 py-3 bg-white text-black hover:bg-gray-200 transition-colors">
+              <button className="px-6 py-3 bg-white text-black hover:bg-gray-200 transition-colors"
+                onClick={() => redirect('/project')}
+              >
                 Start Building
               </button>
               <button className="px-6 py-3 border border-[#333] text-white hover:bg-[#111] transition-colors">
