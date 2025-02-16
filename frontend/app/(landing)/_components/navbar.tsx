@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 interface NavLinkProps {
@@ -43,6 +44,8 @@ const Logo: React.FC = () => (
 );
 
 const Navbar: React.FC = () => {
+  const router = useRouter();
+
   return (
     <header className="fixed top-0 left-0 right-0 bg-background z-50">
       <div className="h-20 border-b border-gray-700">
@@ -55,12 +58,12 @@ const Navbar: React.FC = () => {
             {/* <NavLink href="#blog" label="Blog" /> */}
 
             <div className="flex items-center gap-4">
-              <Button variant="primary">
-                Sign Up
+              <Button variant="outline" className="hover:cursor-pointer" onClick={() => router.push('/project')}>
+                Start Building
               </Button>
-              <Button variant="outline">
+              {/* <Button variant="outline">
                 Log In
-              </Button>
+              </Button> */}
             </div>
           </div>
         </nav>

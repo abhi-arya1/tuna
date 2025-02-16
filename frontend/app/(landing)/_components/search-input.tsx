@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useEnterSubmit } from '@/components/hooks/enter-submit';
 import { motion } from 'framer-motion';
 import { ProjectMakeStatus } from '@/lib/dtypes';
+import { useRouter } from 'next/navigation';
 
 interface SearchInputProps {
   setStep: (step: ProjectMakeStatus) => void;
@@ -16,9 +17,12 @@ const SearchInput = () => {
   const [error, setError] = useState('');
   const [showEnterHint, setShowEnterHint] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleMove = () => {
     if (inputValue) {
+      localStorage.setItem('modelIValue', inputValue);
+      router.push('/project');
     } else {
       setError('Please tell us about your ideal model...');
     }
@@ -68,7 +72,7 @@ const SearchInput = () => {
                      text-white/90 placeholder-gray-600 px-4
                      focus:outline-none focus:border-accent
                      transition-all duration-200"
-            placeholder="Tell us about your ideal model..."
+            placeholder="Tell us about the ideal output of your model..."
           />
           {showEnterHint && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm transition-opacity duration-200">

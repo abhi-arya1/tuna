@@ -40,6 +40,13 @@ const ProjectPage = () => {
     []
   );
 
+  useEffect(() => {
+    if(localStorage.getItem('modelIValue')) {
+      setModelIValue(localStorage.getItem('modelIValue')!);
+      localStorage.removeItem('modelIValue');
+    }
+  }, [])
+
   const connect = useCallback(() => {
     setConnectionState("CONNECTING");
 

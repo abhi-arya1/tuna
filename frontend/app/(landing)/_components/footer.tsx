@@ -18,7 +18,7 @@ const Footer = () => {
                     </div>
 
                     <p className="w-[300px] text-gray-300 tracking-wide text-xs">
-                        <span className={inter.className}>©</span> 2025 Runway
+                        <span className={inter.className}>©</span> 2025 Runway<br/><br/>Built with ❤️ at TreeHacks 2025
                     </p>
                     <div className="flex flex-col gap-y-2 mt-4">
                         <div className="flex flex-row items-start gap-x-6">
@@ -27,45 +27,22 @@ const Footer = () => {
                 </div>
 
                 <div className="grid grid-cols-1">
-                    {/* <div className="flex flex-col gap-y-0 items-start justify-start"> */}
-                        {/* <Button
-                            onClick={() => router.push("/info/careers")}
-                            variant="link"
-                            className="text-white hover:text-gray-300"
-                        >
-                            Careers
-                        </Button>
-                        <Button
-                            onClick={() => router.push("/info/ethos")}
-                            variant="link"
-                            className="text-white hover:text-gray-300"
-                        >
-                            Ethos
-                        </Button> */}
-                        {/* <Button
-                            onClick={() => window.open("https://opennote.statuspage.io/", "_blank")}
-                            variant="link"
-                            className="text-white hover:text-gray-300"
-                        >
-                            Status
-                        </Button> */}
-                    {/* </div> */}
                     <div className="flex flex-col gap-y-0 items-start justify-start">
-                        <Button
+                        {/* <Button
                             onClick={() => router.push("/info/help")}
                             variant="link"
                             className="text-white hover:text-gray-300"
                         >
                             Help
-                        </Button>
+                        </Button> */}
                         <Button
-                            onClick={() => router.push("/auth/signup")}
+                            onClick={() => router.push("/project")}
                             variant="link"
                             className="text-white hover:text-gray-300"
                         >
-                            Sign Up
+                            Start Building
                         </Button>
-                        <Button
+                        {/* <Button
                             onClick={() => router.push("/info/toc")}
                             variant="link"
                             className="text-white hover:text-gray-300"
@@ -78,20 +55,6 @@ const Footer = () => {
                             className="text-white hover:text-gray-300"
                         >
                             Privacy Policy
-                        </Button>
-                        {/* <Button
-                            onClick={() => router.push("/info/edu-compliance")}
-                            variant="link"
-                            className="text-white hover:text-gray-300"
-                        >
-                            Acts Notices
-                        </Button>
-                        <Button
-                            onClick={() => router.push("/labs")}
-                            variant="link"
-                            className="text-white hover:text-gray-300"
-                        >
-                            Labs
                         </Button> */}
                     </div>
                 </div>
