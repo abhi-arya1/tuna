@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Brain, Cloud, BookOpen, Database, Workflow, Stars, Cpu, Code } from 'lucide-react';
 import { redirect, useRouter } from 'next/navigation';
+import { haloGrotesk } from '@/app/fonts';
 
 interface Feature {
   icon: React.ReactNode;
@@ -55,7 +56,7 @@ const FeatureGrid = () => {
   const router = useRouter();
 
   return (
-    <div className="w-full py-20">
+    <div className="w-full mt-8">
       <div className="max-w-[1200px] mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -73,7 +74,7 @@ const FeatureGrid = () => {
           </div>
 
           <div className="max-w-3xl">
-            <h1 className="text-[64px] leading-[1.1] font-normal text-white mb-6">
+            <h1 className={`${haloGrotesk.className} text-[64px] leading-[1.1] font-normal text-white mb-6`}>
                 Empowering the "citizen developer"
             </h1>
             <p className="text-[20px] leading-[1.6] text-[#888] mb-8">
@@ -85,7 +86,7 @@ const FeatureGrid = () => {
               >
                 Start Building
               </button>
-              <button className="px-6 py-3 border border-[#333] text-white hover:bg-[#111] transition-colors">
+              <button className="px-6 py-3 border border-[#333] text-white hover:bg-white hover:text-black transition-colors">
                 Book a Demo
               </button>
             </div>

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useEnterSubmit } from '@/components/hooks/enter-submit';
+import { haloGrotesk } from '@/app/fonts';
 
 const UserInitialInput = ({
   onMove,
@@ -60,7 +61,7 @@ const UserInitialInput = ({
           Models
         </motion.span>
         <motion.h2
-          className="text-4xl font-normal"
+          className={`${haloGrotesk.className} text-4xl font-normal`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}

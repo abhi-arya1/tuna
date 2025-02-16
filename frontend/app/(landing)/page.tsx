@@ -5,6 +5,7 @@ import SearchInput from './_components/search-input';
 import EasyUse from './_components/easy_use';
 import FeatureGrid from './_components/features';
 import { Zap, BookOpen, Database, Globe, Cpu, Code } from 'lucide-react';
+import { haloGrotesk } from '@/app/fonts';
 
 const LandingPage: React.FC = () => {
   return (
@@ -13,7 +14,7 @@ const LandingPage: React.FC = () => {
 
       <div className="pointer-events-none mt-[4rem] md:mt-80">
         <div className="text-center mb-6">
-          <h1 className="text-8xl md:text-8xl font-bold text-white mb-4">
+          <h1 className={`${haloGrotesk.className} text-8xl md:text-8xl font-bold text-white mb-4`}>
               The Vercel for AI Models
           </h1>
         </div>
@@ -31,12 +32,15 @@ const LandingPage: React.FC = () => {
             <EasyUse />
         </div> */}
 
-        <div className="flex flex-row gap-x-4 justify-center items-center py-12">
-            <img src="/groq.png" alt="Hero Image" className="h-8" />
-            <img src="/perplexity.png" alt="Hero Image" className="h-8" />
+        <div className="flex flex-col py-1 mt-20">
+            <h3 className="text-gray-400 text-center">Powered By</h3>
+            <div className="flex flex-row gap-x-4 justify-center items-center pt-4">
+                <img src="/groq.png" alt="Hero Image" className="h-8" />
+                <img src="/perplexity.png" alt="Hero Image" className="h-8" />
+            </div>
         </div>
 
-        <div className="mb-6 mt-5">
+        <div className="mb-6 mt-20">
           <FeatureGrid />
         </div>
 

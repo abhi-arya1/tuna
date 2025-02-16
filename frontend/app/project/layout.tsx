@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { haloGrotesk } from "../fonts";
 
 export default function ProjectLayout({
   children,
@@ -7,7 +8,7 @@ export default function ProjectLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={`${haloGrotesk.className}`}>
         {children}
       </body>
     </html>
