@@ -113,10 +113,12 @@ const LogContent = ({ lines }: { lines: string[] }) => {
 const LiveTrainingView = ({
     onMove,
     logContent,
-    complete
+    complete,
+    text
 }: {
     onMove: () => void;
     logContent: string;
+    text: string;
     complete: boolean;
 }) => {
   const [logOpen, setLogOpen] = useState(true);
@@ -131,7 +133,7 @@ const LiveTrainingView = ({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          Train
+          Trainer
         </motion.span>
         <motion.h2
           className="text-3xl font-normal"
@@ -149,7 +151,7 @@ const LiveTrainingView = ({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        Spinning up a training instance...
+        {text}
       </motion.p>
 
       <motion.div

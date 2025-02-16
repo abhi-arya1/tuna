@@ -53,7 +53,7 @@ const ModelAdvice = ({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          Model Advice
+          Model Selection
         </motion.span>
         <motion.h2
           className="text-3xl font-normal"
@@ -105,7 +105,7 @@ const ModelAdvice = ({
                   <span className="text-lg font-medium">{recommendationModel.id}</span>
                   <span className="text-accent text-sm border border-accent px-2 py-0.5 self-center">Recommended</span>
                 </div>
-                <div className="text-gray-400 text-sm">{recommendationModel.created_at} · {recommendationModel.downloads}</div>
+                <div className="text-gray-400 text-sm">Created on {new Date(recommendationModel.created_at).toDateString()} · {recommendationModel.downloads} Downloads</div>
               </div>
             </label>
           </div>
@@ -142,7 +142,7 @@ const ModelAdvice = ({
                   />
                   <div className="flex-1">
                     <div className="text-lg">{HFModel.id}</div>
-                    <div className="text-gray-400 text-sm">{HFModel.created_at} · {HFModel.downloads}</div>
+                    <div className="text-gray-400 text-sm">Created on {new Date(HFModel.created_at).toDateString()} · {HFModel.downloads} Downloads</div>
                   </div>
                 </label>
               ))

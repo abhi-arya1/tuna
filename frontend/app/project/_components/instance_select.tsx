@@ -91,7 +91,7 @@ const InstanceSelect = ({
                   <div className="flex-1 justify-start items-start flex flex-col">
                      <div className="flex flex-row gap-x-2 items-center justify-center pb-3">
                         <img src="/nvidia.png" className="h-8" />
-                        <span className="text-lg font-medium">NVIDIA T4</span>
+                        <span className="text-lg font-medium">NVIDIA A100</span>
                     </div>
                     <div className="text-gray-400 text-sm">{EC2_G4DN.memory_gb} GB Memory · {EC2_G4DN.vcpus} vCPUs · {EC2_G4DN.storage_gb} GB Storage</div>
                   </div>

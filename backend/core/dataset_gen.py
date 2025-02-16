@@ -15,6 +15,38 @@ from sdks.perplexity import stream_pplx_response
 
 #### GET PROMPT/PLAN FOR DATASET SCRAPING
 
+def get_best_url(usrprompt: str, sources: list[str]) -> str: 
+    completion = syncgroq.chat.completions.create(
+            model=GroqModels.LLAMA_3_1_8B_INSTANT.value,
+            messages=[{
+                "role": "system",
+                "content": """
+                You are a URL picking agent to help build a robust dataset. You will be 
+                presented with a list of potential URLs from a user, as well as the goal they are
+                trying to achieve with this dataset. Your job is to pick the URL that 
+                you believe will be best suited to help get the highest quality data
+                
+                Some things to keep in mind: 
+                    - PDFs, Powerpoints, and other files are NOT HIGH QUALITY AND SHOULD NOT BE SELECTED.
+                    - GitHub Repositories, Gists, and StackOverflow articles are NOT HIGH QUALITY AND SHOULD NOT BE SELECTED.
+                    - Documentation Pages, Research Papers, and Articles are HIGH QUALITY AND SHOULD BE SELECTED, ESPECIALLY ANY DOCS.
+                    - YOU MUST PICK ONLY ONE URL AT A TIME.
+                    - YOU CANNOT RETURN ANYTHING EXCEPT FOR THE URL. ONLY THE URL SHOULD BE PROVIDED IN OUTPUT.
+
+                Good luck!
+                """
+            }, {
+                "role": "user",
+                "content": f"""
+                {usrprompt}
+                Here are my options for URLs to pick from. Please pick the best one for this case: 
+                {sources}
+                """
+            }],
+            max_tokens=512
+        )
+    return completion.choices[0].message.content
+
 async def get_plan(data: WSRequest, send_handler: Callable) -> str:
     final_prompt = ""
 
@@ -228,11 +260,11 @@ async def dataset_build_response(data: WSRequest, send_handler: Callable[[dict, 
     response, sources = await stream_pplx_response(planned_prompt, send_handler)
     
     async with websockets.connect("ws://localhost:8080/ws") as websocket:
-        url = response.citations[0]
-        if response.citations[0].endswith(".pdf"):
-            url = response.citations[1]
-        if "github" in response.citations[0]:
-            url = response.citations[1]
+        url = get_best_url(usrprompt, sources).strip()
+        if not url.startswith("http"):
+            url = response.citations[0]
+            if url.endswith(".pdf") or url.endswith(".pptx") or url.endswith(".docx"):
+                url = response.citations[1]
         
         await websocket.send(json.dumps({
             "url": url,

@@ -70,6 +70,7 @@ const UserDatasetGenInput = ({
                         text-white/90 placeholder-gray-600 px-4
                         focus:outline-none focus:border-accent
                         transition-all duration-200"
+              placeholder='Describe your ideal dataset. Inputs, outputs, etc...'
             />
           </div>
           <button

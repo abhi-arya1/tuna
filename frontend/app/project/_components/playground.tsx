@@ -113,7 +113,7 @@ const Playground = ({ modelId, onError }: PlaygroundProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          Chat with your model
+          Chat with your Model
         </motion.h2>
       </div>
 

@@ -33,22 +33,43 @@ const DatasetViewer: React.FC<DatasetViewerProps> = ({
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <motion.span
-          className="text-gray-400 text-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          Dataset
-        </motion.span>
-        <motion.h2
-          className="text-3xl font-normal"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          {title}
-        </motion.h2>
+        <div className="flex flex-row items-center justify-between">
+          <div className="flex flex-col items-start justify-start gap-y-2">
+            <motion.span
+              className="text-gray-400 text-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              Dataset Generation
+            </motion.span>
+            <motion.h2
+              className="text-3xl font-normal"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              {title}
+            </motion.h2>
+          </div>
+            <motion.button
+              className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
+                          flex items-center gap-2 transition-colors duration-200"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              onClick={() => {
+                const element = document.createElement('a');
+                const file = new Blob([data.join('\n')], { type: 'application/json' });
+                element.href = URL.createObjectURL(file);
+                element.download = 'dataset.json';
+                document.body.appendChild(element);
+                element.click();
+              }}
+            >
+              Download Dataset
+            </motion.button>
+        </div>
       </div>
 
       <motion.div

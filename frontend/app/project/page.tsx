@@ -31,6 +31,8 @@ const ProjectPage = () => {
   const [sources, setSources] = useState<string[]>([]);
   const [complete, setComplete] = useState(false);
 
+  const [trainText, setTrainText] = useState<string>("");
+
   const sendMessage = useCallback(
     (type: string, text?: string, button_reply?: any) => {
       if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
@@ -95,6 +97,7 @@ const ProjectPage = () => {
             case "train_details":
                 setLogContent((prev) => prev + (msg?.log || ""));
                 setComplete(msg?.complete || false);
+                setTrainText((prev) => msg?.text || prev);
                 break;
             default:
                 break;
@@ -226,6 +229,7 @@ const ProjectPage = () => {
                 <LiveTrainingView
                     onMove={() => {setStep(ProjectMakeStatus.DEPLOYMENT)}}
                     logContent={logContent}
+                    text={trainText}
                     complete={complete}
                 />
               )

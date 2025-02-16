@@ -47,7 +47,7 @@ const UserInitialInput = ({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          Models
+          Model Selection
         </motion.span>
         <motion.h2
           className={`${haloGrotesk.className} text-4xl font-normal`}
@@ -55,7 +55,7 @@ const UserInitialInput = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          What are you using your model for?
+          Tell us about your ideal model. Inputs, outputs, etc.
         </motion.h2>
       </div>
 
@@ -65,13 +65,14 @@ const UserInitialInput = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <div className="flex w-full items-center gap-3">
+        <div className="flex w-full items-center gap-3 mb-6">
           <div className="relative flex-1">
             <input
               ref={inputRef}
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              placeholder='Describe your ideal model...'
               className="w-full h-12 bg-transparent border border-gray-700
                         text-white/90 placeholder-gray-600 px-4
                         focus:outline-none focus:border-accent
@@ -101,6 +102,21 @@ const UserInitialInput = ({
             {error}
           </motion.p>
         )}
+          <span className="text-muted-foreground text-sm">Suggestions</span>
+          <button
+            className="w-full px-6 py-3 border-b-2 border-b-muted-foreground/20 self-start text-start hover:bg-muted-foreground/20 text-white
+                      flex items-center gap-2 transition-colors duration-200"
+            onClick={() => setInputValue("A user can describe a graph, and get Python Matplotlib code as the output, prioritzing code generation.")}
+          >
+            A user can describe a graph, and get Python Matplotlib code as the output, prioritzing code generation.
+          </button>
+          <button
+            className="w-full px-6 py-3 my-3 border-b-2 border-b-muted-foreground/20 self-start text-start hover:bg-muted-foreground/20 text-white
+                      flex items-center gap-2 transition-colors duration-200"
+            onClick={() => setInputValue("A user can ask for recent news on Stanford University, and recieve a summary as the output.")}
+          >
+            A user can ask for recent news on Stanford University, and recieve a summary as the output.
+          </button>
       </motion.div>
     </div>
   );

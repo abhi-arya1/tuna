@@ -18,7 +18,7 @@ def get_models():
     # "created_at", "downloads" and "likes".
     return clean_models(api.list_models(
             task=TASK_TEXT_GENERATION,
-            sort="likes",
+            sort="trending_score",
             library="pytorch",
             limit=25
         ))

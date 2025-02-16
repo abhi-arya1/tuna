@@ -65,11 +65,11 @@ const SearchInput = () => {
                      transition-all duration-200"
             placeholder="Tell us about the ideal output of your model..."
           />
-          {showEnterHint && (
+          {/* {showEnterHint && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-sm transition-opacity duration-200">
               Press Enter
             </div>
-          )}
+          )} */}
         </div>
         <button
           className="h-12 px-6 bg-accent hover:bg-accent-hover text-white
